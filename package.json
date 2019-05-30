@@ -1,5 +1,5 @@
 {
-  "name": "core-hydrate",
+  "name": "@architect/hydrate",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
