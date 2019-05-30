@@ -1,0 +1,35 @@
+{
+  "name": "core-hydrate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/*-test.js | tap-spec",
+    "lint": "eslint . --fix --ignore-pattern node_modules"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/architect/hydrate.git"
+  },
+  "keywords": [],
+  "author": "Brian LeRoux <b@brian.io>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/architect/hydrate/issues"
+  },
+  "homepage": "https://github.com/architect/hydrate#readme",
+  "dependencies": {
+    "@architect/parser": "^1.1.7",
+    "@architect/utils": "^1.0.3",
+    "chalk": "^2.4.2",
+    "cpr": "^3.0.1",
+    "glob": "^7.1.4",
+    "run-series": "^1.1.8"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "rimraf": "^2.6.3",
+    "tap-spec": "^5.0.0",
+    "tape": "^4.10.2"
+  }
+}
