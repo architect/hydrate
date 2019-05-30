@@ -11,7 +11,7 @@ let copyStaticJSON = require('./src/copy-static-json')
  * @param {object} params
  * @param {boolean} params.install
  */
-module.exports = function hydrate(params, callback) {
+module.exports = function hydrate(params={}, callback) {
   // default params
   let installing = params.install || true
   // if a callback isn't supplied return a promise
