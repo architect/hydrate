@@ -12,8 +12,6 @@ let copyStaticJSON = require('./src/copy-static-json')
  * @param {boolean} params.install
  */
 module.exports = function hydrate(params={}, callback) {
-  // default params
-  let installing = params.install || true
   // if a callback isn't supplied return a promise
   let promise
   if (!callback) {
@@ -32,7 +30,7 @@ module.exports = function hydrate(params={}, callback) {
     copyArc,
   ]
   // maybe do these
-  if (installing)
+  if (params.install)
     tasks.unshift(installDeps)
   // order important!
   series(tasks, function done(err) {
