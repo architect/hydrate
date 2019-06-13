@@ -1,6 +1,5 @@
 let parse = require('@architect/parser')
-let readArc = require('@architect/utils/read-arc')
-let getLambdaName = require('@architect/utils/get-lambda-name')
+let utils = require('@architect/utils')
 let series = require('run-series')
 let path = require('path')
 let fs = require('fs')
@@ -10,17 +9,14 @@ let fs = require('fs')
  *
  * @param {string} copying - one of: arcfile, shared, views, static
  */
-let arc
+let inventory
 module.exports = function getBasePaths(copying, callback) {
-  if (!arc) {
-    let config = readArc()
-    arc = config.arc
+  if (!inventory) {
+    inventory = utils.inventory()
   }
-  series(arc.http.map(route=> {
+  series(inventory.localPaths.map(base=> {
 
-    let name = `${route[0].toLowerCase()}${getLambdaName(route[1])}`
     let runtime = 'nodejs10.x'
-    let base = path.join('src', 'http', name)
     let arcConfigPath = path.join(base, '.arc-config')
     let noop = false
 

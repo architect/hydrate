@@ -1,5 +1,5 @@
 {
-  "name": "hydrate-get-index",
+  "name": "shared",
   "dependencies": {
     "tiny-json-http": "^7.0.2"
   }

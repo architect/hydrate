@@ -1,5 +1,5 @@
 {
-  "name": "hydrate-get-index",
+  "name": "hydrate-parks-to-visit",
   "dependencies": {
     "tiny-json-http": "^7.0.2"
   }

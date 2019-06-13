@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tape test/*-test.js | tap-spec",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "tape test/unit-tests.js | tap-spec",
+    "test:integration": "tape test/integration-tests.js | tap-spec",
     "lint": "eslint . --fix --ignore-pattern node_modules"
   },
   "repository": {
@@ -29,6 +31,7 @@
   "devDependencies": {
     "eslint": "^5.16.0",
     "rimraf": "^2.6.3",
+    "sinon": "^7.3.2",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.2"
   }

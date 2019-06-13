@@ -1,15 +1,12 @@
 let series = require('run-series')
-let installDeps = require('./src/install-deps')
-let copyArc = require('./src/copy-arc')
-let copyShared = require('./src/copy-shared')
-let copyViews = require('./src/copy-views')
-let copyStaticJSON = require('./src/copy-static-json')
 
 /**
- * populates the deps for all lambdas
+ * populates or updates the deps for all lambdas. will always copy shared
+ * resources into lambdas.
  *
  * @param {object} params
  * @param {boolean} params.install
+ * @param {boolean} params.update
  */
 module.exports = function hydrate(params={}, callback) {
   // if a callback isn't supplied return a promise
@@ -22,20 +19,21 @@ module.exports = function hydrate(params={}, callback) {
       }
     })
   }
-  // always do these tasks
-  let tasks = [
-    copyShared,
-    copyViews,
-    copyStaticJSON,
-    copyArc,
-  ]
-  // maybe do these
+  let tasks = []
   if (params.install)
-    tasks.unshift(installDeps)
-  // order important!
+    tasks.push(module.exports.install) // `install` includes `shared`
+  else if (params.update)
+    tasks.push(module.exports.update) // `update` includes `shared`
+  else
+    tasks.push(module.exports.shared)
+
   series(tasks, function done(err) {
     if (err) callback(err)
     else callback()
   })
   return promise
 }
+
+module.exports.install = require('./src/install')
+module.exports.shared = require('./src/shared')
+module.exports.update = require('./src/update')

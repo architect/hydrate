@@ -4,6 +4,7 @@ let series = require('run-series')
 let fs = require('fs')
 let path = require('path')
 let child = require('child_process')
+let shared = require('./shared')
 
 /**
   installs deps into
@@ -11,7 +12,7 @@ let child = require('child_process')
   - src/shared
   - src/views
 */
-module.exports = function installDeps(callback) {
+module.exports = function install(callback) {
 
   // eslint-disable-next-line
   let pattern = 'src/**/@(package\.json|requirements\.txt|Gemfile)'
@@ -48,9 +49,13 @@ module.exports = function installDeps(callback) {
         if (stderr && stderr.length > 0) {
           console.log(chalk.yellow(stderr))
         }
-        callback()
+        if (err) callback(err)
+        else callback()
       }
 
+      // TODO: I think we should consider what minimum version of node/npm this
+      // module needs to use as the npm commands below have different behaviour
+      // depending on npm versio - and enshrine those in the package.json
       if (file.includes('package.json')) {
         if (fs.existsSync(path.join(cwd, 'package-lock.json'))) {
           exec(`npm ci`, options, done)
@@ -66,9 +71,9 @@ module.exports = function installDeps(callback) {
       if (file.includes('Gemfile'))
         exec(`bundle install --path vendor/bundle`, options, done)
     }
-  }),
+  }).concat([shared]),
   function done(err) {
-    if (err) throw err
-    callback()
+    if (err) callback(err)
+    else callback()
   })
 }
