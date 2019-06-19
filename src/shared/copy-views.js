@@ -1,4 +1,5 @@
 let cp = require('./copy')
+let rmrf = require('rimraf')
 let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
@@ -22,7 +23,11 @@ module.exports = function copyArc(callback) {
       return function copier(callback) {
         let src = path.join(process.cwd(), 'src', 'views')
         if (fs.existsSync(src) && dest.includes('get-')) {
-          cp(src, path.join(dest, 'views'), callback)
+          let finalDest = path.join(dest, 'views')
+          rmrf(finalDest, {glob:false}, function(err) {
+            if (err) callback(err)
+            else cp(src, finalDest, callback)
+          })
         }
         else {
           callback()
@@ -30,8 +35,8 @@ module.exports = function copyArc(callback) {
       }
     }),
     function done(err) {
-      if (err) throw err
-      callback()
+      if (err) callback(err)
+      else callback()
     })
   })
 }

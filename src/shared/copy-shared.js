@@ -1,4 +1,5 @@
 let cp = require('./copy')
+let rmrf = require('rimraf')
 let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
@@ -15,14 +16,18 @@ let getBasePaths = require('./get-base-paths')
  * python3.7  | vendor/architect-functions/shared/
  *
  */
-module.exports = function copyArc(callback) {
+module.exports = function copyShared(callback) {
   getBasePaths('shared', function gotBasePaths(err, paths) {
     if (err) throw err
     series(paths.map(dest=> {
       return function copier(callback) {
         let src = path.join(process.cwd(), 'src', 'shared')
         if (fs.existsSync(src)) {
-          cp(src, path.join(dest, 'shared'), callback)
+          let finalDest = path.join(dest, 'shared')
+          rmrf(finalDest, {glob:false}, function(err) {
+            if (err) callback(err)
+            else cp(src, finalDest, callback)
+          })
         }
         else {
           callback()
@@ -30,8 +35,8 @@ module.exports = function copyArc(callback) {
       }
     }),
     function done(err) {
-      if (err) throw err
-      callback()
+      if (err) callback(err)
+      else callback()
     })
   })
 }

@@ -25,8 +25,8 @@ module.exports = function copyArc(callback) {
       }
     }),
     function done(err) {
-      if (err) throw err
-      callback()
+      if (err) callback(err)
+      else callback()
     })
   })
 }

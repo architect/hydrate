@@ -4,6 +4,7 @@ let glob = require('glob')
 let fs = require('fs')
 let exists = fs.existsSync
 let cp = require('cpr')
+let mkdirp = require('mkdirp')
 let test = require('tape')
 let hydrate = require('../')
 let utils = require('@architect/utils')
@@ -46,7 +47,7 @@ test('Load project and paths', t => {
         if (p.includes('memories')) return path.join(p, 'vendor', 'architect-functions', 'views', 'views.md')
         else if (p.includes('badness')) return path.join(p, 'vendor', 'bundle', 'architect-functions', 'views', 'views.md')
         return path.join(p, 'node_modules', '@architect', 'views', 'views.md')
-      }).filter(p => p.includes('http'))
+      }).filter(p => p.includes('http') && p.includes('get-'))
       t.ok(true, 'inventory populated')
       t.end()
     }
@@ -91,7 +92,7 @@ test(`shared() copies src/shared and src/views`, t=> {
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          t.plan(inventory.localPaths.filter(p => p.includes('http')).length * 2)
+          t.plan(sharedArtifacts.length + viewsArtifacts.length)
           hydrate.shared(function done(err) {
             if (err) t.fail(err)
             else {
@@ -105,6 +106,46 @@ test(`shared() copies src/shared and src/views`, t=> {
                 } else {
                   t.notOk(exists(path), `Did not find views file in non-GET function ${path}`)
                 }
+              })
+            }
+          })
+        }
+      })
+    }
+  })
+})
+
+test(`shared() should remove files in functions that do not exist in src/shared and src/views`, t=> {
+  reset(function(err) {
+    if (err) t.fail(err)
+    else {
+      cp('_optional', 'src', {overwrite: true}, function done(err) {
+        if (err) t.fail(err)
+        else {
+          let sharedStragglers = sharedArtifacts.map((p) => {
+            let dir = path.dirname(p)
+            mkdirp.sync(dir)
+            let file = path.join(dir, 'straggler.json')
+            fs.writeFileSync(file, '{surprise:true}')
+            return file
+          })
+          let viewsStragglers = viewsArtifacts.map((p) => {
+            let dir = path.dirname(p)
+            mkdirp.sync(dir)
+            let file = path.join(dir, 'straggler.json')
+            fs.writeFileSync(file, '{surprise:true}')
+            return file
+          })
+          t.plan(sharedStragglers.length + viewsStragglers.length)
+          hydrate.shared(function done(err) {
+            if (err) t.fail(err)
+            else {
+              // Check to see if files that are supposed to be there are actually there
+              sharedStragglers.forEach(path => {
+                t.notOk(exists(path), `shared straggler file removed from ${path}`)
+              })
+              viewsStragglers.forEach(path => {
+                t.notOk(exists(path), `views straggler file removed from ${path}`)
               })
             }
           })
