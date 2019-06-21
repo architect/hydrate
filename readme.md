@@ -1,8 +1,8 @@
 # Hydrate [![Build Status](https://travis-ci.com/architect/hydrate.svg?branch=master)](https://travis-ci.com/architect/hydrate)
 
 @architect/hydrate ensures that all functions managed by architect have their
-dependencies installed. Functions with all required dependencies are considered
-to be 'hydrated' - thus the name!
+dependencies installed. Functions containing all its required dependencies are
+considered to be 'hydrated' - thus the name!
 
 @architect/hydrate supports dependencies managed in the following languages
 using the following package managers:
@@ -15,13 +15,19 @@ using the following package managers:
 
 ## `hydrate(options)`
 
-By default, invokes [`hydrate.shared()`](#hydrate-shared). If `options.install`
-is truthy, invokes [`hydrate.install()`](#hydrate-install). If `options.update`
-is truthy, invokes [`hydrate.update()`](#hydrate-update).
+`options` object can include the following properties:
 
-## `hydrate.install()`
+- `basepath`: What path hydrate should consider as the root for searching for
+    functions to hydrate. Useful if you want to hydrate a subset of functions.
+    Defaults to `src` in the current working directory.
+- `install`: If truthy, will invoke [`hydrate.install()`](#hydrate-install).
+- `update`: If truthy, will invoke [`hydrate.update()`](#hydrate-update).
 
-Installs dependencies for all Functions. Invokes
+By default, invokes [`hydrate.shared()`](#hydrate-shared).
+
+## `hydrate.install(basepath='src', callback)`
+
+Installs dependencies for all Functions found in the specified `basepath`. Invokes
 [`hydrate.shared()`](#hydrate-shared).
 
 To ensure local development behavior is as close to `staging` and `production`
@@ -31,9 +37,9 @@ as possible, `hydrate.install()` (and other hydrate functions) uses:
 - **python**: `pip3 install`
 - **ruby**: `bundle install`
 
-## `hydrate.update()`
+## `hydrate.update(basepath='src', callback)`
 
-Updates dependencies in all Functions. Invokes
+Updates dependencies in all Functions found in the specified `basepath`. Invokes
 [`hydrate.shared()`](#hydrate-shared).
 
 `update` is functionally almost identical to [`install`](#hydrate-install),
@@ -44,6 +50,6 @@ done via:
 - **python**: `pip3 install -U --upgrade-strategy eager`
 - **ruby**: `bundle update`
 
-## `hydrate.shared()`
+## `hydrate.shared(callback)`
 
 Copies shared code (from `src/shared` and `src/views`) into all Functions.
