@@ -11,7 +11,13 @@ let utils = require('@architect/utils')
 
 let mockSource = path.join(__dirname, 'mock')
 let mockTmp = path.join(__dirname, 'tmp')
-let arcFileArtifacts, sharedArtifacts, viewsArtifacts, inventory
+let arcFileArtifacts, sharedArtifacts, viewsArtifacts
+let pythonShared = path.join('vendor', 'architect-functions', 'shared')
+let rubyShared = path.join('vendor', 'bundle', 'architect-functions', 'shared')
+let nodeShared = path.join('node_modules', '@architect', 'shared')
+let pythonViews = path.join('vendor', 'architect-functions', 'views')
+let rubyViews = path.join('vendor', 'bundle', 'architect-functions', 'views')
+let nodeViews = path.join('node_modules', '@architect', 'views')
 
 function reset(callback) {
   rm.sync(mockTmp)
@@ -29,26 +35,19 @@ test('Load project and paths', t => {
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      inventory = utils.inventory()
-      // The path weirdness below is due to figuring out which runtime is which
-      // currently just basing it on the mock app's route names
-      // would be nice if arc/utils.inventory could help figure this out
-      // TODO: can glob instead of using inventory?
-      arcFileArtifacts = inventory.localPaths.map((p) => {
-        if (p.includes('memories')) return path.join(p, 'vendor', 'architect-functions', 'shared', '.arc')
-        else if (p.includes('badness')) return path.join(p, 'vendor', 'bundle', 'architect-functions', 'shared', '.arc')
-        return path.join(p, 'node_modules', '@architect', 'shared', '.arc')
-      })
-      sharedArtifacts = inventory.localPaths.map((p) => {
-        if (p.includes('memories')) return path.join(p, 'vendor', 'architect-functions', 'shared', 'shared.md')
-        else if (p.includes('badness')) return path.join(p, 'vendor', 'bundle', 'architect-functions', 'shared', 'shared.md')
-        return path.join(p, 'node_modules', '@architect', 'shared', 'shared.md')
-      }).filter(p => p.includes('http'))
-      viewsArtifacts = inventory.localPaths.map((p) => {
-        if (p.includes('memories')) return path.join(p, 'vendor', 'architect-functions', 'views', 'views.md')
-        else if (p.includes('badness')) return path.join(p, 'vendor', 'bundle', 'architect-functions', 'views', 'views.md')
-        return path.join(p, 'node_modules', '@architect', 'views', 'views.md')
-      }).filter(p => p.includes('http') && p.includes('get-'))
+      // Figure out where files we expect to be based on runtime
+      let pythonFunctions = glob.sync(path.join('src', '**', 'requirements.txt'))
+      let rubyFunctions = glob.sync(path.join('src', '**', 'Gemfile')).filter(p => !p.includes(path.join('vendor', 'bundle')))
+      let nodeFunctions = glob.sync(path.join('src', '**', 'package.json')).filter(p => !p.includes('node_modules'))
+      arcFileArtifacts = pythonFunctions.map(p => path.join(path.dirname(p), pythonShared, '.arc'))
+        .concat(rubyFunctions.map(p => path.join(path.dirname(p), rubyShared, '.arc')))
+        .concat(nodeFunctions.map(p => path.join(path.dirname(p), nodeShared, '.arc')))
+      sharedArtifacts = pythonFunctions.map(p => path.join(path.dirname(p), pythonShared, 'shared.md'))
+        .concat(rubyFunctions.map(p => path.join(path.dirname(p), rubyShared, 'shared.md')))
+        .concat(nodeFunctions.map(p => path.join(path.dirname(p), nodeShared, 'shared.md'))).filter(p => p.includes('http'))
+      viewsArtifacts = pythonFunctions.map(p => path.join(path.dirname(p), pythonViews, 'views.md'))
+        .concat(rubyFunctions.map(p => path.join(path.dirname(p), rubyViews, 'views.md')))
+        .concat(nodeFunctions.map(p => path.join(path.dirname(p), nodeViews, 'views.md'))).filter(p => p.includes('http') && p.includes('get-'))
       t.ok(true, 'inventory populated')
       t.end()
     }
@@ -58,24 +57,23 @@ test('Load project and paths', t => {
 // Figure out where expected dependencies exist at runtime, since runtime
 // versions may be variable (e.g. CI or random contributor machine)
 function discoverFunctionDependencies () {
-  return inventory.localPaths.map((p) => {
-    if (p.includes('memories')) {
-      return path.join(p, 'vendor', 'minimal-0.1.0.dist-info')
-    } else if (p.includes('badness')) {
-      // Need to glob here since the path to dependencies are based on the ruby version you have installed 🤪
-      let subpath = path.join(p, 'vendor', 'bundle', 'ruby', '**', 'gems', 'a-0.2.1')
-      let rubyglob = glob.sync(subpath)
-      return rubyglob[0]
-    }
-    return path.join(p, 'node_modules', 'tiny-json-http')
+  let pythonDeps = glob.sync(path.join('src', '**', 'requirements.txt')).map(p => path.join(path.dirname(p), 'vendor', 'minimal-0.1.0.dist-info'))
+  let rubyDeps = glob.sync(path.join('src', '**', 'Gemfile')).filter(p => !p.includes(path.join('vendor', 'bundle'))).map(function(p) {
+    let base = path.dirname(p)
+    // Need to glob here since the path to dependencies are based on the ruby version you have installed 🤪
+    let subpath = path.join(base, 'vendor', 'bundle', 'ruby', '**', 'gems', 'a-0.2.1')
+    let rubyglob = glob.sync(subpath)
+    return rubyglob[0]
   })
+  let nodeDeps = glob.sync(path.join('src', '**', 'package.json')).filter(p => !p.includes('node_modules')).map(p => path.join(path.dirname(p), 'node_modules', 'tiny-json-http'))
+  return pythonDeps.concat(rubyDeps).concat(nodeDeps)
 }
 
 test('parameterless hydrate() runs to completion on mock app', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       hydrate({}, function done(err) {
         if (err) t.fail(err)
         else {
@@ -87,13 +85,13 @@ test('parameterless hydrate() runs to completion on mock app', t=> {
 })
 
 test(`shared() copies src/shared and src/views`, t=> {
+  t.plan(sharedArtifacts.length + viewsArtifacts.length)
   reset(function(err) {
     if (err) t.fail(err)
     else {
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          t.plan(sharedArtifacts.length + viewsArtifacts.length)
           hydrate.shared(function done(err) {
             if (err) t.fail(err)
             else {
@@ -117,27 +115,27 @@ test(`shared() copies src/shared and src/views`, t=> {
 })
 
 test(`shared() should remove files in functions that do not exist in src/shared and src/views`, t=> {
+  let sharedStragglers = sharedArtifacts.map((p) => {
+    let dir = path.dirname(p)
+    mkdirp.sync(dir)
+    let file = path.join(dir, 'straggler.json')
+    fs.writeFileSync(file, '{surprise:true}')
+    return file
+  })
+  let viewsStragglers = viewsArtifacts.map((p) => {
+    let dir = path.dirname(p)
+    mkdirp.sync(dir)
+    let file = path.join(dir, 'straggler.json')
+    fs.writeFileSync(file, '{surprise:true}')
+    return file
+  })
+  t.plan(sharedStragglers.length + viewsStragglers.length)
   reset(function(err) {
     if (err) t.fail(err)
     else {
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          let sharedStragglers = sharedArtifacts.map((p) => {
-            let dir = path.dirname(p)
-            mkdirp.sync(dir)
-            let file = path.join(dir, 'straggler.json')
-            fs.writeFileSync(file, '{surprise:true}')
-            return file
-          })
-          let viewsStragglers = viewsArtifacts.map((p) => {
-            let dir = path.dirname(p)
-            mkdirp.sync(dir)
-            let file = path.join(dir, 'straggler.json')
-            fs.writeFileSync(file, '{surprise:true}')
-            return file
-          })
-          t.plan(sharedStragglers.length + viewsStragglers.length)
           hydrate.shared(function done(err) {
             if (err) t.fail(err)
             else {
@@ -157,10 +155,10 @@ test(`shared() should remove files in functions that do not exist in src/shared 
 })
 
 test(`install() hydrates all Functions' dependencies`, t=> {
+  t.plan(utils.inventory().localPaths.length * 2)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(inventory.localPaths.length * 2)
       hydrate.install(function done(err) {
         if (err) t.fail(err)
         else {
@@ -177,11 +175,32 @@ test(`install() hydrates all Functions' dependencies`, t=> {
   })
 })
 
-test(`update() bumps installed dependencies to newer versions`, t=> {
+test(`install() should not recurse into Functions dependencies and hydrate those`, t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(2)
+      let subdep = path.join('src', 'http', 'get-index', 'node_modules', 'poop')
+      mkdirp.sync(subdep)
+      fs.writeFileSync(path.join(subdep, 'package.json'), JSON.stringify({
+        name: 'poop',
+        dependencies: { 'tiny-json-http': '*' }
+      }), 'utf-8')
+      hydrate.install(function done(err) {
+        if (err) t.fail(err)
+        else {
+          t.notOk(exists(path.join(subdep, 'node_modules')), '`install` did not recurse into node subdependencies')
+        }
+      })
+    }
+  })
+})
+
+test(`update() bumps installed dependencies to newer versions`, t=> {
+  t.plan(2)
+  reset(function(err) {
+    if (err) t.fail(err)
+    else {
       // TODO: pip requires manual locking (via two requirements.txt files) so
       // we dont test update w/ python
       hydrate.update(function done(err) {
@@ -201,10 +220,10 @@ test(`update() bumps installed dependencies to newer versions`, t=> {
 })
 
 test('Corrupt package-lock.json fails hydrate.install', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-index', 'package-lock.json'), corruptPackage)
@@ -217,10 +236,10 @@ test('Corrupt package-lock.json fails hydrate.install', t=> {
 })
 
 test('Corrupt package-lock.json fails hydrate.update', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-index', 'package-lock.json'), corruptPackage)
@@ -233,10 +252,10 @@ test('Corrupt package-lock.json fails hydrate.update', t=> {
 })
 
 test('Corrupt Gemfile fails hydrate.install', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       let corruptPackage = 'ohayo gozaimasu!'
       fs.unlinkSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile.lock'))
       fs.writeFileSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile'), corruptPackage)
@@ -249,10 +268,10 @@ test('Corrupt Gemfile fails hydrate.install', t=> {
 })
 
 test('Corrupt Gemfile fails hydrate.update', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       let corruptPackage = 'ohayo gozaimasu!'
       fs.unlinkSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile.lock'))
       fs.writeFileSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile'), corruptPackage)
@@ -265,10 +284,10 @@ test('Corrupt Gemfile fails hydrate.update', t=> {
 })
 
 test('Corrupt requirements.txt fails hydrate.install', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-memories', 'requirements.txt'), corruptPackage)
       hydrate.install(function done(err) {
@@ -280,10 +299,10 @@ test('Corrupt requirements.txt fails hydrate.install', t=> {
 })
 
 test('Corrupt requirements.txt fails hydrate.update', t=> {
+  t.plan(1)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      t.plan(1)
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-memories', 'requirements.txt'), corruptPackage)
       hydrate.update(function done(err) {

@@ -16,7 +16,7 @@ module.exports = function update(callback) {
   let files = glob.sync(pattern).filter(function filter(filePath) {
     if (filePath.includes('node_modules'))
       return false
-    if (filePath.includes('vendor/bundle'))
+    if (filePath.includes(path.join('vendor', 'bundle')))
       return false
     return true
   })
