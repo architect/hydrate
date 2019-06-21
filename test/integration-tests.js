@@ -33,6 +33,7 @@ test('Load project and paths', t => {
       // The path weirdness below is due to figuring out which runtime is which
       // currently just basing it on the mock app's route names
       // would be nice if arc/utils.inventory could help figure this out
+      // TODO: can glob instead of using inventory?
       arcFileArtifacts = inventory.localPaths.map((p) => {
         if (p.includes('memories')) return path.join(p, 'vendor', 'architect-functions', 'shared', '.arc')
         else if (p.includes('badness')) return path.join(p, 'vendor', 'bundle', 'architect-functions', 'shared', '.arc')
