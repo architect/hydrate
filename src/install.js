@@ -12,10 +12,9 @@ let shared = require('./shared')
   - src/shared
   - src/views
 */
-module.exports = function install(callback) {
-
+module.exports = function install(basepath='src', callback) {
   // eslint-disable-next-line
-  let pattern = 'src/**/@(package\.json|requirements\.txt|Gemfile)'
+  let pattern = path.join(basepath, '**', '@(package\.json|requirements\.txt|Gemfile)')
 
   let files = glob.sync(pattern).filter(function filter(filePath) {
     if (filePath.includes('node_modules'))

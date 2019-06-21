@@ -8,10 +8,9 @@ let shared = require('./shared')
 /**
  * updates dependencies to newer versions
 */
-module.exports = function update(callback) {
-
+module.exports = function update(basepath='src', callback) {
   // eslint-disable-next-line
-  let pattern = 'src/**/@(package\.json|requirements\.txt|Gemfile)'
+  let pattern = path.join(basepath, '**', '@(package\.json|requirements\.txt|Gemfile)')
 
   let files = glob.sync(pattern).filter(function filter(filePath) {
     if (filePath.includes('node_modules'))

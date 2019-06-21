@@ -159,7 +159,7 @@ test(`install() hydrates all Functions' dependencies`, t=> {
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      hydrate.install(function done(err) {
+      hydrate.install(undefined, function done(err) {
         if (err) t.fail(err)
         else {
           // Check to see if files that are supposed to be there are actually there
@@ -169,6 +169,25 @@ test(`install() hydrates all Functions' dependencies`, t=> {
           arcFileArtifacts.forEach(path => {
             t.ok(exists(path), `Found .arc file in ${path}`);
           })
+        }
+      })
+    }
+  })
+})
+
+test(`install() hydrates only specified Functions' dependencies`, t=> {
+  t.plan(2)
+  reset(function(err) {
+    if (err) t.fail(err)
+    else {
+      let index = path.join('src', 'http', 'get-index')
+      let memories = path.join('src', 'http', 'get-memories', 'vendor', 'minimal-0.1.0.dist-info')
+      hydrate.install(index, function done(err) {
+        if (err) t.fail(err)
+        else {
+          // Check to see if files that are supposed to be there are actually there
+          t.ok(exists(path.join(index, 'node_modules', 'tiny-json-http')), 'scoped install only installs dependencies for correct function')
+          t.notOk(exists(memories), 'scoped install did not install dependencies for unspecified function')
         }
       })
     }
@@ -186,7 +205,7 @@ test(`install() should not recurse into Functions dependencies and hydrate those
         name: 'poop',
         dependencies: { 'tiny-json-http': '*' }
       }), 'utf-8')
-      hydrate.install(function done(err) {
+      hydrate.install(undefined, function done(err) {
         if (err) t.fail(err)
         else {
           t.notOk(exists(path.join(subdep, 'node_modules')), '`install` did not recurse into node subdependencies')
@@ -203,7 +222,7 @@ test(`update() bumps installed dependencies to newer versions`, t=> {
     else {
       // TODO: pip requires manual locking (via two requirements.txt files) so
       // we dont test update w/ python
-      hydrate.update(function done(err) {
+      hydrate.update(undefined, function done(err) {
         if (err) t.fail(err)
         else {
           // eslint-disable-next-line
@@ -227,7 +246,7 @@ test('Corrupt package-lock.json fails hydrate.install', t=> {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-index', 'package-lock.json'), corruptPackage)
-      hydrate.install(function done(err) {
+      hydrate.install(undefined, function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -243,7 +262,7 @@ test('Corrupt package-lock.json fails hydrate.update', t=> {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-index', 'package-lock.json'), corruptPackage)
-      hydrate.update(function done(err) {
+      hydrate.update(undefined, function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -259,7 +278,7 @@ test('Corrupt Gemfile fails hydrate.install', t=> {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.unlinkSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile.lock'))
       fs.writeFileSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile'), corruptPackage)
-      hydrate.install(function done(err) {
+      hydrate.install(undefined, function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -275,7 +294,7 @@ test('Corrupt Gemfile fails hydrate.update', t=> {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.unlinkSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile.lock'))
       fs.writeFileSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile'), corruptPackage)
-      hydrate.update(function done(err) {
+      hydrate.update(undefined, function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -290,7 +309,7 @@ test('Corrupt requirements.txt fails hydrate.install', t=> {
     else {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-memories', 'requirements.txt'), corruptPackage)
-      hydrate.install(function done(err) {
+      hydrate.install(undefined, function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -305,7 +324,7 @@ test('Corrupt requirements.txt fails hydrate.update', t=> {
     else {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join('src', 'http', 'get-memories', 'requirements.txt'), corruptPackage)
-      hydrate.update(function done(err) {
+      hydrate.update(undefined, function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
