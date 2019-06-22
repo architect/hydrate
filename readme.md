@@ -1,15 +1,19 @@
 # Hydrate [![Build Status](https://travis-ci.com/architect/hydrate.svg?branch=master)](https://travis-ci.com/architect/hydrate)
 
-@architect/hydrate ensures that all functions managed by architect have their
-dependencies installed. Functions containing all its required dependencies are
-considered to be 'hydrated' - thus the name!
+[@architect/hydrate][npm] ensures that all functions managed by architect have
+their dependencies installed. Functions containing all its required dependencies
+are considered to be 'hydrated' - thus the name!
 
-@architect/hydrate supports dependencies managed in the following languages
+[@architect/hydrate][npm] supports dependencies managed in the following languages
 using the following package managers:
 
 - **node.js** via `npm` using `package.json` and `package-lock.json` files
 - **python (3.7+)** via `pip3` using a `requirements.txt` file
 - **ruby** via `bundle` using `Gemfile` and `Gemfile.lock` files
+
+# Installation
+
+    npm install @architect/hydrate
 
 # API
 
@@ -20,15 +24,15 @@ using the following package managers:
 - `basepath`: What path hydrate should consider as the root for searching for
     functions to hydrate. Useful if you want to hydrate a subset of functions.
     Defaults to `src` in the current working directory.
-- `install`: If truthy, will invoke [`hydrate.install()`](#hydrate-install).
-- `update`: If truthy, will invoke [`hydrate.update()`](#hydrate-update).
+- `install`: If truthy, will invoke [`hydrate.install()`][install].
+- `update`: If truthy, will invoke [`hydrate.update()`][update].
 
-By default, invokes [`hydrate.shared()`](#hydrate-shared).
+By default, invokes [`hydrate.shared()`][shared].
 
 ## `hydrate.install(basepath='src', callback)`
 
 Installs dependencies for all Functions found in the specified `basepath`. Invokes
-[`hydrate.shared()`](#hydrate-shared).
+[`hydrate.shared()`][shared].
 
 To ensure local development behavior is as close to `staging` and `production`
 as possible, `hydrate.install()` (and other hydrate functions) uses:
@@ -40,9 +44,11 @@ as possible, `hydrate.install()` (and other hydrate functions) uses:
 ## `hydrate.update(basepath='src', callback)`
 
 Updates dependencies in all Functions found in the specified `basepath`. Invokes
-[`hydrate.shared()`](#hydrate-shared).
+[`hydrate.shared()`][shared]. Note that this will only functionally differ from
+[`hydrate.install()`][install] if you use a lockfile like `package-lock.json` or
+`Gemfile.lock`.
 
-`update` is functionally almost identical to [`install`](#hydrate-install),
+`update` is functionally almost identical to [`install`][install],
 except it will update dependencies to newer versions _if they exist_. This is
 done via:
 
@@ -53,3 +59,8 @@ done via:
 ## `hydrate.shared(callback)`
 
 Copies shared code (from `src/shared` and `src/views`) into all Functions.
+
+[shared]: #hydratesharedcallback
+[install]: #hydrateinstallbasepathsrc-callback
+[update]: #hydrateupdatebasepathsrc-callback
+[npm]: https://www.npmjs.com/package/@architect/hydrate
