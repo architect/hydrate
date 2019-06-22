@@ -1,17 +1,15 @@
 let path = require('path')
 let rm = require('rimraf')
-let glob = require('glob')
 let fs = require('fs')
 let exists = fs.existsSync
 let cp = require('cpr')
 let mkdirp = require('mkdirp')
 let test = require('tape')
+let glob = require('glob')
 let hydrate = require('../')
-let utils = require('@architect/utils')
 
 let mockSource = path.join(__dirname, 'mock')
 let mockTmp = path.join(__dirname, 'tmp')
-let arcFileArtifacts, sharedArtifacts, viewsArtifacts
 let pythonShared = path.join('vendor', 'architect-functions', 'shared')
 let rubyShared = path.join('vendor', 'bundle', 'architect-functions', 'shared')
 let nodeShared = path.join('node_modules', '@architect', 'shared')
@@ -19,70 +17,56 @@ let pythonViews = path.join('vendor', 'architect-functions', 'views')
 let rubyViews = path.join('vendor', 'bundle', 'architect-functions', 'views')
 let nodeViews = path.join('node_modules', '@architect', 'views')
 
+// Manual list of mock app resources. If you change the mock app, update these!
+let arcHttp = ['get-index', 'post-up-tents', 'put-on_your_boots', 'get-memories', 'delete-badness_in_life'].map(route => path.join('src', 'http', route))
+let arcEvents = ['just-being-in-nature'].map(route => path.join('src', 'events', route))
+let arcQueues = ['parks-to-visit'].map(route => path.join('src', 'queues', route))
+let arcScheduled = ['hikes-with-friends'].map(route => path.join('src', 'scheduled', route))
+let arcTables = ['trails-insert'].map(route => path.join('src', 'tables', route))
+let pythonFunctions = [path.join('src', 'http', 'get-memories')]
+let rubyFunctions = [path.join('src', 'http', 'delete-badness_in_life')]
+let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTables).filter(p => !pythonFunctions.includes(p) && !rubyFunctions.includes(p))
+let pythonDependencies = pythonFunctions.map(p => path.join(p, 'vendor', 'minimal-0.1.0.dist-info'))
+let rubyDependencies = function () {
+  return rubyFunctions.map(p => glob.sync(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`)[0])
+}
+let nodeDependencies = nodeFunctions.map(p => path.join(p, 'node_modules', 'tiny-json-http'))
+let pythonSharedDependencies = pythonFunctions.map(p => path.join(p, pythonShared, 'node_modules', 'tiny-json-http'))
+let pythonViewsDependencies = pythonFunctions.map(p => path.join(p, pythonViews, 'node_modules', 'tiny-json-http'))
+  .filter(p => p.includes('get-'))
+let rubySharedDependencies = rubyFunctions.map(p => path.join(p, rubyShared, 'node_modules', 'tiny-json-http'))
+let rubyViewsDependencies = rubyFunctions.map(p => path.join(p, rubyViews, 'node_modules', 'tiny-json-http'))
+  .filter(p => p.includes('get-'))
+let nodeSharedDependencies = nodeFunctions.map(p => path.join(p, nodeShared, 'node_modules', 'tiny-json-http'))
+let nodeViewsDependencies = nodeFunctions.map(p => path.join(p, nodeViews, 'node_modules', 'tiny-json-http'))
+  .filter(p => p.includes('get-'))
+let arcFileArtifacts = pythonFunctions.map(p => path.join(p, pythonShared, '.arc'))
+  .concat(rubyFunctions.map(p => path.join(p, rubyShared, '.arc')))
+  .concat(nodeFunctions.map(p => path.join(p, nodeShared, '.arc')))
+let staticArtifacts = arcFileArtifacts.map(p => path.join(path.dirname(p), 'static.json'))
+let sharedArtifacts = pythonFunctions.map(p => path.join(p, pythonShared, 'shared.md'))
+  .concat(rubyFunctions.map(p => path.join(p, rubyShared, 'shared.md')))
+  .concat(nodeFunctions.map(p => path.join(p, nodeShared, 'shared.md')))
+let viewsArtifacts = pythonFunctions.map(p => path.join(p, pythonViews, 'views.md'))
+  .concat(rubyFunctions.map(p => path.join(p, rubyViews, 'views.md')))
+  .concat(nodeFunctions.map(p => path.join(p, nodeViews, 'views.md')))
+  .filter(p => p.includes('get-'))
+
 function reset(callback) {
-  rm.sync(mockTmp)
-  cp(mockSource, mockTmp, {overwrite:true}, function(err) {
+  process.chdir(__dirname)
+  rm(mockTmp, {glob: false, maxBusyTries: 30}, function(err) {
     if (err) callback(err)
     else {
-      process.chdir(mockTmp)
-      callback()
-    }
-  })
-}
-
-test('Load project and paths', t => {
-  t.plan(1)
-  reset(function(err) {
-    if (err) t.fail(err)
-    else {
-      // Figure out where files we expect to be based on runtime
-      let pythonFunctions = glob.sync(path.join('src', '**', 'requirements.txt'))
-      let rubyFunctions = glob.sync(path.join('src', '**', 'Gemfile')).filter(p => !p.includes(path.join('vendor', 'bundle')))
-      let nodeFunctions = glob.sync(path.join('src', '**', 'package.json')).filter(p => !p.includes('node_modules'))
-      arcFileArtifacts = pythonFunctions.map(p => path.join(path.dirname(p), pythonShared, '.arc'))
-        .concat(rubyFunctions.map(p => path.join(path.dirname(p), rubyShared, '.arc')))
-        .concat(nodeFunctions.map(p => path.join(path.dirname(p), nodeShared, '.arc')))
-      sharedArtifacts = pythonFunctions.map(p => path.join(path.dirname(p), pythonShared, 'shared.md'))
-        .concat(rubyFunctions.map(p => path.join(path.dirname(p), rubyShared, 'shared.md')))
-        .concat(nodeFunctions.map(p => path.join(path.dirname(p), nodeShared, 'shared.md'))).filter(p => p.includes('http'))
-      viewsArtifacts = pythonFunctions.map(p => path.join(path.dirname(p), pythonViews, 'views.md'))
-        .concat(rubyFunctions.map(p => path.join(path.dirname(p), rubyViews, 'views.md')))
-        .concat(nodeFunctions.map(p => path.join(path.dirname(p), nodeViews, 'views.md'))).filter(p => p.includes('http') && p.includes('get-'))
-      t.ok(true, 'inventory populated')
-      t.end()
-    }
-  })
-})
-
-// Figure out where expected dependencies exist at runtime, since runtime
-// versions may be variable (e.g. CI or random contributor machine)
-function discoverFunctionDependencies () {
-  let pythonDeps = glob.sync(path.join('src', '**', 'requirements.txt')).map(p => path.join(path.dirname(p), 'vendor', 'minimal-0.1.0.dist-info'))
-  let rubyDeps = glob.sync(path.join('src', '**', 'Gemfile')).filter(p => !p.includes(path.join('vendor', 'bundle'))).map(function(p) {
-    let base = path.dirname(p)
-    // Need to glob here since the path to dependencies are based on the ruby version you have installed 🤪
-    let subpath = path.join(base, 'vendor', 'bundle', 'ruby', '**', 'gems', 'a-0.2.1')
-    let rubyglob = glob.sync(subpath)
-    return rubyglob[0]
-  })
-  let nodeDeps = glob.sync(path.join('src', '**', 'package.json')).filter(p => !p.includes('node_modules')).map(p => path.join(path.dirname(p), 'node_modules', 'tiny-json-http'))
-  return pythonDeps.concat(rubyDeps).concat(nodeDeps)
-}
-
-test('parameterless hydrate() runs to completion on mock app', t=> {
-  t.plan(1)
-  reset(function(err) {
-    if (err) t.fail(err)
-    else {
-      hydrate({}, function done(err) {
-        if (err) t.fail(err)
+      cp(mockSource, mockTmp, {overwrite:true}, function(err) {
+        if (err) callback(err)
         else {
-          t.ok(true, 'clean run to completion')
+          process.chdir(mockTmp)
+          callback()
         }
       })
     }
   })
-})
+}
 
 test(`shared() copies src/shared and src/views`, t=> {
   t.plan(sharedArtifacts.length + viewsArtifacts.length)
@@ -114,25 +98,46 @@ test(`shared() copies src/shared and src/views`, t=> {
   })
 })
 
-test(`shared() should remove files in functions that do not exist in src/shared and src/views`, t=> {
-  let sharedStragglers = sharedArtifacts.map((p) => {
-    let dir = path.dirname(p)
-    mkdirp.sync(dir)
-    let file = path.join(dir, 'straggler.json')
-    fs.writeFileSync(file, '{surprise:true}')
-    return file
-  })
-  let viewsStragglers = viewsArtifacts.map((p) => {
-    let dir = path.dirname(p)
-    mkdirp.sync(dir)
-    let file = path.join(dir, 'straggler.json')
-    fs.writeFileSync(file, '{surprise:true}')
-    return file
-  })
-  t.plan(sharedStragglers.length + viewsStragglers.length)
+test(`shared() copies .arc file and static.json`, t => {
+  t.plan(arcFileArtifacts.length + staticArtifacts.length)
   reset(function(err) {
     if (err) t.fail(err)
     else {
+      hydrate.shared(function done(err) {
+        if (err) t.fail(err)
+        else {
+          // Check to see if files that are supposed to be there are actually there
+          arcFileArtifacts.forEach(path => {
+            t.ok(exists(path), `Found .arc file in ${path}`);
+          })
+          staticArtifacts.forEach(path => {
+            t.ok(exists(path), `Found static.json file in ${path}`);
+          })
+        }
+      })
+    }
+  })
+})
+
+test(`shared() should remove files in functions that do not exist in src/shared and src/views`, t=> {
+  t.plan(sharedArtifacts.length + viewsArtifacts.length)
+  reset(function(err) {
+    if (err) t.fail(err)
+    else {
+      let sharedStragglers = sharedArtifacts.map((p) => {
+        let dir = path.dirname(p)
+        mkdirp.sync(dir)
+        let file = path.join(dir, 'straggler.json')
+        fs.writeFileSync(file, '{surprise:true}')
+        return file
+      })
+      let viewsStragglers = viewsArtifacts.map((p) => {
+        let dir = path.dirname(p)
+        mkdirp.sync(dir)
+        let file = path.join(dir, 'straggler.json')
+        fs.writeFileSync(file, '{surprise:true}')
+        return file
+      })
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
@@ -154,20 +159,45 @@ test(`shared() should remove files in functions that do not exist in src/shared 
   })
 })
 
-test(`install() hydrates all Functions' dependencies`, t=> {
-  t.plan(utils.inventory().localPaths.length * 2)
+test.only(`install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t=> {
+  t.plan(pythonDependencies.length + rubyDependencies().length + nodeDependencies.length + pythonSharedDependencies.length + pythonViewsDependencies.length + rubySharedDependencies.length + rubyViewsDependencies.length + nodeSharedDependencies.length + nodeViewsDependencies.length)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      hydrate.install(undefined, function done(err) {
+      cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          // Check to see if files that are supposed to be there are actually there
-          discoverFunctionDependencies().forEach(path => {
-            t.ok(exists(path), `Found expected dependency in ${path}`);
-          })
-          arcFileArtifacts.forEach(path => {
-            t.ok(exists(path), `Found .arc file in ${path}`);
+          hydrate.install(undefined, function done(err) {
+            if (err) t.fail(err)
+            else {
+              pythonDependencies.forEach(p => {
+                t.ok(exists(p), `python dependency exists at ${p}`)
+              })
+              rubyDependencies().forEach(p => {
+                t.ok(exists(p), `ruby dependency exists at ${p}`)
+              })
+              nodeDependencies.forEach(p => {
+                t.ok(exists(p), `node dependency exists at ${p}`)
+              })
+              pythonSharedDependencies.forEach(p => {
+                t.ok(exists(p), `python shared dependency exists at ${p}`)
+              })
+              rubySharedDependencies.forEach(p => {
+                t.ok(exists(p), `ruby shared dependency exists at ${p}`)
+              })
+              nodeSharedDependencies.forEach(p => {
+                t.ok(exists(p), `node shared dependency exists at ${p}`)
+              })
+              pythonViewsDependencies.forEach(p => {
+                t.ok(exists(p), `python views dependency exists at ${p}`)
+              })
+              rubyViewsDependencies.forEach(p => {
+                t.ok(exists(p), `ruby views dependency exists at ${p}`)
+              })
+              nodeViewsDependencies.forEach(p => {
+                t.ok(exists(p), `node views dependency exists at ${p}`)
+              })
+            }
           })
         }
       })
@@ -175,19 +205,18 @@ test(`install() hydrates all Functions' dependencies`, t=> {
   })
 })
 
-test(`install() hydrates only specified Functions' dependencies`, t=> {
+test(`install(specific-path) hydrates only Functions found in the specified subpath`, t=> {
   t.plan(2)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      let index = path.join('src', 'http', 'get-index')
-      let memories = path.join('src', 'http', 'get-memories', 'vendor', 'minimal-0.1.0.dist-info')
+      let index = nodeFunctions[0]
       hydrate.install(index, function done(err) {
         if (err) t.fail(err)
         else {
           // Check to see if files that are supposed to be there are actually there
-          t.ok(exists(path.join(index, 'node_modules', 'tiny-json-http')), 'scoped install only installs dependencies for correct function')
-          t.notOk(exists(memories), 'scoped install did not install dependencies for unspecified function')
+          t.ok(exists(nodeDependencies[0]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[0]}`)
+          t.notOk(exists(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
         }
       })
     }
@@ -199,16 +228,17 @@ test(`install() should not recurse into Functions dependencies and hydrate those
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      let subdep = path.join('src', 'http', 'get-index', 'node_modules', 'poop')
+      let subdep = path.join(nodeFunctions[0], 'node_modules', 'poop')
       mkdirp.sync(subdep)
       fs.writeFileSync(path.join(subdep, 'package.json'), JSON.stringify({
         name: 'poop',
         dependencies: { 'tiny-json-http': '*' }
       }), 'utf-8')
-      hydrate.install(undefined, function done(err) {
+      hydrate.install(nodeFunctions[0], function done(err) {
         if (err) t.fail(err)
         else {
-          t.notOk(exists(path.join(subdep, 'node_modules')), '`install` did not recurse into node subdependencies')
+          let submod = path.join(subdep, 'node_modules')
+          t.notOk(exists(), `install did not recurse into node subdependencies at ${submod}`)
         }
       })
     }
@@ -226,10 +256,10 @@ test(`update() bumps installed dependencies to newer versions`, t=> {
         if (err) t.fail(err)
         else {
           // eslint-disable-next-line
-          let lock = require(path.join(mockTmp, 'src', 'http', 'get-index', 'package-lock.json'))
+          let lock = require(path.join(mockTmp, nodeFunctions[0], 'package-lock.json'))
           let newVersion = lock.dependencies['tiny-json-http'].version
           t.notEqual(newVersion, '7.0.2', `get-index tiny-json-http bumped to ${newVersion} from 7.0.2`)
-          let gemfileLock = fs.readFileSync(path.join(mockTmp, 'src', 'http', 'delete-badness_in_life', 'Gemfile.lock'), 'utf-8')
+          let gemfileLock = fs.readFileSync(path.join(mockTmp, rubyFunctions[0], 'Gemfile.lock'), 'utf-8')
           let newGem = gemfileLock.split('\n').filter(t=>t.includes('a (0'))[0].split('(')[1].split(')')[0]
           t.notEqual(newGem, '0.2.1', `delete-badness_in_life 'a' gem bumped to ${newGem} from 0.2.1`)
         }
@@ -245,8 +275,8 @@ test('Corrupt package-lock.json fails hydrate.install', t=> {
     else {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join('src', 'http', 'get-index', 'package-lock.json'), corruptPackage)
-      hydrate.install(undefined, function done(err) {
+      fs.writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
+      hydrate.install(nodeFunctions[0], function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -261,8 +291,8 @@ test('Corrupt package-lock.json fails hydrate.update', t=> {
     else {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join('src', 'http', 'get-index', 'package-lock.json'), corruptPackage)
-      hydrate.update(undefined, function done(err) {
+      fs.writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
+      hydrate.update(nodeFunctions[0], function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -276,9 +306,9 @@ test('Corrupt Gemfile fails hydrate.install', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.unlinkSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile.lock'))
-      fs.writeFileSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile'), corruptPackage)
-      hydrate.install(undefined, function done(err) {
+      fs.unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
+      fs.writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
+      hydrate.install(rubyFunctions[0], function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -292,9 +322,9 @@ test('Corrupt Gemfile fails hydrate.update', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.unlinkSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile.lock'))
-      fs.writeFileSync(path.join('src', 'http', 'delete-badness_in_life', 'Gemfile'), corruptPackage)
-      hydrate.update(undefined, function done(err) {
+      fs.unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
+      fs.writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
+      hydrate.update(rubyFunctions[0], function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -308,8 +338,8 @@ test('Corrupt requirements.txt fails hydrate.install', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join('src', 'http', 'get-memories', 'requirements.txt'), corruptPackage)
-      hydrate.install(undefined, function done(err) {
+      fs.writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
+      hydrate.install(pythonFunctions[0], function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
@@ -323,8 +353,8 @@ test('Corrupt requirements.txt fails hydrate.update', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join('src', 'http', 'get-memories', 'requirements.txt'), corruptPackage)
-      hydrate.update(undefined, function done(err) {
+      fs.writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
+      hydrate.update(pythonFunctions[0], function done(err) {
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
       })
