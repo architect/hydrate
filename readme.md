@@ -1,4 +1,4 @@
-# Hydrate [![Build Status](https://travis-ci.com/architect/hydrate.svg?branch=master)](https://travis-ci.com/architect/hydrate)
+# Hydrate [![Travis Build Status](https://travis-ci.com/architect/hydrate.svg?branch=master)](https://travis-ci.com/architect/hydrate) [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/1svykswtyce1k3u9/branch/master?svg=true)](https://ci.appveyor.com/project/ArchitectCI/hydrate/branch/master)
 
 [@architect/hydrate][npm] ensures that all functions managed by architect have
 their dependencies installed. Functions containing all its required dependencies
