@@ -61,7 +61,7 @@ module.exports = function install(basepath='src', callback) {
   })
 
   // If installing to everything, run shared operations
-  if (basepath === 'src') ops.concat([shared])
+  if (basepath === 'src') ops.push(shared)
 
   series(ops, function done(err) {
     if (err) callback(err)
