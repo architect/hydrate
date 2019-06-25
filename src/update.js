@@ -1,7 +1,7 @@
 let glob = require('glob')
-let chalk = require('chalk')
 let series = require('run-series')
 let path = require('path')
+let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
 
@@ -27,25 +27,13 @@ module.exports = function update(basepath='src', callback) {
 
       // printer function
       function exec(cmd, opts, callback) {
-        console.log(chalk.green(cwd))
-        console.log(chalk.bold.green(cmd))
+        print.start(cwd, cmd)
         child.exec(cmd, opts, callback)
       }
 
       // also a printer function
       function done(err, stdout, stderr) {
-        if (err) {
-          console.log(chalk.bgRed.bold.white(err.message))
-          console.log(chalk.grey(err.stack))
-        }
-        if (stdout && stdout.length > 0) {
-          console.log(chalk.grey(stdout))
-        }
-        if (stderr && stderr.length > 0) {
-          console.log(chalk.yellow(stderr))
-        }
-        if (err) callback(err)
-        else callback()
+        print.done(err, stdout, stderr, callback)
       }
 
       if (file.includes('package.json')) {

@@ -1,8 +1,8 @@
 let glob = require('glob')
-let chalk = require('chalk')
 let series = require('run-series')
 let fs = require('fs')
 let path = require('path')
+let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
 
@@ -31,30 +31,18 @@ module.exports = function install(basepath='src', callback) {
 
       // printer function
       function exec(cmd, opts, callback) {
-        console.log(chalk.green(cwd))
-        console.log(chalk.bold.green(cmd))
+        print.start(cwd, cmd)
         child.exec(cmd, opts, callback)
       }
 
       // also a printer function
       function done(err, stdout, stderr) {
-        if (err) {
-          console.log(chalk.bgRed.bold.white(err.message))
-          console.log(chalk.grey(err.stack))
-        }
-        if (stdout && stdout.length > 0) {
-          console.log(chalk.grey(stdout))
-        }
-        if (stderr && stderr.length > 0) {
-          console.log(chalk.yellow(stderr))
-        }
-        if (err) callback(err)
-        else callback()
+        print.done(err, stdout, stderr, callback)
       }
 
       // TODO: I think we should consider what minimum version of node/npm this
       // module needs to use as the npm commands below have different behaviour
-      // depending on npm versio - and enshrine those in the package.json
+      // depending on npm version - and enshrine those in the package.json
       if (file.includes('package.json')) {
         if (fs.existsSync(path.join(cwd, 'package-lock.json'))) {
           exec(`npm ci`, options, done)
