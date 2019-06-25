@@ -20,7 +20,7 @@ module.exports = function update(basepath='src', callback) {
     return true
   })
 
-  series(files.map(file=> {
+  let ops = files.map(file=> {
     let cwd = path.dirname(file)
     let options = {cwd}
     return function updation(callback) {
@@ -49,8 +49,12 @@ module.exports = function update(basepath='src', callback) {
       if (file.includes('Gemfile'))
         exec(`bundle update`, options, done)
     }
-  }).concat([shared]),
-  function done(err) {
+  })
+
+  // If installing to everything, run shared operations
+  if (basepath === 'src') ops.concat([shared])
+
+  series(ops, function done(err) {
     if (err) callback(err)
     else callback()
   })

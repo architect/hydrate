@@ -24,7 +24,7 @@ module.exports = function install(basepath='src', callback) {
     return true
   })
 
-  series(files.map(file=> {
+  let ops = files.map(file=> {
     let cwd = path.dirname(file)
     let options = {cwd}
     return function hydration(callback) {
@@ -58,8 +58,12 @@ module.exports = function install(basepath='src', callback) {
       if (file.includes('Gemfile'))
         exec(`bundle install --path vendor/bundle`, options, done)
     }
-  }).concat([shared]),
-  function done(err) {
+  })
+
+  // If installing to everything, run shared operations
+  if (basepath === 'src') ops.concat([shared])
+
+  series(ops, function done(err) {
     if (err) callback(err)
     else callback()
   })
