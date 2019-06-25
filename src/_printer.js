@@ -9,15 +9,15 @@ function start (cwd, cmd) {
 }
 
 function done (err, stdout, stderr, callback) {
-  let format = input => input.trim().split('\n').map(l => `  | ${l}`).join('\n')
+  let print = input => console.log(input.split('\n').map(l => `  ${chalk.grey('|')} ${l}`).join('\n'))
   if (err) {
-    console.log(chalk.red.bold(format(err.message)))
+    print(chalk.red.bold(err.message.trim()))
   }
   if (stdout && stdout.length > 0) {
-    console.log(chalk.grey(format(stdout)))
+    print(chalk.grey(stdout.trim()))
   }
   if (stderr && stderr.length > 0) {
-    console.log(chalk.yellow.dim(format(stderr)))
+    print(chalk.yellow.dim(stderr.trim()))
   }
   if (err) callback(Error('hydration_error'))
   else callback()
