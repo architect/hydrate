@@ -4,7 +4,6 @@ let fs = require('fs')
 let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
-let shared = require('./shared')
 
 /**
   installs deps into
@@ -24,7 +23,7 @@ module.exports = function install(basepath='src', callback) {
     return true
   })
 
-  let ops = files.map(file=> {
+  series(files.map(file=> {
     let cwd = path.dirname(file)
     let options = {cwd}
     return function hydration(callback) {
@@ -58,12 +57,8 @@ module.exports = function install(basepath='src', callback) {
       if (file.includes('Gemfile'))
         exec(`bundle install --path vendor/bundle`, options, done)
     }
-  })
-
-  // If installing to everything, run shared operations
-  if (basepath === 'src') ops.push(shared)
-
-  series(ops, function done(err) {
+  }),
+  function done(err) {
     if (err) callback(err)
     else callback()
   })

@@ -31,14 +31,6 @@ let rubyDependencies = function () {
   return rubyFunctions.map(p => glob.sync(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`)[0])
 }
 let nodeDependencies = nodeFunctions.map(p => path.join(p, 'node_modules', 'tiny-json-http'))
-let pythonSharedDependencies = pythonFunctions.map(p => path.join(p, pythonShared, 'node_modules', 'tiny-json-http'))
-let pythonViewsDependencies = pythonFunctions.map(p => path.join(p, pythonViews, 'node_modules', 'tiny-json-http'))
-  .filter(p => p.includes('get-'))
-let rubySharedDependencies = rubyFunctions.map(p => path.join(p, rubyShared, 'node_modules', 'tiny-json-http'))
-let rubyViewsDependencies = rubyFunctions.map(p => path.join(p, rubyViews, 'node_modules', 'tiny-json-http'))
-  .filter(p => p.includes('get-'))
-let nodeSharedDependencies = nodeFunctions.map(p => path.join(p, nodeShared, 'node_modules', 'tiny-json-http'))
-let nodeViewsDependencies = nodeFunctions.map(p => path.join(p, nodeViews, 'node_modules', 'tiny-json-http'))
   .filter(p => p.includes('get-'))
 let arcFileArtifacts = pythonFunctions.map(p => path.join(p, pythonShared, '.arc'))
   .concat(rubyFunctions.map(p => path.join(p, rubyShared, '.arc')))
@@ -159,8 +151,8 @@ test(`shared() should remove files in functions that do not exist in src/shared 
   })
 })
 
-test.only(`install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t=> {
-  t.plan(pythonDependencies.length + rubyDependencies().length + nodeDependencies.length + pythonSharedDependencies.length + pythonViewsDependencies.length + rubySharedDependencies.length + rubyViewsDependencies.length + nodeSharedDependencies.length + nodeViewsDependencies.length)
+test(`install(undefined) installs manifest dependencies in all Functions as well as src/shared and src/views`, t=> {
+  t.plan(pythonDependencies.length + rubyDependencies().length + nodeDependencies.length + 2)
   reset(function(err) {
     if (err) t.fail(err)
     else {
@@ -179,24 +171,10 @@ test.only(`install(undefined) hydrates all Functions', src/shared and src/views 
               nodeDependencies.forEach(p => {
                 t.ok(exists(p), `node dependency exists at ${p}`)
               })
-              pythonSharedDependencies.forEach(p => {
-                t.ok(exists(p), `python shared dependency exists at ${p}`)
-              })
-              rubySharedDependencies.forEach(p => {
-                t.ok(exists(p), `ruby shared dependency exists at ${p}`)
-              })
-              nodeSharedDependencies.forEach(p => {
-                t.ok(exists(p), `node shared dependency exists at ${p}`)
-              })
-              pythonViewsDependencies.forEach(p => {
-                t.ok(exists(p), `python views dependency exists at ${p}`)
-              })
-              rubyViewsDependencies.forEach(p => {
-                t.ok(exists(p), `ruby views dependency exists at ${p}`)
-              })
-              nodeViewsDependencies.forEach(p => {
-                t.ok(exists(p), `node views dependency exists at ${p}`)
-              })
+              let sharedDep = path.join('src', 'shared', 'node_modules', 'tiny-json-http')
+              let viewsDep = path.join('src', 'views', 'node_modules', 'tiny-json-http')
+              t.ok(exists(sharedDep), `${sharedDep} exists`)
+              t.ok(exists(viewsDep), `${viewsDep} exists`)
             }
           })
         }

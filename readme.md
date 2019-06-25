@@ -26,13 +26,15 @@ using the following package managers:
     Defaults to `src` in the current working directory.
 - `install`: If truthy, will invoke [`hydrate.install()`][install].
 - `update`: If truthy, will invoke [`hydrate.update()`][update].
+- `shared`: If truthy, will invoke [`hydrate.shared()`][shared].
 
-By default, invokes [`hydrate.shared()`][shared].
+By default, invokes [`hydrate.shared()`][shared]. If any number of `install`,
+`update` or `shared` are specified, then each will execute in series in this aforementioned
+order.
 
 ## `hydrate.install(basepath='src', callback)`
 
-Installs dependencies for all Functions found in the specified `basepath`. Invokes
-[`hydrate.shared()`][shared].
+Installs dependencies for all Functions found in the specified `basepath`.
 
 Note that for the default value of `basepath='src'`, this means `install` will
 also hydrate shared folders like `src/shared` and `src/views`.
@@ -46,10 +48,9 @@ as possible, `hydrate.install()` (and other hydrate functions) uses:
 
 ## `hydrate.update(basepath='src', callback)`
 
-Updates dependencies in all Functions found in the specified `basepath`. Invokes
-[`hydrate.shared()`][shared]. Note that this will only functionally differ from
-[`hydrate.install()`][install] if you use a lockfile like `package-lock.json` or
-`Gemfile.lock`.
+Updates dependencies in all Functions found in the specified `basepath`. Note that
+this will only functionally differ from [`hydrate.install()`][install] if you use
+a lockfile like `package-lock.json` or `Gemfile.lock`.
 
 Note that for the default value of `basepath='src'`, this means `update` will
 also update dependencies in shared folders like `src/shared` and `src/views`.

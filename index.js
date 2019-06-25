@@ -24,11 +24,11 @@ module.exports = function hydrate(params={}, callback) {
     tasks.push(function install(callback) {
       module.exports.install(params.basepath, callback) // `install` includes `shared`
     })
-  else if (params.update)
+  if (params.update)
     tasks.push(function update(callback) {
       module.exports.update(params.basepath, callback) // `update` includes `shared`
     })
-  else
+  if (params.shared || tasks.length === 0)
     tasks.push(module.exports.shared)
 
   series(tasks, function done(err) {

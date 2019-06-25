@@ -3,7 +3,6 @@ let series = require('run-series')
 let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
-let shared = require('./shared')
 
 /**
  * updates dependencies to newer versions
@@ -20,7 +19,7 @@ module.exports = function update(basepath='src', callback) {
     return true
   })
 
-  let ops = files.map(file=> {
+  series(files.map(file=> {
     let cwd = path.dirname(file)
     let options = {cwd}
     return function updation(callback) {
@@ -49,12 +48,8 @@ module.exports = function update(basepath='src', callback) {
       if (file.includes('Gemfile'))
         exec(`bundle update`, options, done)
     }
-  })
-
-  // If installing to everything, run shared operations
-  if (basepath === 'src') ops.push(shared)
-
-  series(ops, function done(err) {
+  }),
+  function done(err) {
     if (err) callback(err)
     else callback()
   })
