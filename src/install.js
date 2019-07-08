@@ -29,13 +29,13 @@ module.exports = function install(basepath='src', callback) {
     let options = {cwd}
     return function hydration(callback) {
 
-      // printer function
+      // Prints and executes the command
       function exec(cmd, opts, callback) {
         print.start(cwd, cmd)
         child.exec(cmd, opts, callback)
       }
 
-      // also a printer function
+      // Prints the result
       function done(err, stdout, stderr) {
         print.done(err, stdout, stderr, callback)
       }
@@ -63,8 +63,5 @@ module.exports = function install(basepath='src', callback) {
   // If installing to everything, run shared operations
   if (basepath === 'src') ops.push(shared)
 
-  series(ops, function done(err) {
-    if (err) callback(err)
-    else callback()
-  })
+  series(ops, callback)
 }
