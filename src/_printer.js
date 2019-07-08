@@ -16,7 +16,9 @@ function done (params, callback) {
   let {err, stdout, stderr, start, quiet} = params
   let result = {
     raw: {},
-    term: {}
+    term: {
+      stdout: start
+    }
   }
   let format = input => input.split('\n').map(l => `  ${chalk.grey('|')} ${l}`).join('\n')
 
@@ -27,7 +29,7 @@ function done (params, callback) {
   }
   if (stdout && stdout.length > 0) {
     result.raw.stdout = stdout
-    result.term.stdout = `${start}\n${format(chalk.grey(stdout.trim()))}`
+    result.term.stdout += `\n${format(chalk.grey(stdout.trim()))}`
     if (!quiet) console.log(stdout)
   }
   if (stderr && stderr.length > 0) {
