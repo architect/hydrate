@@ -31,16 +31,17 @@ module.exports = function install(params={}, callback) {
     let cwd = path.dirname(file)
     let options = {cwd, env, shell, timeout}
     return function hydration(callback) {
+      let start
 
       // Prints and executes the command
       function exec(cmd, opts, callback) {
-        print.start({cwd, cmd, quiet})
+        start = print.start({cwd, cmd, quiet})
         child.exec(cmd, opts, callback)
       }
 
       // Prints the result
       function done(err, stdout, stderr) {
-        print.done({err, stdout, stderr, quiet}, callback)
+        print.done({err, stdout, stderr, start, quiet}, callback)
       }
 
       // TODO: I think we should consider what minimum version of node/npm this

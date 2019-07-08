@@ -6,24 +6,38 @@ function start (params) {
   let status = chalk.grey('Hydrating dependencies:')
   let path = chalk.cyan(cwd.replace(process.cwd(), ''))
   let command = chalk.cyan.dim(`[${cmd}]`)
-  if (!quiet) console.log(`${indicator} ${status} ${path} ${command}`)
+  let info = `${indicator} ${status} ${path} ${command}`
+  if (!quiet) console.log(info)
+  return info
 }
 
-// Prints and passes along the result
+// Prints and passes along the result (in both raw and terminal (ANSI) formats)
 function done (params, callback) {
-  let {err, stdout, stderr, quiet} = params
-  let print = input => console.log(input.split('\n').map(l => `  ${chalk.grey('|')} ${l}`).join('\n'))
-  if (err && !quiet) {
-    print(chalk.red.bold(err.message.trim()))
+  let {err, stdout, stderr, start, quiet} = params
+  let result = {
+    raw: {},
+    term: {}
   }
-  if (stdout && stdout.length > 0 && !quiet) {
-    print(chalk.grey(stdout.trim()))
+  let format = input => input.split('\n').map(l => `  ${chalk.grey('|')} ${l}`).join('\n')
+
+  if (err) {
+    result.raw.err = err
+    result.term.err = format(chalk.red.bold(err.message.trim()))
+    if (!quiet) console.err(err)
   }
-  if (stderr && stderr.length > 0 && !quiet) {
-    print(chalk.yellow.dim(stderr.trim()))
+  if (stdout && stdout.length > 0) {
+    result.raw.stdout = stdout
+    result.term.stdout = `${start}\n${format(chalk.grey(stdout.trim()))}`
+    if (!quiet) console.log(stdout)
   }
-  if (err) callback(Error('hydration_error'), {err, stdout, stderr})
-  else callback(null, {err, stdout, stderr})
+  if (stderr && stderr.length > 0) {
+    result.raw.stderr = stderr
+    result.term.stderr = format(chalk.yellow.dim(stderr.trim()))
+    if (!quiet) console.log(stderr)
+  }
+
+  if (err) callback(Error('hydration_error'), result)
+  else callback(null, result)
 }
 
 module.exports = {
