@@ -1,23 +1,25 @@
 let chalk = require('chalk')
 
-function start (cwd, cmd) {
+function start (params) {
+  let {cwd, cmd, quiet} = params
   let indicator = chalk.green.dim('⚬')
   let status = chalk.grey('Hydrating dependencies:')
   let path = chalk.cyan(cwd.replace(process.cwd(), ''))
   let command = chalk.cyan.dim(`[${cmd}]`)
-  console.log(`${indicator} ${status} ${path} ${command}`)
+  if (!quiet) console.log(`${indicator} ${status} ${path} ${command}`)
 }
 
 // Prints and passes along the result
-function done (err, stdout, stderr, callback) {
+function done (params, callback) {
+  let {err, stdout, stderr, quiet} = params
   let print = input => console.log(input.split('\n').map(l => `  ${chalk.grey('|')} ${l}`).join('\n'))
-  if (err) {
+  if (err && !quiet) {
     print(chalk.red.bold(err.message.trim()))
   }
-  if (stdout && stdout.length > 0) {
+  if (stdout && stdout.length > 0 && !quiet) {
     print(chalk.grey(stdout.trim()))
   }
-  if (stderr && stderr.length > 0) {
+  if (stderr && stderr.length > 0 && !quiet) {
     print(chalk.yellow.dim(stderr.trim()))
   }
   if (err) callback(Error('hydration_error'), {err, stdout, stderr})

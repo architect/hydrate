@@ -8,7 +8,10 @@ let shared = require('./shared')
 /**
  * updates dependencies to newer versions
 */
-module.exports = function update(basepath='src', callback) {
+module.exports = function update(params={}, callback) {
+  let {basepath, env, quiet, shell, timeout} = params
+  basepath = basepath || 'src'
+
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
 
@@ -22,18 +25,18 @@ module.exports = function update(basepath='src', callback) {
 
   let ops = files.map(file=> {
     let cwd = path.dirname(file)
-    let options = {cwd}
+    let options = {cwd, env, shell, timeout}
     return function updation(callback) {
 
       // printer function
       function exec(cmd, opts, callback) {
-        print.start(cwd, cmd)
+        print.start({cwd, cmd, quiet})
         child.exec(cmd, opts, callback)
       }
 
       // also a printer function
       function done(err, stdout, stderr) {
-        print.done(err, stdout, stderr, callback)
+        print.done({err, stdout, stderr, quiet}, callback)
       }
 
       if (file.includes('package.json')) {

@@ -12,7 +12,10 @@ let shared = require('./shared')
   - src/shared
   - src/views
 */
-module.exports = function install(basepath='src', callback) {
+module.exports = function install(params={}, callback) {
+  let {basepath, env, quiet, shell, timeout} = params
+  basepath = basepath || 'src'
+
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
 
@@ -26,18 +29,18 @@ module.exports = function install(basepath='src', callback) {
 
   let ops = files.map(file=> {
     let cwd = path.dirname(file)
-    let options = {cwd}
+    let options = {cwd, env, shell, timeout}
     return function hydration(callback) {
 
       // Prints and executes the command
       function exec(cmd, opts, callback) {
-        print.start(cwd, cmd)
+        print.start({cwd, cmd, quiet})
         child.exec(cmd, opts, callback)
       }
 
       // Prints the result
       function done(err, stdout, stderr) {
-        print.done(err, stdout, stderr, callback)
+        print.done({err, stdout, stderr, quiet}, callback)
       }
 
       // TODO: I think we should consider what minimum version of node/npm this
