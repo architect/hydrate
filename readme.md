@@ -17,7 +17,7 @@ using the following package managers:
 
 # API
 
-## `hydrate(options)`
+## `hydrate(options, callback)`
 
 `options` object can include the following properties:
 
@@ -29,12 +29,23 @@ using the following package managers:
 
 By default, invokes [`hydrate.shared()`][shared].
 
-## `hydrate.install(basepath='src', callback)`
+## `hydrate.install(options, callback)`
+
+`options` object can include the following properties:
+
+- `basepath`: What path hydrate should consider as the root for searching for
+    functions to install. Useful if you want to install a subset of functions.
+    Defaults to `src` in the current working directory.
+- `env`: Environment variables provided to `install` command.
+- `quiet`: If falsey, additional information about the `install` command used 
+    will be logged to the console.
+- `shell`: Shell to execute the `install` command with.
+- `timeout`
 
 Installs dependencies for all Functions found in the specified `basepath`. Invokes
-[`hydrate.shared()`][shared].
+[`hydrate.shared()`][shared] when installing to `src`.
 
-Note that for the default value of `basepath='src'`, this means `install` will
+Note that for the default value of `options.basepath='src'`, this means `install` will
 also hydrate shared folders like `src/shared` and `src/views`.
 
 To ensure local development behavior is as close to `staging` and `production`
@@ -44,7 +55,18 @@ as possible, `hydrate.install()` (and other hydrate functions) uses:
 - **python**: `pip3 install`
 - **ruby**: `bundle install`
 
-## `hydrate.update(basepath='src', callback)`
+## `hydrate.update(options, callback)`
+
+`options` object can include the following properties:
+
+- `basepath`: What path hydrate should consider as the root for searching for
+    functions to update. Useful if you want to update a subset of functions.
+    Defaults to `src` in the current working directory.
+- `env`: Environment variables provided to `update` command.
+- `quiet`: If falsey, additional information about the `update` command used 
+    will be logged to the console.
+- `shell`: Shell to execute the `install` command with.
+- `timeout`
 
 Updates dependencies in all Functions found in the specified `basepath`. Invokes
 [`hydrate.shared()`][shared]. Note that this will only functionally differ from
