@@ -7,6 +7,7 @@
     "test": "npm run lint && npm run test:unit && npm run test:integration",
     "test:unit": "tape test/unit-tests.js | tap-spec",
     "test:integration": "tape test/integration-tests.js | tap-spec",
+    "coverage": "istanbul cover tape test/unit-tests.js",
     "lint": "eslint . --fix --ignore-pattern node_modules"
   },
   "repository": {
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
+    "istanbul": "^0.4.5",
     "mkdirp": "^0.5.1",
     "sinon": "^7.3.2",
     "tap-spec": "^5.0.0",
