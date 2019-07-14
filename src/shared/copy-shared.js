@@ -12,8 +12,8 @@ let getBasePaths = require('./get-base-paths')
  * Runtime    | Function Path
  * ----------------------------------------------------------
  * nodejs10.x | node_modules/@architect/shared/
- * ruby2.5    | vendor/bundle/architect-functions/shared/
- * python3.7  | vendor/architect-functions/shared/
+ * ruby2.5    | vendor/shared/
+ * python3.7  | vendor/shared/
  *
  */
 module.exports = function copyShared(callback) {

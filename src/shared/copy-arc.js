@@ -12,8 +12,8 @@ let getBasePaths = require('./get-base-paths')
  * Runtime    | Function Path
  * ----------------------------------------------------------
  * nodejs10.x | node_modules/@architect/shared/.arc
- * ruby2.5    | vendor/bundle/architect-functions/shared/.arc
- * python3.7  | vendor/architect-functions/shared/.arc
+ * ruby2.5    | vendor/shared/.arc
+ * python3.7  | vendor/shared/.arc
  *
  */
 module.exports = function copyArc(callback) {

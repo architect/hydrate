@@ -12,8 +12,8 @@ let getBasePaths = require('./get-base-paths')
  * Runtime    | Function Path
  * ----------------------------------------------------------
  * nodejs10.x | node_modules/@architect/views/
- * ruby2.5    | vendor/bundle/architect-functions/views/
- * python3.7  | vendor/architect-functions/views/
+ * ruby2.5    | vendor/views/
+ * python3.7  | vendor/views/
  *
  */
 module.exports = function copyArc(callback) {

@@ -10,11 +10,11 @@ let hydrate = require('../')
 
 let mockSource = path.join(__dirname, 'mock')
 let mockTmp = path.join(__dirname, 'tmp')
-let pythonShared = path.join('vendor', 'architect-functions', 'shared')
-let rubyShared = path.join('vendor', 'bundle', 'architect-functions', 'shared')
+let pythonShared = path.join('vendor', 'shared')
+let rubyShared = path.join('vendor', 'shared')
 let nodeShared = path.join('node_modules', '@architect', 'shared')
-let pythonViews = path.join('vendor', 'architect-functions', 'views')
-let rubyViews = path.join('vendor', 'bundle', 'architect-functions', 'views')
+let pythonViews = path.join('vendor', 'views')
+let rubyViews = path.join('vendor', 'views')
 let nodeViews = path.join('node_modules', '@architect', 'views')
 
 // Manual list of mock app resources. If you change the mock app, update these!
