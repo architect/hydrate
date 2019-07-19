@@ -25,7 +25,7 @@ function done (params, callback) {
   if (err) {
     result.raw.err = err
     result.term.err = format(chalk.red.bold(err.message.trim()))
-    if (!quiet) console.err(err)
+    if (!quiet) console.error(err)
   }
   if (stdout && stdout.length > 0) {
     result.raw.stdout = stdout
