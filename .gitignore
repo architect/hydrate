@@ -1,4 +1,5 @@
 vendor/
 node_modules/
 test/tmp
-coverage
+coverage/
+.nyc_output/
