@@ -3,10 +3,8 @@ python: "3.6"
 node_js: "lts/*"
 before_install:
   - npm i -g npm@latest
-  - npm i -g codecov
 install:
   - npm i
 script:
   - npm test
-  - npm run coverage
-  - codecov
+after_success: npx codecov
