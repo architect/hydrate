@@ -1,12 +1,12 @@
 let chalk = require('chalk')
+let chars = require('@architect/utils').chars
 
 function start (params) {
   let {cwd, cmd, quiet} = params
-  let indicator = chalk.green.dim('⚬')
   let status = chalk.grey('Hydrating dependencies:')
   let path = chalk.cyan(cwd.replace(process.cwd(), ''))
   let command = chalk.cyan.dim(`[${cmd}]`)
-  let info = `${indicator} ${status} ${path} ${command}`
+  let info = `${chars.start} ${status} ${path} ${command}`
   if (!quiet) console.log(info)
   return info
 }
