@@ -8,7 +8,7 @@ let series = require('run-series')
  * @param {boolean} params.install
  * @param {boolean} params.update
  */
-module.exports = function hydrate(params={}, callback) {
+module.exports = function hydrate(params={install:true}, callback) {
   // if a callback isn't supplied return a promise
   let promise
   if (!callback) {
