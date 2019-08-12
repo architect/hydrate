@@ -1,6 +1,8 @@
-test/
+.github
 .eslintrc.js
-coverage
-codecov.yaml
+.nyc_output
 .travis.yml
+coverage
+test
+codecov.yaml
 appveyor.yml
