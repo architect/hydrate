@@ -159,7 +159,7 @@ test(`shared() should remove files in functions that do not exist in src/shared 
   })
 })
 
-test.only(`install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t=> {
+test(`install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t=> {
   t.plan(pythonDependencies.length + rubyDependencies().length + nodeDependencies.length + pythonSharedDependencies.length + pythonViewsDependencies.length + rubySharedDependencies.length + rubyViewsDependencies.length + nodeSharedDependencies.length + nodeViewsDependencies.length)
   reset(function(err) {
     if (err) t.fail(err)
@@ -210,8 +210,8 @@ test(`install(specific-path) hydrates only Functions found in the specified subp
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      let index = nodeFunctions[0]
-      hydrate.install(index, function done(err) {
+      let basepath = nodeFunctions[0]
+      hydrate.install({basepath}, function done(err) {
         if (err) t.fail(err)
         else {
           // Check to see if files that are supposed to be there are actually there
