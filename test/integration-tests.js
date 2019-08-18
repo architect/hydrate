@@ -243,6 +243,34 @@ test(`shared() copies static.json but not .arc (Arc v6+)`, t => {
   })
 })
 
+test(`shared() copies static.json with @static folder configured`, t => {
+  t.plan(staticArtifacts.length + 2)
+  reset(function(err) {
+    if (err) t.fail(err)
+    else {
+      // Rewrite .arc to include @static folder directive
+      let arcFile = path.join(process.cwd(), '.arc')
+      let arc = fs.readFileSync(arcFile).toString()
+      arc += '@static\nfolder foo'
+      fs.writeFileSync(arcFile, arc)
+      t.pass(`Added '@static folder foo' to .arc`)
+      // Move public/ to foo/
+      fs.renameSync(path.join(process.cwd(), 'public'), path.join(process.cwd(), 'foo'))
+      t.ok(fs.existsSync(path.join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
+      hydrate.shared(function done(err) {
+        if (err) t.fail(err)
+        else {
+          console.log(`noop log to help reset tap-spec lol`)
+          // Check to see if files that are supposed to be there are actually there
+          staticArtifacts.forEach(path => {
+            t.ok(exists(path), `Found static.json file in ${path}`);
+          })
+        }
+      })
+    }
+  })
+})
+
 test(`shared() should remove files in functions that do not exist in src/shared and src/views`, t=> {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length)
   reset(function(err) {
