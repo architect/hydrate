@@ -19,7 +19,7 @@ module.exports = function install(params={}, callback) {
   basepath = basepath || 'src'
 
   let update = updater('Hydrate')
-  let p = basepath.substr(-1) === '/' ? basepath : `${basepath}/`
+  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
 
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
@@ -38,7 +38,7 @@ module.exports = function install(params={}, callback) {
     update.status(`Hydrating dependencies in ${deps} function${deps > 1 ? 's' : ''}`)
 
   if (!deps && verbose)
-    update.status(`No dependencies found to hydrate in: ${p}`)
+    update.status(`No dependencies found in: ${p}${path.sep}**`)
 
   let ops = files.map(file=> {
     let cwd = path.dirname(file)
@@ -91,6 +91,8 @@ module.exports = function install(params={}, callback) {
     else {
       if (deps && deps > 0)
         updater('Success!').done(chalk.green('Finished hydrating dependencies'))
+      if (!deps)
+        updater('Hydrate').done('Finished checks, nothing to hydrate')
 
       callback(null, result)
     }
