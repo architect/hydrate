@@ -8,6 +8,10 @@ post    /up/tents
 put     /on_your_boots
 delete  /badness-in-life
 
+@views
+get /
+post /up/tents
+
 @events
 just-being-in-nature
 
