@@ -41,6 +41,7 @@ module.exports = function update(params={}, callback) {
     return function updation(callback) {
       let start
       let cmd
+      let now = Date.now()
 
       // printer function
       function exec(command, opts, callback) {
@@ -52,6 +53,8 @@ module.exports = function update(params={}, callback) {
 
       // also a printer function
       function done(err, stdout, stderr) {
+        // If zero output, acknowledge *something* happened
+        if (!err && !stdout && !stderr) stdout = `done in ${(Date.now() - now) / 1000}s`
         print.done({err, stdout, stderr, cmd, start, quiet, verbose}, callback)
       }
 

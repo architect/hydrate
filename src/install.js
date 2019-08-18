@@ -46,6 +46,7 @@ module.exports = function install(params={}, callback) {
     return function hydration(callback) {
       let start
       let cmd
+      let now = Date.now()
 
       // Prints and executes the command
       function exec(command, opts, callback) {
@@ -57,6 +58,8 @@ module.exports = function install(params={}, callback) {
 
       // Prints the result
       function done(err, stdout, stderr) {
+        // If zero output, acknowledge *something* happened
+        if (!err && !stdout && !stderr) stdout = `done in ${(Date.now() - now) / 1000}s`
         print.done({err, stdout, stderr, cmd, start, quiet, verbose}, callback)
       }
 
