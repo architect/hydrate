@@ -17,18 +17,21 @@ let getBasePaths = require('./get-base-paths')
  *
  */
 module.exports = function copyArc(callback) {
-  getBasePaths('arcfile', function gotBasePaths(err, paths) {
-    if (err) throw err
-    series(paths.map(dest=> {
-      return function copier(callback) {
-        copy(path.join(dest, 'shared'), callback)
-      }
-    }),
-    function done(err) {
-      if (err) callback(err)
-      else callback()
+  if (process.env.DEPRECATED) {
+    getBasePaths('arcfile', function gotBasePaths(err, paths) {
+      if (err) throw err
+      series(paths.map(dest=> {
+        return function copier(callback) {
+          copy(path.join(dest, 'shared'), callback)
+        }
+      }),
+      function done(err) {
+        if (err) callback(err)
+        else callback()
+      })
     })
-  })
+  }
+  else callback()
 }
 
 /**
