@@ -5,7 +5,7 @@ let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
 
 /**
- * copies src/views
+ * copies public/static.json
  * into function runtime discoverable directory
  *
  * Runtime    | Function Path
@@ -18,11 +18,12 @@ let getBasePaths = require('./get-base-paths')
 module.exports = function copyArc(callback) {
   getBasePaths('static', function gotBasePaths(err, paths) {
     if (err) throw err
+    let static = path.join(process.cwd(), 'public', 'static.json')
+    let hasStatic = fs.existsSync(static)
     series(paths.map(dest=> {
       return function copier(callback) {
-        let src = path.join(process.cwd(), 'public', 'static.json')
-        if (fs.existsSync(src)) {
-          cp(src, path.join(dest, 'shared', 'static.json'), callback)
+        if (hasStatic) {
+          cp(static, path.join(dest, 'shared', 'static.json'), callback)
         }
         else {
           callback()

@@ -4,6 +4,7 @@ let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
+let {updater} = require('@architect/utils')
 
 /**
  * copies src/shared
@@ -19,14 +20,20 @@ let getBasePaths = require('./get-base-paths')
 module.exports = function copyShared(callback) {
   getBasePaths('shared', function gotBasePaths(err, paths) {
     if (err) throw err
+    let update
+    let shared = path.join(process.cwd(), 'src', 'shared')
+    let hasShared = fs.existsSync(shared)
+    if (hasShared) {
+      update = updater('Hydrate')
+      update.start(`Hydrating app with src${path.sep}shared`)
+    }
     series(paths.map(dest=> {
       return function copier(callback) {
-        let src = path.join(process.cwd(), 'src', 'shared')
-        if (fs.existsSync(src)) {
+        if (hasShared) {
           let finalDest = path.join(dest, 'shared')
           rmrf(finalDest, {glob:false}, function(err) {
             if (err) callback(err)
-            else cp(src, finalDest, callback)
+            else cp(shared, finalDest, callback)
           })
         }
         else {
@@ -36,7 +43,11 @@ module.exports = function copyShared(callback) {
     }),
     function done(err) {
       if (err) callback(err)
-      else callback()
+      else {
+        if (update)
+          update.done(`Hydrated app with src${path.sep}shared`)
+        callback()
+      }
     })
   })
 }
