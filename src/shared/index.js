@@ -4,8 +4,6 @@ let copyShared = require('./copy-shared')
 let copyViews = require('./copy-views')
 let copyStaticJSON = require('./copy-static-json')
 
-/**
-*/
 module.exports = function shared(callback) {
   series([
     copyShared,
