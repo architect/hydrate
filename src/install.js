@@ -45,16 +45,19 @@ module.exports = function install(params={}, callback) {
     let options = {cwd, env, shell, timeout}
     return function hydration(callback) {
       let start
+      let cmd
 
       // Prints and executes the command
-      function exec(cmd, opts, callback) {
-        start = print.start({cwd, cmd, quiet, verbose})
+      function exec(command, opts, callback) {
+        cmd = command
+        let action = 'Hydrating'
+        start = print.start({cwd, action, quiet, verbose})
         child.exec(cmd, opts, callback)
       }
 
       // Prints the result
       function done(err, stdout, stderr) {
-        print.done({err, stdout, stderr, start, quiet, verbose}, callback)
+        print.done({err, stdout, stderr, cmd, start, quiet, verbose}, callback)
       }
 
       // TODO: I think we should consider what minimum version of node/npm this
