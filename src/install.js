@@ -6,7 +6,7 @@ let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
-let {updater} = require('@architect/utils')
+let {inventory, updater} = require('@architect/utils')
 
 /**
   installs deps into
@@ -30,6 +30,14 @@ module.exports = function install(params={}, callback) {
     if (filePath.includes('vendor/bundle'))
       return false
     return true
+  })
+
+  let inv = inventory()
+  files = files.filter(file => {
+    let cwd = path.dirname(file)
+    let isShared = path.join('src', 'shared')
+    let isViews = path.join('src', 'views')
+    return inv.localPaths.some(p => p === cwd || isShared || isViews)
   })
 
   let deps = files.length
