@@ -4,6 +4,7 @@ let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
+let {updater} = require('@architect/utils')
 
 /**
  * updates dependencies to newer versions
@@ -11,6 +12,10 @@ let shared = require('./shared')
 module.exports = function update(params={}, callback) {
   let {basepath, env, quiet, shell, timeout} = params
   basepath = basepath || 'src'
+
+  let update = updater('Hydrate')
+  let p = basepath.substr(-1) === '/' ? basepath : `${basepath}/`
+  update.status(`Updating dependencies in: ${p}`)
 
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
