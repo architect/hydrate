@@ -1,43 +1,45 @@
-name: Node CI
+# TODO figure out how to get bundle + pip3 running on GH CI containers
 
-on: [push, pull_request]
+# name: Node CI
 
-jobs:
-  build:
-    name: test
-    runs-on: ubuntu-latest
+# on: [push, pull_request]
 
-    strategy:
-      matrix:
-        node-version: [8.x, 10.x, 12.x]
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+# jobs:
+#   build:
+#     name: test
+#     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v1
+#     strategy:
+#       matrix:
+#         node-version: [8.x, 10.x, 12.x]
+#         os: [windows-latest, ubuntu-latest, macOS-latest]
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+#     steps:
+#     - uses: actions/checkout@v1
 
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v1
+#       with:
+#         node-version: ${{ matrix.node-version }}
 
-    - name: Set up Ruby
-      uses: actions/setup-ruby@v1
-      with:
-        ruby-version: '2.5'
+#     - name: Set up Python
+#       uses: actions/setup-python@v1
+#       with:
+#         python-version: '3.x'
 
-    - name: Versions
-      run: |
-        node --version
-        python --version
-        ruby --version
+#     - name: Set up Ruby
+#       uses: actions/setup-ruby@v1
+#       with:
+#         ruby-version: '2.5'
 
-    - name: Install
-      run: npm install
+#     - name: Versions
+#       run: |
+#         node --version
+#         python --version
+#         ruby --version
 
-    - name: Test
-      run: npm test
+#     - name: Install
+#       run: npm install
+
+#     - name: Test
+#       run: npm test
