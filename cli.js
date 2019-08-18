@@ -7,6 +7,7 @@ let hydrate = require('.')
  * Hydrates functions' dependencies, respecting runtime
  *
  * options
+ * (default) .............. hydrates all functions, shared, copies files
  * -s|--shared|shared ..... hydrates and copies shared files only
  * -u|--update|update ..... updates each function's dependencies
  * -v|--verbose|verbose ... prints additional output to console

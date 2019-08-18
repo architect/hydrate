@@ -11,10 +11,8 @@ let regexes = [
 ]
 
 module.exports = function denoise (m) {
-  return m.trim()
-          .split('\n')
+  return m.trim().split('\n')
           .filter(msg => msg && !strings.some(s => msg.includes(s)))
           .filter(msg => msg && !regexes.some(r => r.test(msg)))
-          .join('\n')
-          .trim()
+          .join('\n').trim()
 }
