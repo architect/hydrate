@@ -37,7 +37,9 @@ module.exports = function install(params={}, callback) {
     let cwd = path.dirname(file)
     let isShared = path.join('src', 'shared')
     let isViews = path.join('src', 'views')
-    return inv.localPaths.some(p => p === cwd || isShared || isViews)
+    if (cwd === isShared || cwd === isViews)
+      return true
+    return inv.localPaths.some(p => p === cwd)
   })
 
   let deps = files.length
