@@ -34,6 +34,7 @@ module.exports = function install(params={}, callback) {
 
   let inv = inventory()
   files = files.filter(file => {
+    if (process.platform.startsWith('win')) file = file.replace(/\//gi, '\\')
     let cwd = path.dirname(file)
     let isShared = path.join('src', 'shared')
     let isViews = path.join('src', 'views')
