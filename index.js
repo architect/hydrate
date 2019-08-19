@@ -19,14 +19,15 @@ module.exports = function hydrate(params={install:true}, callback) {
       }
     })
   }
+  let {verbose=false, basepath=''} = params
   let tasks = []
   if (params.install)
     tasks.push(function install(callback) {
-      module.exports.install(params.basepath, callback) // `install` includes `shared`
+      module.exports.install({verbose, basepath}, callback) // `install` includes `shared`
     })
   else if (params.update)
     tasks.push(function update(callback) {
-      module.exports.update(params.basepath, callback) // `update` includes `shared`
+      module.exports.update({verbose, basepath}, callback) // `update` includes `shared`
     })
   else
     tasks.push(module.exports.shared)

@@ -4,6 +4,7 @@ let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
+let {inventory, updater} = require('@architect/utils')
 
 /**
  * copies src/views
@@ -17,16 +18,25 @@ let getBasePaths = require('./get-base-paths')
  *
  */
 module.exports = function copyArc(callback) {
+  let inv
   getBasePaths('views', function gotBasePaths(err, paths) {
     if (err) throw err
+    let update
+    let views = path.join(process.cwd(), 'src', 'views')
+    let hasViews = fs.existsSync(views)
+    if (hasViews) {
+      update = updater('Hydrate')
+      update.start(`Hydrating app with src${path.sep}views`)
+      if (!inv)
+        inv = inventory()
+    }
     series(paths.map(dest=> {
       return function copier(callback) {
-        let src = path.join(process.cwd(), 'src', 'views')
-        if (fs.existsSync(src) && dest.includes('get-')) {
+        if (hasViews && isView(dest)) {
           let finalDest = path.join(dest, 'views')
           rmrf(finalDest, {glob:false}, function(err) {
             if (err) callback(err)
-            else cp(src, finalDest, callback)
+            else cp(views, finalDest, callback)
           })
         }
         else {
@@ -36,7 +46,19 @@ module.exports = function copyArc(callback) {
     }),
     function done(err) {
       if (err) callback(err)
-      else callback()
+      else {
+        if (update)
+          update.done(`Hydrated app with src${path.sep}views`)
+        callback()
+      }
     })
   })
+
+  function isView (dest) {
+    let viewsConfig = inv && inv.views
+    let viewsPaths = viewsConfig && viewsConfig.map(v => path.join('src', 'http', v, path.sep))
+    if (viewsPaths)
+      return viewsPaths.some(p => dest.startsWith(p))
+    else return dest.startsWith(path.join('src', 'http', 'get-'))
+  }
 }

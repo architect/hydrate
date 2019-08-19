@@ -1,3 +1,4 @@
+let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let fs = require('fs')
@@ -5,6 +6,7 @@ let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
+let {inventory, updater} = require('@architect/utils')
 
 /**
   installs deps into
@@ -13,8 +15,11 @@ let shared = require('./shared')
   - src/views
 */
 module.exports = function install(params={}, callback) {
-  let {basepath, env, quiet, shell, timeout} = params
+  let {basepath, env, quiet, shell, timeout, verbose} = params
   basepath = basepath || 'src'
+
+  let update = updater('Hydrate')
+  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
 
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
@@ -27,21 +32,45 @@ module.exports = function install(params={}, callback) {
     return true
   })
 
+  let inv = inventory()
+  files = files.filter(file => {
+    let cwd = path.dirname(file)
+    let isShared = path.join('src', 'shared')
+    let isViews = path.join('src', 'views')
+    if (cwd === isShared || cwd === isViews)
+      return true
+    return inv.localPaths.some(p => p === cwd)
+  })
+
+  let deps = files.length
+
+  if (deps && deps > 0)
+    update.status(`Hydrating dependencies in ${deps} function${deps > 1 ? 's' : ''}`)
+
+  if (!deps && verbose)
+    update.status(`No dependencies found in: ${p}${path.sep}**`)
+
   let ops = files.map(file=> {
     let cwd = path.dirname(file)
     let options = {cwd, env, shell, timeout}
     return function hydration(callback) {
       let start
+      let cmd
+      let now = Date.now()
 
       // Prints and executes the command
-      function exec(cmd, opts, callback) {
-        start = print.start({cwd, cmd, quiet})
+      function exec(command, opts, callback) {
+        cmd = command
+        let action = 'Hydrating'
+        start = print.start({cwd, action, quiet, verbose})
         child.exec(cmd, opts, callback)
       }
 
       // Prints the result
       function done(err, stdout, stderr) {
-        print.done({err, stdout, stderr, start, quiet}, callback)
+        // If zero output, acknowledge *something* happened
+        if (!err && !stdout && !stderr) stdout = `done in ${(Date.now() - now) / 1000}s`
+        print.done({err, stdout, stderr, cmd, start, quiet, verbose}, callback)
       }
 
       // TODO: I think we should consider what minimum version of node/npm this
@@ -67,5 +96,15 @@ module.exports = function install(params={}, callback) {
   // If installing to everything, run shared operations
   if (basepath === 'src') ops.push(shared)
 
-  series(ops, callback)
+  series(ops, (err, result) => {
+    if (err) callback(err)
+    else {
+      if (deps && deps > 0)
+        updater('Success!').done(chalk.green('Finished hydrating dependencies'))
+      if (!deps)
+        updater('Hydrate').done('Finished checks, nothing to hydrate')
+
+      callback(null, result)
+    }
+  })
 }

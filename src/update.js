@@ -4,13 +4,17 @@ let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
+let {updater} = require('@architect/utils')
 
 /**
  * updates dependencies to newer versions
 */
 module.exports = function update(params={}, callback) {
-  let {basepath, env, quiet, shell, timeout} = params
+  let {basepath, env, quiet, shell, timeout, verbose} = params
   basepath = basepath || 'src'
+
+  let update = updater('Hydrate')
+  let p = basepath.substr(-1) === '/' ? basepath : `${basepath}/`
 
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
@@ -23,20 +27,35 @@ module.exports = function update(params={}, callback) {
     return true
   })
 
+  let deps = files.length
+
+  if (deps && deps > 0)
+    update.status(`Updating dependencies in ${deps} function${deps > 1 ? 's' : ''}`)
+
+  if (!deps && verbose)
+    update.status(`No dependencies found to update in: ${p}`)
+
   let ops = files.map(file=> {
     let cwd = path.dirname(file)
     let options = {cwd, env, shell, timeout}
     return function updation(callback) {
+      let start
+      let cmd
+      let now = Date.now()
 
       // printer function
-      function exec(cmd, opts, callback) {
-        print.start({cwd, cmd, quiet})
+      function exec(command, opts, callback) {
+        cmd = command
+        let action = 'Updating'
+        start = print.start({cwd, action, quiet, verbose})
         child.exec(cmd, opts, callback)
       }
 
       // also a printer function
       function done(err, stdout, stderr) {
-        print.done({err, stdout, stderr, quiet}, callback)
+        // If zero output, acknowledge *something* happened
+        if (!err && !stdout && !stderr) stdout = `done in ${(Date.now() - now) / 1000}s`
+        print.done({err, stdout, stderr, cmd, start, quiet, verbose}, callback)
       }
 
       if (file.includes('package.json')) {
