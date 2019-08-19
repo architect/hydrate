@@ -100,9 +100,9 @@ module.exports = function install(params={}, callback) {
     if (err) callback(err)
     else {
       if (deps && deps > 0)
-        updater('Success!').done(chalk.green('Finished hydrating dependencies'))
+        update.done('Success!', chalk.green('Finished hydrating dependencies'))
       if (!deps)
-        updater('Hydrate').done('Finished checks, nothing to hydrate')
+        update.done('Finished checks, nothing to hydrate')
 
       callback(null, result)
     }
