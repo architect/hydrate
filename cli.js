@@ -13,7 +13,8 @@ let hydrate = require('.')
  * -v|--verbose|verbose ... prints additional output to console
  */
 let isShared = opt => opt === 'shared' || opt === '--shared' || opt === '-s'
-let isUpdate = opt => opt === 'update' || opt === '--update' || opt === '-u'
+let isUpdate = opt => opt === 'update' || opt === '--update' || opt === '-u' ||
+                      opt === 'upgrade' || opt === '--upgrade' // jic
 let isVerbose = opt => opt === 'verbose' || opt === '--verbose' || opt === '-v'
 
 async function cmd(opts=[]) {
