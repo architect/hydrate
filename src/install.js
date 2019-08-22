@@ -36,11 +36,12 @@ module.exports = function install(params={}, callback) {
   files = files.filter(file => {
     if (process.platform.startsWith('win')) file = file.replace(/\//gi, '\\')
     let cwd = path.dirname(file)
+    let relativeBasepath = basepath.replace(process.cwd(),'').substr(1)
     let isShared = path.join('src', 'shared')
     let isViews = path.join('src', 'views')
     if (cwd === isShared || cwd === isViews)
       return true
-    return inv.localPaths.some(p => p === cwd)
+    return inv.localPaths.some(p => p === cwd || p === relativeBasepath)
   })
 
   let deps = files.length
