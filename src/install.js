@@ -83,7 +83,7 @@ module.exports = function install(params={}, callback) {
   let deps = files.length
   let update = updater('Hydrate')
   let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
-  if (deps && deps > 0)
+  if (deps && deps > 0 && !quiet)
     update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
     update.status(`No dependencies found in: ${p}${path.sep}**`)
@@ -132,16 +132,26 @@ module.exports = function install(params={}, callback) {
   })
 
   // Always run shared hydration
-  ops.push(shared)
+  ops.push(function (callback) {
+    shared(params, callback)
+  })
 
   series(ops, (err, result) => {
-    if (err) callback(err)
+    result = [].concat.apply([], result) // Flatten the nested shared array
+    if (err) callback(err, result)
     else {
-      if (deps && deps > 0)
-        update.done('Success!', chalk.green('Finished hydrating dependencies'))
-      if (!deps)
+      if (deps && deps > 0 && !quiet) {
+        let msg = 'Finished hydrating dependencies'
+        let confirm = chalk.green(msg)
+        update.done('Success!', confirm)
+        // TODO have updater actually return terminal output
+        result.push({raw: {stdout: msg}, term: {stdout: `Success! ${confirm}`}})
+      }
+      if (!deps && !quiet) {
+        let msg = 'Finished checks, nothing to hydrate'
         update.done('Finished checks, nothing to hydrate')
-
+        result.push({raw: {stdout: msg}, term: {stdout: msg}})
+      }
       callback(null, result)
     }
   })

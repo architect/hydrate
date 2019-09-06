@@ -18,7 +18,6 @@ function done (params, callback) {
   let result = {
     raw: {},
     term: {
-      start,
       stdout: ''
     }
   }
@@ -39,6 +38,8 @@ function done (params, callback) {
       ? format(chalk.grey(stdout.trim()))
       : '' // Necessary, or de-noised lines result in empty lines
     if (!quiet && result.term.stdout) console.log(result.term.stdout)
+    // Prepend start msg after logging to prevent duplicate logging
+    if (start) result.term.stdout = `${start}\n` + result.term.stdout
   }
   if (stderr && stderr.length > 0) {
     stderr = verbose
