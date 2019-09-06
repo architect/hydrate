@@ -30,7 +30,9 @@ module.exports = function hydrate(params={install:true}, callback) {
       module.exports.update({verbose, basepath}, callback) // `update` includes `shared`
     })
   else
-    tasks.push(module.exports.shared)
+    tasks.push(function shared(callback) {
+      module.exports.shared({}, callback)
+    })
 
   series(tasks, function done(err) {
     if (err) callback(err)

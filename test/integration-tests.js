@@ -131,7 +131,7 @@ test(`shared() copies src/shared and src/views to all (@views not specified)`, t
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared(function done(err) {
+          hydrate.shared({}, function done(err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -165,7 +165,7 @@ test(`shared() src/views to only @views`, t=> {
           cp(path.join('src', '.arc-with-views'), path.join('.', '.arc'), {overwrite: true}, function done(err) {
             if (err) t.fail(err)
             else {
-              hydrate.shared(function done(err) {
+              hydrate.shared({}, function done(err) {
                 if (err) t.fail(err)
                 else {
                   console.log(`noop log to help reset tap-spec lol`)
@@ -196,7 +196,7 @@ test(`shared() copies .arc file and static.json (Arc <5)`, t => {
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared(function done(err) {
+          hydrate.shared({}, function done(err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -224,7 +224,7 @@ test(`shared() copies static.json but not .arc (Arc v6+)`, t => {
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared(function done(err) {
+          hydrate.shared({}, function done(err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -257,7 +257,7 @@ test(`shared() copies static.json with @static folder configured`, t => {
       // Move public/ to foo/
       fs.renameSync(path.join(process.cwd(), 'public'), path.join(process.cwd(), 'foo'))
       t.ok(fs.existsSync(path.join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
-      hydrate.shared(function done(err) {
+      hydrate.shared({}, function done(err) {
         if (err) t.fail(err)
         else {
           console.log(`noop log to help reset tap-spec lol`)
@@ -293,7 +293,7 @@ test(`shared() should remove files in functions that do not exist in src/shared 
       cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared(function done(err) {
+          hydrate.shared({}, function done(err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
