@@ -5,8 +5,9 @@ let denoise = require('./_denoise')
 function start (params) {
   let {cwd, action, quiet} = params
   let status = chalk.grey('Hydrate')
-  let path = chalk.cyan(action, cwd.replace(process.cwd(), ''))
-  let info = `${chars.start} ${status} ${path}`
+  let relativePath = cwd !== '.' ? cwd : 'project root'
+  let hydrationPath = chalk.cyan(action, relativePath)
+  let info = `${chars.start} ${status} ${hydrationPath}`
   if (!quiet) console.log(info)
   return info
 }
@@ -17,7 +18,6 @@ function done (params, callback) {
   let result = {
     raw: {},
     term: {
-      start,
       stdout: ''
     }
   }
@@ -38,6 +38,8 @@ function done (params, callback) {
       ? format(chalk.grey(stdout.trim()))
       : '' // Necessary, or de-noised lines result in empty lines
     if (!quiet && result.term.stdout) console.log(result.term.stdout)
+    // Prepend start msg after logging to prevent duplicate logging
+    if (start) result.term.stdout = `${start}\n` + result.term.stdout
   }
   if (stderr && stderr.length > 0) {
     stderr = verbose

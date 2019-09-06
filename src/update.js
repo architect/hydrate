@@ -1,3 +1,4 @@
+let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let path = require('path')
@@ -29,7 +30,7 @@ module.exports = function update(params={}, callback) {
 
   let deps = files.length
 
-  if (deps && deps > 0)
+  if (deps && deps > 0 && !quiet)
     update.status(`Updating dependencies in ${deps} function${deps > 1 ? 's' : ''}`)
 
   if (!deps && verbose)
@@ -73,11 +74,28 @@ module.exports = function update(params={}, callback) {
     }
   })
 
-  // If installing to everything, run shared operations
-  if (basepath === 'src') ops.push(shared)
+   // Always run shared hydration
+   ops.push(function (callback) {
+    shared(params, callback)
+  })
 
-  series(ops, function done(err) {
-    if (err) callback(err)
-    else callback()
+  series(ops, (err, result) => {
+    result = [].concat.apply([], result) // Flatten the nested shared array
+    if (err) callback(err, result)
+    else {
+      if (deps && deps > 0 && !quiet) {
+        let msg = 'Finished updating dependencies'
+        let confirm = chalk.green(msg)
+        update.done('Success!', confirm)
+        // TODO have updater actually return terminal output
+        result.push({raw: {stdout: msg}, term: {stdout: `Success! ${confirm}`}})
+      }
+      if (!deps && !quiet) {
+        let msg = 'Finished checks, nothing to update'
+        update.done('Finished checks, nothing to update')
+        result.push({raw: {stdout: msg}, term: {stdout: msg}})
+      }
+      callback(null, result)
+    }
   })
 }

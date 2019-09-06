@@ -18,37 +18,73 @@ module.exports = function install(params={}, callback) {
   let {basepath, env, quiet, shell, timeout, verbose} = params
   basepath = basepath || 'src'
 
-  let update = updater('Hydrate')
-  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
-
+  /**
+   * Find our dependency manifests
+   */
   // eslint-disable-next-line
-  let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
-
-  let files = glob.sync(pattern).filter(function filter(filePath) {
-    if (filePath.includes('node_modules'))
+  let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
+  // Always hydrate src/shared + src/views
+  let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter(filePath) {
+    if (filePath.includes('node_modules') ||
+        filePath.includes('vendor/bundle'))
       return false
-    if (filePath.includes('vendor/bundle'))
+    if (filePath.includes('src/shared') ||
+        filePath.includes('src/views'))
+      return true
+  })
+  // Get everything else
+  let files = glob.sync(pattern(basepath)).filter(function filter(filePath) {
+    if (filePath.includes('node_modules') ||
+        filePath.includes('vendor/bundle') ||
+        filePath.includes('src/shared') ||
+        filePath.includes('src/views'))
       return false
     return true
   })
+  files = files.concat(sharedFiles)
 
-  let inv = inventory()
-  files = files.filter(file => {
-    if (process.platform.startsWith('win')) file = file.replace(/\//gi, '\\')
-    let cwd = path.dirname(file)
-    let relativeBasepath = basepath.replace(process.cwd(),'').substr(1)
-    let isShared = path.join('src', 'shared')
-    let isViews = path.join('src', 'views')
-    if (cwd === isShared || cwd === isViews)
-      return true
-    return inv.localPaths.some(p => p === cwd || p === relativeBasepath)
+  /**
+   * Normalize paths
+   */
+  // Windows
+  if (process.platform.startsWith('win')) {
+    files = files.map(file => file.replace(/\//gi, '\\'))
+  }
+  // Ensure all paths are relative; previous glob ops may be from absolute paths, producing absolute-pathed results
+  files = files.map(file => {
+    // Normalize to relative paths
+    file = file.replace(process.cwd(),'')
+    return file[0] === path.sep ? file.substr(1) : file // jiccya
   })
 
+  /**
+   * Filter by active project paths (and root, if applicable)
+   */
+  let inv = inventory()
+  files = files.filter(file => {
+    // Allow root project hydration of process.cwd() if passed as basepath
+    let hydrateBasepath = basepath === process.cwd()
+    if (hydrateBasepath && path.dirname(file) === '.')
+      return true
+
+    // Allow src/shared and src/views
+    let isShared = path.join('src', 'shared')
+    let isViews = path.join('src', 'views')
+    if (file.startsWith(isShared) || file.startsWith(isViews))
+      return true
+
+    // Hydrate functions, of course
+    return inv.localPaths.some(p => p === path.dirname(file))
+  })
+
+  /**
+   * Build out job queue
+   */
   let deps = files.length
-
-  if (deps && deps > 0)
-    update.status(`Hydrating dependencies in ${deps} function${deps > 1 ? 's' : ''}`)
-
+  let update = updater('Hydrate')
+  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
+  if (deps && deps > 0 && !quiet)
+    update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
     update.status(`No dependencies found in: ${p}${path.sep}**`)
 
@@ -95,17 +131,27 @@ module.exports = function install(params={}, callback) {
     }
   })
 
-  // If installing to everything, run shared operations
-  if (basepath === 'src') ops.push(shared)
+  // Always run shared hydration
+  ops.push(function (callback) {
+    shared(params, callback)
+  })
 
   series(ops, (err, result) => {
-    if (err) callback(err)
+    result = [].concat.apply([], result) // Flatten the nested shared array
+    if (err) callback(err, result)
     else {
-      if (deps && deps > 0)
-        update.done('Success!', chalk.green('Finished hydrating dependencies'))
-      if (!deps)
+      if (deps && deps > 0 && !quiet) {
+        let msg = 'Finished hydrating dependencies'
+        let confirm = chalk.green(msg)
+        update.done('Success!', confirm)
+        // TODO have updater actually return terminal output
+        result.push({raw: {stdout: msg}, term: {stdout: `Success! ${confirm}`}})
+      }
+      if (!deps && !quiet) {
+        let msg = 'Finished checks, nothing to hydrate'
         update.done('Finished checks, nothing to hydrate')
-
+        result.push({raw: {stdout: msg}, term: {stdout: msg}})
+      }
       callback(null, result)
     }
   })

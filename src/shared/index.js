@@ -7,19 +7,32 @@ let copyViews = require('./copy-views')
 let copyStaticJSON = require('./copy-static-json')
 let {updater} = require('@architect/utils')
 
-module.exports = function shared(callback) {
+module.exports = function shared(params={}, callback) {
+  let {quiet} = params
   let shared = path.join(process.cwd(), 'src', 'shared')
   let views = path.join(process.cwd(), 'src', 'views')
   let hasShared = fs.existsSync(shared) || fs.existsSync(views)
-  if (hasShared)
+  if (hasShared && !quiet)
     updater('Hydrate').status('Hydrating app with shared files')
   series([
-    copyShared,
-    copyViews,
-    copyStaticJSON,
-    copyArc,
-  ], function done(err) {
+    function (callback) {
+      copyShared(params, callback)
+    },
+    function (callback) {
+      copyViews(params, callback)
+    },
+    function (callback) {
+      copyStaticJSON(params, callback)
+    },
+    function (callback) {
+      copyArc(params, callback)
+    },
+  ], function done(err, result) {
     if (err) callback(err)
-    else callback()
+    else {
+      // Remove empty positions from series functions that skipped
+      result = result.filter(r => r)
+      callback(null, result)
+    }
   })
 }
