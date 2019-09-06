@@ -412,7 +412,8 @@ test(`install() should not recurse into Functions dependencies and hydrate those
         name: 'poop',
         dependencies: { 'tiny-json-http': '*' }
       }), 'utf-8')
-      hydrate.install(nodeFunctions[0], function done(err) {
+      let basepath = nodeFunctions[0]
+      hydrate.install({basepath}, function done(err) {
         if (err) t.fail(err)
         else {
           console.log(`noop log to help reset tap-spec lol`)
@@ -456,7 +457,8 @@ test('Corrupt package-lock.json fails hydrate.install', t=> {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
-      hydrate.install(nodeFunctions[0], function done(err) {
+      let basepath = nodeFunctions[0]
+      hydrate.install({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
@@ -490,7 +492,8 @@ test('Corrupt Gemfile fails hydrate.install', t=> {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
       fs.writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
-      hydrate.install(rubyFunctions[0], function done(err) {
+      let basepath = rubyFunctions[0]
+      hydrate.install({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
@@ -507,7 +510,8 @@ test('Corrupt Gemfile fails hydrate.update', t=> {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
       fs.writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
-      hydrate.update(rubyFunctions[0], function done(err) {
+      let basepath = rubyFunctions[0]
+      hydrate.update({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
@@ -523,7 +527,8 @@ test('Corrupt requirements.txt fails hydrate.install', t=> {
     else {
       let corruptPackage = 'ohayo gozaimasu!'
       fs.writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
-      hydrate.install(pythonFunctions[0], function done(err) {
+      let basepath = pythonFunctions[0]
+      hydrate.install({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
