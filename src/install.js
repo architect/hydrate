@@ -21,9 +21,11 @@ module.exports = function install(params={}, callback) {
   let update = updater('Hydrate')
   let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
 
+  /**
+   * Find our dependency manifests
+   */
   // eslint-disable-next-line
   let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
-
   let files = glob.sync(pattern).filter(function filter(filePath) {
     if (filePath.includes('node_modules'))
       return false
@@ -32,15 +34,29 @@ module.exports = function install(params={}, callback) {
     return true
   })
 
+  /**
+   * Normalize paths
+   */
+  // Windows
+  if (process.platform.startsWith('win')) {
+    files = files.map(file => file.replace(/\//gi, '\\'))
+  }
+  // basepath specified is process.cwd
+  let hydrateBasepath = basepath === process.cwd()
+  if (hydrateBasepath) {
+    files = files.map(file => {
+      // Normalize to relative paths
+      file = file.replace(process.cwd(),'')
+      return file[0] === path.sep ? file.substr(1) : file // jiccya
+    })
+  }
+
+  /**
+   * Filter by active project paths (and root, if applicable)
+   */
   let inv = inventory()
   files = files.filter(file => {
-    if (process.platform.startsWith('win')) file = file.replace(/\//gi, '\\')
-    // Normalize to relative paths
-    if (file.startsWith(process.cwd()))
-      file = file.replace(process.cwd(),'').substr(1)
-
     // Allow root project hydration of process.cwd() if passed as basepath
-    let hydrateBasepath = basepath === process.cwd()
     if (hydrateBasepath && path.dirname(file) === '.')
       return true
 
@@ -54,11 +70,12 @@ module.exports = function install(params={}, callback) {
     return inv.localPaths.some(p => p === path.dirname(file))
   })
 
+  /**
+   * Build out job queue
+   */
   let deps = files.length
-
   if (deps && deps > 0)
     update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
-
   if (!deps && verbose)
     update.status(`No dependencies found in: ${p}${path.sep}**`)
 
