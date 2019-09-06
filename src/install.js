@@ -18,21 +18,30 @@ module.exports = function install(params={}, callback) {
   let {basepath, env, quiet, shell, timeout, verbose} = params
   basepath = basepath || 'src'
 
-  let update = updater('Hydrate')
-  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
-
   /**
    * Find our dependency manifests
    */
   // eslint-disable-next-line
-  let pattern = `${basepath}/**/@(package\.json|requirements\.txt|Gemfile)`
-  let files = glob.sync(pattern).filter(function filter(filePath) {
-    if (filePath.includes('node_modules'))
+  let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
+  // Always hydrate src/shared + src/views
+  let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter(filePath) {
+    if (filePath.includes('node_modules') ||
+        filePath.includes('vendor/bundle'))
       return false
-    if (filePath.includes('vendor/bundle'))
+    if (filePath.includes('src/shared') ||
+        filePath.includes('src/views'))
+      return true
+  })
+  // Get everything else
+  let files = glob.sync(pattern(basepath)).filter(function filter(filePath) {
+    if (filePath.includes('node_modules') ||
+        filePath.includes('vendor/bundle') ||
+        filePath.includes('src/shared') ||
+        filePath.includes('src/views'))
       return false
     return true
   })
+  files = files.concat(sharedFiles)
 
   /**
    * Normalize paths
@@ -41,15 +50,12 @@ module.exports = function install(params={}, callback) {
   if (process.platform.startsWith('win')) {
     files = files.map(file => file.replace(/\//gi, '\\'))
   }
-  // basepath specified is process.cwd
-  let hydrateBasepath = basepath === process.cwd()
-  if (hydrateBasepath) {
-    files = files.map(file => {
-      // Normalize to relative paths
-      file = file.replace(process.cwd(),'')
-      return file[0] === path.sep ? file.substr(1) : file // jiccya
-    })
-  }
+  // Ensure all paths are relative; previous glob ops may be from absolute paths, producing absolute-pathed results
+  files = files.map(file => {
+    // Normalize to relative paths
+    file = file.replace(process.cwd(),'')
+    return file[0] === path.sep ? file.substr(1) : file // jiccya
+  })
 
   /**
    * Filter by active project paths (and root, if applicable)
@@ -57,6 +63,7 @@ module.exports = function install(params={}, callback) {
   let inv = inventory()
   files = files.filter(file => {
     // Allow root project hydration of process.cwd() if passed as basepath
+    let hydrateBasepath = basepath === process.cwd()
     if (hydrateBasepath && path.dirname(file) === '.')
       return true
 
@@ -74,6 +81,8 @@ module.exports = function install(params={}, callback) {
    * Build out job queue
    */
   let deps = files.length
+  let update = updater('Hydrate')
+  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
   if (deps && deps > 0)
     update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
@@ -122,8 +131,8 @@ module.exports = function install(params={}, callback) {
     }
   })
 
-  // If installing to everything, run shared operations
-  if (basepath === 'src' || basepath === process.cwd()) ops.push(shared)
+  // Always run shared hydration
+  ops.push(shared)
 
   series(ops, (err, result) => {
     if (err) callback(err)

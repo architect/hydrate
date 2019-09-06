@@ -369,19 +369,32 @@ test(`install(undefined) hydrates all Functions', src/shared and src/views depen
   })
 })
 
-test(`install(specific-path) hydrates only Functions found in the specified subpath`, t=> {
-  t.plan(2)
+test(`install (specific path / single path) hydrates only Functions found in the specified subpath`, t=> {
+  t.plan(7)
   reset(function(err) {
     if (err) t.fail(err)
     else {
-      let basepath = nodeFunctions[0]
-      hydrate.install({basepath}, function done(err) {
+      cp('_optional', 'src', {overwrite: true}, function done(err) {
         if (err) t.fail(err)
         else {
-          console.log(`noop log to help reset tap-spec lol`)
-          // Check to see if files that are supposed to be there are actually there
-          t.ok(exists(nodeDependencies[0]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[0]}`)
-          t.notOk(exists(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
+          let basepath = nodeFunctions[0]
+          hydrate.install({basepath}, function done(err) {
+            if (err) t.fail(err)
+            else {
+              console.log(`noop log to help reset tap-spec lol`)
+              // Check to see if files that are supposed to be there are actually there
+              t.ok(exists(nodeDependencies[0]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[0]}`)
+              t.notOk(exists(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
+              let arcFileArtifact = arcFileArtifacts.find(p => p.startsWith(arcHttp[0]))
+              let sharedArtifact = sharedArtifacts.find(p => p.startsWith(arcHttp[0]))
+              let viewsArtifact = viewsArtifacts.find(p => p.startsWith(arcHttp[0]))
+              t.ok(exists(nodeSharedDependencies[0]), `node shared dependency exists at ${nodeSharedDependencies[0]}`)
+              t.ok(exists(nodeViewsDependencies[0]), `node views dependency exists at ${nodeViewsDependencies[0]}`)
+              t.notOk(exists(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
+              t.ok(exists(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
+              t.ok(exists(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+            }
+          })
         }
       })
     }
