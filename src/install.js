@@ -35,19 +35,29 @@ module.exports = function install(params={}, callback) {
   let inv = inventory()
   files = files.filter(file => {
     if (process.platform.startsWith('win')) file = file.replace(/\//gi, '\\')
-    let cwd = path.dirname(file)
-    let relativeBasepath = basepath.replace(process.cwd(),'').substr(1)
+    // Normalize to relative paths
+    if (file.startsWith(process.cwd()))
+      file = file.replace(process.cwd(),'').substr(1)
+
+    // Allow root project hydration of process.cwd() if passed as basepath
+    let hydrateBasepath = basepath === process.cwd()
+    if (hydrateBasepath && path.dirname(file) === '.')
+      return true
+
+    // Allow src/shared and src/views
     let isShared = path.join('src', 'shared')
     let isViews = path.join('src', 'views')
-    if (cwd === isShared || cwd === isViews)
+    if (file.startsWith(isShared) || file.startsWith(isViews))
       return true
-    return inv.localPaths.some(p => p === cwd || p === relativeBasepath)
+
+    // Hydrate functions, of course
+    return inv.localPaths.some(p => p === path.dirname(file))
   })
 
   let deps = files.length
 
   if (deps && deps > 0)
-    update.status(`Hydrating dependencies in ${deps} function${deps > 1 ? 's' : ''}`)
+    update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
 
   if (!deps && verbose)
     update.status(`No dependencies found in: ${p}${path.sep}**`)
@@ -96,7 +106,7 @@ module.exports = function install(params={}, callback) {
   })
 
   // If installing to everything, run shared operations
-  if (basepath === 'src') ops.push(shared)
+  if (basepath === 'src' || basepath === process.cwd()) ops.push(shared)
 
   series(ops, (err, result) => {
     if (err) callback(err)

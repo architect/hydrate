@@ -1,3 +1,4 @@
+let path = require('path')
 let chalk = require('chalk')
 let chars = require('@architect/utils').chars
 let denoise = require('./_denoise')
@@ -5,8 +6,11 @@ let denoise = require('./_denoise')
 function start (params) {
   let {cwd, action, quiet} = params
   let status = chalk.grey('Hydrate')
-  let path = chalk.cyan(action, cwd.replace(process.cwd(), ''))
-  let info = `${chars.start} ${status} ${path}`
+  let relativePath = cwd.replace(process.cwd(), '')
+  relativePath = relativePath[0] === path.sep ? relativePath.substr(1) : relativePath
+  if (!relativePath) relativePath = 'project root'
+  let hydrationPath = chalk.cyan(action, relativePath)
+  let info = `${chars.start} ${status} ${hydrationPath}`
   if (!quiet) console.log(info)
   return info
 }
