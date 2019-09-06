@@ -4,6 +4,8 @@ let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
+let printer = require('../_printer')
+let {updater} = require('@architect/utils')
 
 /**
  * copies the current .arc, app.arc, arc.yaml or arc.json manifest
@@ -16,19 +18,56 @@ let getBasePaths = require('./get-base-paths')
  * python3.7  | vendor/shared/.arc
  *
  */
-module.exports = function copyArc(callback) {
+module.exports = function copyArc(params, callback) {
+  let {quiet} = params
+  let start
+  let update // Always set quiet: true in updater, as updater will double-log to console
+
   if (process.env.DEPRECATED) {
-    getBasePaths('arcfile', function gotBasePaths(err, paths) {
-      if (err) throw err
-      series(paths.map(dest=> {
-        return function copier(callback) {
-          copy(path.join(dest, 'shared'), callback)
+    // Kick off logging
+    start = printer.start({
+      cwd: '',
+      action: `Hydrating app with Architect manifest`,
+      quiet: true
+    })
+    if (!quiet) {
+      update = updater('Hydrate')
+      update.start(`Hydrating app with Architect manifest`)
+    }
+
+    function done (err) {
+      if (err) {
+        if (update && !quiet)
+          update.err(err)
+        let params = {
+          cmd: 'copy',
+          err,
+          start,
+          quiet: true
         }
-      }),
-      function done(err) {
-        if (err) callback(err)
-        else callback()
-      })
+        printer.done(params, callback)
+      }
+      else {
+        if (update && !quiet)
+          update.done(`Hydrated app with Architect manifest`)
+        let params = {
+          cmd: 'copy',
+          stdout: `Hydrated app with Architect manifest`,
+          start,
+          quiet: true
+        }
+        printer.done(params, callback)
+      }
+    }
+    getBasePaths('arcfile', function gotBasePaths(err, paths) {
+      if (err) done(err)
+      else {
+        series(paths.map(dest=> {
+          return function copier(callback) {
+            copy(path.join(dest, 'shared'), callback)
+          }
+        }), done)
+      }
     })
   }
   else callback()

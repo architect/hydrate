@@ -15,12 +15,24 @@ module.exports = function shared(params={}, callback) {
   if (hasShared && !quiet)
     updater('Hydrate').status('Hydrating app with shared files')
   series([
-    copyShared,
-    copyViews,
-    copyStaticJSON,
-    copyArc,
-  ], function done(err) {
+    function (callback) {
+      copyShared(params, callback)
+    },
+    function (callback) {
+      copyViews(params, callback)
+    },
+    function (callback) {
+      copyStaticJSON(params, callback)
+    },
+    function (callback) {
+      copyArc(params, callback)
+    },
+  ], function done(err, result) {
     if (err) callback(err)
-    else callback()
+    else {
+      // Remove empty positions from series functions that skipped
+      result = result.filter(r => r)
+      callback(null, result)
+    }
   })
 }
