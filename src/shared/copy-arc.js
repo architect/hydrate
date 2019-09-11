@@ -5,7 +5,6 @@ let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
 let printer = require('../_printer')
-let {updater} = require('@architect/utils')
 
 /**
  * copies the current .arc, app.arc, arc.yaml or arc.json manifest
@@ -19,44 +18,33 @@ let {updater} = require('@architect/utils')
  *
  */
 module.exports = function copyArc(params, callback) {
-  let {quiet} = params
+  let {update} = params
   let start
-  let update // Always set quiet: true in updater, as updater will double-log to console
 
   if (process.env.DEPRECATED) {
     // Kick off logging
     start = printer.start({
       cwd: '',
       action: `Hydrating app with Architect manifest`,
-      quiet: true
+      update
     })
-    if (!quiet) {
-      update = updater('Hydrate')
-      update.start(`Hydrating app with Architect manifest`)
-    }
 
     function done (err) {
       if (err) {
-        if (update && !quiet)
-          update.err(err)
-        let params = {
+        printer.done({
           cmd: 'copy',
           err,
           start,
-          quiet: true
-        }
-        printer.done(params, callback)
+          update
+        }, callback)
       }
       else {
-        if (update && !quiet)
-          update.done(`Hydrated app with Architect manifest`)
-        let params = {
+        printer.done({
           cmd: 'copy',
           stdout: `Hydrated app with Architect manifest`,
           start,
-          quiet: true
-        }
-        printer.done(params, callback)
+          update
+        }, callback)
       }
     }
     getBasePaths('arcfile', function gotBasePaths(err, paths) {

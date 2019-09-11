@@ -5,7 +5,6 @@ let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
 let printer = require('../_printer')
-let {updater} = require('@architect/utils')
 
 /**
  * copies src/shared
@@ -19,46 +18,35 @@ let {updater} = require('@architect/utils')
  *
  */
 module.exports = function copyShared(params, callback) {
-  let {quiet} = params
+  let {update} = params
   let shared = path.join(process.cwd(), 'src', 'shared')
   let hasShared = fs.existsSync(shared)
   let start
-  let update // Always set quiet: true in updater, as updater will double-log to console
 
   if (hasShared) {
     // Kick off logging
     start = printer.start({
       cwd: '',
       action: `Hydrating app with src${path.sep}shared`,
-      quiet: true
+      update
     })
-    if (!quiet) {
-      update = updater('Hydrate')
-      update.start(`Hydrating app with src${path.sep}shared`)
-    }
 
     function done (err) {
       if (err) {
-        if (update && !quiet)
-          update.err(err)
-        let params = {
+        printer.done({
           cmd: 'copy',
           err,
           start,
-          quiet: true
-        }
-        printer.done(params, callback)
+          update
+        }, callback)
       }
       else {
-        if (update && !quiet)
-          update.done(`Hydrated app with src${path.sep}shared`)
-        let params = {
+        printer.done({
           cmd: 'copy',
           stdout: `Hydrated app with src${path.sep}shared`,
           start,
-          quiet: true
-        }
-        printer.done(params, callback)
+          update
+        }, callback)
       }
     }
     getBasePaths('shared', function gotBasePaths(err, paths) {
