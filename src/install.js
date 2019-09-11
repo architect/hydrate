@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let fs = require('fs')
@@ -6,14 +5,15 @@ let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
+let stripAnsi = require('strip-ansi')
 let {inventory, updater} = require('@architect/utils')
 
 /**
-  installs deps into
-  - functions
-  - src/shared
-  - src/views
-*/
+ * Installs deps into:
+ * - functions
+ * - src/shared
+ * - src/views
+ */
 module.exports = function install(params={}, callback) {
   let {basepath, env, quiet, shell, timeout, verbose} = params
   basepath = basepath || 'src'
@@ -81,12 +81,22 @@ module.exports = function install(params={}, callback) {
    * Build out job queue
    */
   let deps = files.length
-  let update = updater('Hydrate')
+  let updaterParams = {quiet}
+  let update = updater('Hydrate', updaterParams)
   let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
-  if (deps && deps > 0 && !quiet)
-    update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
+  let init
+  if (deps && deps > 0)
+    init += update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
-    update.status(`No dependencies found in: ${p}${path.sep}**`)
+    init += update.status(`No dependencies found in: ${p}${path.sep}**`)
+  if (init) {
+    init = {
+      raw: stripAnsi(init),
+      term: {
+        stdout: init
+      }
+    }
+  }
 
   let ops = files.map(file=> {
     let cwd = path.dirname(file)
@@ -100,15 +110,16 @@ module.exports = function install(params={}, callback) {
       function exec(command, opts, callback) {
         cmd = command
         let action = 'Hydrating'
-        start = print.start({cwd, action, quiet, verbose})
-        child.exec(cmd, opts, callback)
-      }
-
-      // Prints the result
-      function done(err, stdout, stderr) {
-        // If zero output, acknowledge *something* happened
-        if (!err && !stdout && !stderr) stdout = `done in ${(Date.now() - now) / 1000}s`
-        print.done({err, stdout, stderr, cmd, start, quiet, verbose}, callback)
+        start = print.start({cwd, action, update})
+        child.exec(cmd, opts,
+        function done(err, stdout, stderr) {
+          // If zero output, acknowledge *something* happened
+          if (!err && !stdout && !stderr) {
+            update.cancel()
+            stdout = `Done in ${(Date.now() - now) / 1000}s`
+          }
+          print.done({err, stdout, stderr, cmd, start, update, verbose}, callback)
+        })
       }
 
       // TODO: I think we should consider what minimum version of node/npm this
@@ -116,41 +127,45 @@ module.exports = function install(params={}, callback) {
       // depending on npm version - and enshrine those in the package.json
       if (file.includes('package.json')) {
         if (fs.existsSync(path.join(cwd, 'package-lock.json'))) {
-          exec(`npm ci`, options, done)
+          exec(`npm ci`, options, callback)
         }
         else {
-          exec(`npm i`, options, done)
+          exec(`npm i`, options, callback)
         }
       }
 
       if (file.includes('requirements.txt'))
-        exec(`pip3 install -r requirements.txt -t ./vendor`, options, done)
+        exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
 
       if (file.includes('Gemfile'))
-        exec(`bundle install --path vendor/bundle`, options, done)
+        exec(`bundle install --path vendor/bundle`, options, callback)
     }
   })
 
   // Always run shared hydration
   ops.push(function (callback) {
+    params.update = update
     shared(params, callback)
   })
 
   series(ops, (err, result) => {
     result = [].concat.apply([], result) // Flatten the nested shared array
+    if (init) result.unshift(init) // Bump init logging to the top
     if (err) callback(err, result)
     else {
-      if (deps && deps > 0 && !quiet) {
-        let msg = 'Finished hydrating dependencies'
-        let confirm = chalk.green(msg)
-        update.done('Success!', confirm)
-        // TODO have updater actually return terminal output
-        result.push({raw: {stdout: msg}, term: {stdout: `Success! ${confirm}`}})
+      if (deps && deps > 0) {
+        let done = update.done('Success!', 'Finished hydrating dependencies')
+        result.push({
+          raw: {stdout: stripAnsi(done)},
+          term: {stdout: done}
+        })
       }
       if (!deps && !quiet) {
-        let msg = 'Finished checks, nothing to hydrate'
-        update.done('Finished checks, nothing to hydrate')
-        result.push({raw: {stdout: msg}, term: {stdout: msg}})
+        let done = update.done('Finished checks, nothing to hydrate')
+        result.push({
+          raw: {stdout: stripAnsi(done)},
+          term: {stdout: done}
+        })
       }
       callback(null, result)
     }

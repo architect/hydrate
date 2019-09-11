@@ -5,7 +5,7 @@ let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
 let printer = require('../_printer')
-let {inventory, updater} = require('@architect/utils')
+let {inventory} = require('@architect/utils')
 
 /**
  * copies src/views
@@ -19,24 +19,19 @@ let {inventory, updater} = require('@architect/utils')
  *
  */
 module.exports = function copyViews(params, callback) {
-  let {quiet} = params
+  let {update} = params
   let views = path.join(process.cwd(), 'src', 'views')
   let hasViews = fs.existsSync(views)
   let inv
   let start
-  let update // Always set quiet: true in updater, as updater will double-log to console
 
   if (hasViews) {
     // Kick off logging
     start = printer.start({
       cwd: '',
       action: `Hydrating app with src${path.sep}views`,
-      quiet: true
+      update
     })
-    if (!quiet) {
-      update = updater('Hydrate')
-      update.start(`Hydrating app with src${path.sep}views`)
-    }
     if (!inv)
       inv = inventory()
 
@@ -50,26 +45,20 @@ module.exports = function copyViews(params, callback) {
 
     function done (err) {
       if (err) {
-        if (update && !quiet)
-          update.err(err)
-        let params = {
+        printer.done({
           cmd: 'copy',
           err,
           start,
-          quiet: true
-        }
-        printer.done(params, callback)
+          update
+        }, callback)
       }
       else {
-        if (update && !quiet)
-          update.done(`Hydrated app with src${path.sep}views`)
-        let params = {
+        printer.done(params = {
           cmd: 'copy',
           stdout: `Hydrated app with src${path.sep}views`,
           start,
-          quiet: true
-        }
-        printer.done(params, callback)
+          update
+        }, callback)
       }
     }
     getBasePaths('views', function gotBasePaths(err, paths) {
