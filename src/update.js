@@ -14,7 +14,7 @@ let {inventory, updater} = require('@architect/utils')
  * - src/views
  */
 module.exports = function update(params={}, callback) {
-  let {basepath, env, quiet, shell, timeout, verbose} = params
+  let {basepath, copyShared=true, env, quiet, shell, timeout, verbose} = params
   basepath = basepath || 'src'
 
   /**
@@ -136,11 +136,13 @@ module.exports = function update(params={}, callback) {
     }
   })
 
-   // Always run shared hydration
-   ops.push(function (callback) {
-    params.update = update
-    shared(params, callback)
-  })
+  // Usually run shared hydration
+  if (copyShared) {
+    ops.push(function (callback) {
+      params.update = update
+      shared(params, callback)
+    })
+  }
 
   series(ops, (err, result) => {
     result = [].concat.apply([], result) // Flatten the nested shared array
