@@ -96,17 +96,15 @@ module.exports = function install(params={}, callback) {
     }
   }
 
-  let ops = files.map(file=> {
+  let ops = files.map(file => {
     let cwd = path.dirname(file)
     let options = {cwd, env, shell, timeout}
     return function hydration(callback) {
       let start
-      let cmd
       let now = Date.now()
 
       // Prints and executes the command
-      function exec(command, opts, callback) {
-        cmd = command
+      function exec(cmd, opts, callback) {
         let relativePath = cwd !== '.' ? cwd : 'project root'
         let done = `Hydrated ${relativePath}`
         start = update.start(`Hydrating ${relativePath}`)
@@ -151,7 +149,7 @@ module.exports = function install(params={}, callback) {
     })
   }
 
-  series(ops, (err, result) => {
+  series(ops, function done (err, result) {
     result = [].concat.apply([], result) // Flatten the nested shared array
     if (init) result.unshift(init) // Bump init logging to the top
     if (err) callback(err, result)

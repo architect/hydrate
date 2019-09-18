@@ -95,17 +95,15 @@ module.exports = function update(params={}, callback) {
     }
   }
 
-  let ops = files.map(file=> {
+  let ops = files.map(file => {
     let cwd = path.dirname(file)
     let options = {cwd, env, shell, timeout}
     return function updation(callback) {
       let start
-      let cmd
       let now = Date.now()
 
       // Prints and executes the command
-      function exec(command, opts, callback) {
-        cmd = command
+      function exec(cmd, opts, callback) {
         let relativePath = cwd !== '.' ? cwd : 'project root'
         let done = `Updated ${relativePath}`
         start = update.start(`Updating ${relativePath}`)
@@ -145,7 +143,7 @@ module.exports = function update(params={}, callback) {
     })
   }
 
-  series(ops, (err, result) => {
+  series(ops, function done (err, result) {
     result = [].concat.apply([], result) // Flatten the nested shared array
     if (init) result.unshift(init) // Bump init logging to the top
     if (err) callback(err, result)
