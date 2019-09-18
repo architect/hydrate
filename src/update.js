@@ -83,17 +83,15 @@ module.exports = function update(params={}, callback) {
   let updaterParams = {quiet}
   let update = updater('Hydrate', updaterParams)
   let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
-  let init
+  let init = ''
   if (deps && deps > 0)
     init += update.status(`Updating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
     init += update.status(`No dependencies found in: ${p}${path.sep}**`)
   if (init) {
     init = {
-      raw: stripAnsi(init),
-      term: {
-        stdout: init
-      }
+      raw: {stdout: stripAnsi(init)},
+      term: {stdout: init}
     }
   }
 
