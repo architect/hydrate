@@ -4,7 +4,7 @@ let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
-let printer = require('../_printer')
+let print = require('../_printer')
 let {inventory} = require('@architect/utils')
 
 /**
@@ -22,16 +22,14 @@ module.exports = function copyViews(params, callback) {
   let {update} = params
   let views = path.join(process.cwd(), 'src', 'views')
   let hasViews = fs.existsSync(views)
-  let inv
-  let start
 
   if (hasViews) {
     // Kick off logging
-    start = printer.start({
-      cwd: '',
-      action: `Hydrating app with src${path.sep}views`,
-      update
-    })
+    let srcViews = `src${path.sep}views`
+    let done = `Hydrated app with ${srcViews}`
+    let start = update.start(`Hydrating app with ${srcViews}`)
+
+    let inv
     if (!inv)
       inv = inventory()
 
@@ -43,26 +41,17 @@ module.exports = function copyViews(params, callback) {
       else return dest.startsWith(path.join('src', 'http', 'get-'))
     }
 
-    function done (err) {
+    function _done (err) {
+      let cmd = 'copy'
       if (err) {
-        printer.done({
-          cmd: 'copy',
-          err,
-          start,
-          update
-        }, callback)
+        print({cmd, err, start, update}, callback)
       }
       else {
-        printer.done(params = {
-          cmd: 'copy',
-          stdout: `Hydrated app with src${path.sep}views`,
-          start,
-          update
-        }, callback)
+        print({cmd, start, done, update}, callback)
       }
     }
     getBasePaths('views', function gotBasePaths(err, paths) {
-      if (err) done(err)
+      if (err) _done(err)
       else {
         series(paths.map(dest=> {
           return function copier(callback) {
@@ -77,7 +66,7 @@ module.exports = function copyViews(params, callback) {
               callback()
             }
           }
-        }), done)
+        }), _done)
       }
     })
   }

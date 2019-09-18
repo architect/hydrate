@@ -1,5 +1,5 @@
-vendor/
-node_modules/
-test/tmp
-coverage/
 .nyc_output/
+coverage/
+node_modules/
+test/integration/tmp
+vendor/

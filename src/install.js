@@ -84,17 +84,15 @@ module.exports = function install(params={}, callback) {
   let updaterParams = {quiet}
   let update = updater('Hydrate', updaterParams)
   let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
-  let init
+  let init = ''
   if (deps && deps > 0)
     init += update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
     init += update.status(`No dependencies found in: ${p}${path.sep}**`)
   if (init) {
     init = {
-      raw: stripAnsi(init),
-      term: {
-        stdout: init
-      }
+      raw: {stdout: stripAnsi(init)},
+      term: {stdout: init}
     }
   }
 
@@ -109,16 +107,19 @@ module.exports = function install(params={}, callback) {
       // Prints and executes the command
       function exec(command, opts, callback) {
         cmd = command
-        let action = 'Hydrating'
-        start = print.start({cwd, action, update})
+        let relativePath = cwd !== '.' ? cwd : 'project root'
+        let done = `Hydrated ${relativePath}`
+        start = update.start(`Hydrating ${relativePath}`)
+
         child.exec(cmd, opts,
-        function done(err, stdout, stderr) {
+        function (err, stdout, stderr) {
           // If zero output, acknowledge *something* happened
           if (!err && !stdout && !stderr) {
             update.cancel()
             stdout = `Done in ${(Date.now() - now) / 1000}s`
           }
-          print.done({err, stdout, stderr, cmd, start, update, verbose}, callback)
+          let params = {err, stdout, stderr, cmd, done, start, update, verbose}
+          print(params, callback)
         })
       }
 

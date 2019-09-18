@@ -2,64 +2,86 @@ let chalk = require('chalk')
 let stripAnsi = require('strip-ansi')
 let denoise = require('./_denoise')
 
-function start (params) {
-  let {cwd, action, update} = params
-  let relativePath = cwd !== '.' ? cwd : 'project root'
-  let info = chalk.cyan(action, relativePath)
-  return update.start(info)
-}
+/**
+ * Prints result and passes along the result
+ * - Returns both raw and terminal (ANSI) formats
+ * - Diff tools may do weird things; e.g. may only receive stderr, but no err, and exit 0
+ */
+module.exports = function print (params, callback) {
+  let {err, stdout, stderr, cmd, start, done, update, verbose} = params
 
-// Prints and passes along the result (in both raw and terminal (ANSI) formats)
-function done (params, callback) {
-  let {err, stdout, stderr, cmd, start, update, verbose} = params
-  let result = {
-    raw: {},
-    term: {
-      stdout: ''
+  if (stdout && !cmd)
+    callback(ReferenceError('Must specify command to print'))
+  else if (!update)
+    callback(ReferenceError('Must pass an updater'))
+  else if (!err && !done)
+    callback(ReferenceError('Must pass err or done'))
+  else {
+    // Set up result structure
+    let result = {
+      raw: {
+        stdout: ''
+      },
+      term: {
+        stdout: ''
+      }
     }
-  }
-  let command = chalk.cyan.dim(`${cmd}:`)
-  let format = input => {
-    let output = input.split('\n').map(l => `${command} ${l.trim()}`)
-    if (start) output.unshift('') // Pass null message not double print start
-    return update.status(...output)
-  }
 
-  if (err) {
-    result.raw.err = err
-    result.term.err = update.error(err)
-  }
-  if (stdout && stdout.length > 0) {
-    stdout = verbose
-      ? stdout
-      : denoise(stdout)
-    result.term.stdout = stdout
-      ? format(stdout.trim())
-      : '' // Necessary, or de-noised lines result in empty lines
-    result.raw.stdout = stripAnsi(result.term.stdout.trim())
-  }
-  // Always prepend start, if present
-  if (start) {
-    result.raw.stdout = stripAnsi(start).trim() + result.raw.stdout
-    result.term.stdout = start + result.term.stdout
-  }
-  // Check for existence of error before printing stderr
-  // If present, it's almost certainly the same as in err and would double print/return
-  if (stderr && stderr.length > 0 && !err) {
-    stderr = verbose
-      ? stderr
-      : denoise(stderr)
-    result.term.stderr = stderr
-      ? format(stderr.trim())
-      : '' // Necessary, or de-noised lines result in empty lines
-    result.raw.stderr = stripAnsi(result.term.stderr.trim())
-  }
+    // Assemble multi-line output with corresponding command
+    let format = input => {
+      let command = chalk.cyan.dim(`${cmd}:`)
+      let output = input.split('\n').map(l => `${command} ${l.trim()}`)
+      if (start) output.unshift('') // Pass null message not double print start
+      return update.status(...output)
+    }
 
-  if (err) callback(Error('hydration_error'), result)
-  else callback(null, result)
-}
+    /**
+     * err
+     */
+    if (err) {
+      let error = update.error(err)
+      result.raw.err = stripAnsi(error)
+      result.term.err = error
+      done = null // Prevent prepending to stdout in an error state
+    }
+    if (!err) {
+      done = update.done(done)
+    }
 
-module.exports = {
-  start,
-  done
+    /**
+     * stdout
+     */
+    if (stdout && stdout.length > 0) {
+      stdout = verbose
+        ? stdout
+        : denoise(stdout)
+      result.term.stdout = stdout
+        ? format(stdout)
+        : '' // Necessary, or de-noised lines result in empty lines
+      result.raw.stdout = stripAnsi(result.term.stdout)
+    }
+
+    // Prepend start + done, if present
+    let prepStdout = output => `${start ? start + '\n' : ''}${done ? done : ''}${output}`
+    result.raw.stdout = stripAnsi(prepStdout(result.raw.stdout))
+    result.term.stdout = prepStdout(result.term.stdout)
+
+    /**
+     * stderr
+     * - Check for existence of error before printing stderr
+     * - If present, it's almost certainly the same as in err and would double print/return
+     */
+    if (stderr && stderr.length > 0 && !err) {
+      stderr = verbose
+        ? stderr
+        : denoise(stderr)
+      result.term.stderr = stderr
+        ? format(stderr)
+        : '' // Necessary, or de-noised lines result in empty lines
+      result.raw.stderr = stripAnsi(result.term.stderr)
+    }
+
+    if (err) callback(Error('hydration_error'), result)
+    else callback(null, result)
+  }
 }

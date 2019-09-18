@@ -6,7 +6,7 @@ let cp = require('cpr')
 let mkdirp = require('mkdirp')
 let test = require('tape')
 let glob = require('glob')
-let hydrate = require('../')
+let hydrate = require('../../')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
 let mockSource    = path.join(__dirname, 'mock')
