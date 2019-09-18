@@ -1,6 +1,6 @@
 let test = require('tape')
 let sinon = require('sinon')
-let hydrate = require('../')
+let hydrate = require('../../')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
 test('sanity check', t=> {
