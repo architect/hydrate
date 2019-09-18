@@ -47,7 +47,9 @@ module.exports = function getBasePaths(copying, callback) {
     }
   }),
   function done(err, results) {
-    if (err) throw err
-    callback(null, results.filter(Boolean))
+    if (err) callback(err)
+    else {
+      callback(null, results.filter(Boolean))
+    }
   })
 }
