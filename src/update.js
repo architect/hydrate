@@ -1,3 +1,4 @@
+let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let path = require('path')
@@ -106,16 +107,19 @@ module.exports = function update(params={}, callback) {
       // Prints and executes the command
       function exec(command, opts, callback) {
         cmd = command
-        let action = 'Updating'
-        start = print.start({cwd, action, update})
+        let relativePath = cwd !== '.' ? cwd : 'project root'
+        let done = `Updated ${relativePath}`
+        start = update.start(chalk.cyan(`Updating ${relativePath}`))
+
         child.exec(cmd, opts,
-        function done(err, stdout, stderr) {
+        function (err, stdout, stderr) {
           // If zero output, acknowledge *something* happened
           if (!err && !stdout && !stderr) {
             update.cancel()
             stdout = `Done in ${(Date.now() - now) / 1000}s`
           }
-          print.done({err, stdout, stderr, cmd, start, update, verbose}, callback)
+          let params = {err, stdout, stderr, cmd, done, start, update, verbose}
+          print(params, callback)
         })
       }
 
@@ -148,14 +152,14 @@ module.exports = function update(params={}, callback) {
     if (err) callback(err, result)
     else {
       if (deps && deps > 0) {
-        let done = update.done('Success!', 'Finished hydrating dependencies')
+        let done = update.done('Success!', 'Finished updating dependencies')
         result.push({
           raw: {stdout: stripAnsi(done)},
           term: {stdout: done}
         })
       }
       if (!deps && !quiet) {
-        let done = update.done('Finished checks, nothing to hydrate')
+        let done = update.done('Finished checks, nothing to update')
         result.push({
           raw: {stdout: stripAnsi(done)},
           term: {stdout: done}

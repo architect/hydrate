@@ -1,10 +1,11 @@
+let chalk = require('chalk')
 let parse = require('@architect/parser')
 let cp = require('./copy')
 let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
-let printer = require('../_printer')
+let print = require('../_printer')
 
 /**
  * copies the current .arc, app.arc, arc.yaml or arc.json manifest
@@ -19,42 +20,29 @@ let printer = require('../_printer')
  */
 module.exports = function copyArc(params, callback) {
   let {update} = params
-  let start
 
   if (process.env.DEPRECATED) {
     // Kick off logging
-    start = printer.start({
-      cwd: '',
-      action: `Hydrating app with Architect manifest`,
-      update
-    })
+    let done = `Hydrated app with Architect manifest`
+    let start = update.start(chalk.cyan(`Hydrating app with Architect manifest`))
 
-    function done (err) {
+    function _done (err) {
+      let cmd = 'copy'
       if (err) {
-        printer.done({
-          cmd: 'copy',
-          err,
-          start,
-          update
-        }, callback)
+        print({cmd, err, start, update}, callback)
       }
       else {
-        printer.done({
-          cmd: 'copy',
-          stdout: `Hydrated app with Architect manifest`,
-          start,
-          update
-        }, callback)
+        print({cmd, start, done, update}, callback)
       }
     }
     getBasePaths('arcfile', function gotBasePaths(err, paths) {
-      if (err) done(err)
+      if (err) _done(err)
       else {
         series(paths.map(dest=> {
           return function copier(callback) {
             copy(path.join(dest, 'shared'), callback)
           }
-        }), done)
+        }), _done)
       }
     })
   }

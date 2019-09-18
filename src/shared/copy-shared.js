@@ -1,10 +1,11 @@
+let chalk = require('chalk')
 let cp = require('./copy')
 let rmrf = require('rimraf')
 let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
-let printer = require('../_printer')
+let print = require('../_printer')
 
 /**
  * copies src/shared
@@ -21,36 +22,24 @@ module.exports = function copyShared(params, callback) {
   let {update} = params
   let shared = path.join(process.cwd(), 'src', 'shared')
   let hasShared = fs.existsSync(shared)
-  let start
 
   if (hasShared) {
     // Kick off logging
-    start = printer.start({
-      cwd: '',
-      action: `Hydrating app with src${path.sep}shared`,
-      update
-    })
+    let srcShared = `src${path.sep}shared`
+    let done = `Hydrated app with ${srcShared}`
+    let start = update.start(chalk.cyan(`Hydrating app with ${srcShared}`))
 
-    function done (err) {
+    function _done (err) {
+      let cmd = 'copy'
       if (err) {
-        printer.done({
-          cmd: 'copy',
-          err,
-          start,
-          update
-        }, callback)
+        print({cmd, err, start, update}, callback)
       }
       else {
-        printer.done({
-          cmd: 'copy',
-          stdout: `Hydrated app with src${path.sep}shared`,
-          start,
-          update
-        }, callback)
+        print({cmd, start, done, update}, callback)
       }
     }
     getBasePaths('shared', function gotBasePaths(err, paths) {
-      if (err) done(err)
+      if (err) _done(err)
       else {
         series(paths.map(dest=> {
           return function copier(callback) {
@@ -60,7 +49,7 @@ module.exports = function copyShared(params, callback) {
               else cp(shared, finalDest, callback)
             })
           }
-        }), done)
+        }), _done)
       }
     })
   }

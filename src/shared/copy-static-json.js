@@ -1,9 +1,10 @@
+let chalk = require('chalk')
 let cp = require('./copy')
 let fs = require('fs')
 let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
-let printer = require('../_printer')
+let print = require('../_printer')
 let {readArc} = require('@architect/utils')
 
 /**
@@ -26,42 +27,29 @@ module.exports = function copyStatic(params, callback) {
   }
   let static = path.join(process.cwd(), staticDir, 'static.json')
   let hasStatic = fs.existsSync(static)
-  let start
 
   if (hasStatic) {
     // Kick off logging
-    start = printer.start({
-      cwd: '',
-      action: `Hydrating app with static.json`,
-      update
-    })
+    let done = `Hydrated app with static.json`
+    let start = update.start(chalk.cyan(`Hydrating app with static.json`))
 
-    function done (err) {
+    function _done (err) {
+      let cmd = 'copy'
       if (err) {
-        printer.done( {
-          cmd: 'copy',
-          err,
-          start,
-          update
-        }, callback)
+        print({cmd, err, start, update}, callback)
       }
       else {
-        printer.done({
-          cmd: 'copy',
-          stdout: `Hydrated app with static.json`,
-          start,
-          update
-        }, callback)
+        print({cmd, start, done, update}, callback)
       }
     }
     getBasePaths('static', function gotBasePaths(err, paths) {
-      if (err) done(err)
+      if (err) _done(err)
       else {
         series(paths.map(dest=> {
           return function copier(callback) {
             cp(static, path.join(dest, 'shared', 'static.json'), callback)
           }
-        }), done)
+        }), _done)
       }
     })
   }

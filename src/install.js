@@ -1,3 +1,4 @@
+let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let fs = require('fs')
@@ -107,16 +108,19 @@ module.exports = function install(params={}, callback) {
       // Prints and executes the command
       function exec(command, opts, callback) {
         cmd = command
-        let action = 'Hydrating'
-        start = print.start({cwd, action, update})
+        let relativePath = cwd !== '.' ? cwd : 'project root'
+        let done = `Hydrated ${relativePath}`
+        start = update.start(chalk.cyan(`Hydrating ${relativePath}`))
+
         child.exec(cmd, opts,
-        function done(err, stdout, stderr) {
+        function (err, stdout, stderr) {
           // If zero output, acknowledge *something* happened
           if (!err && !stdout && !stderr) {
             update.cancel()
             stdout = `Done in ${(Date.now() - now) / 1000}s`
           }
-          print.done({err, stdout, stderr, cmd, start, update, verbose}, callback)
+          let params = {err, stdout, stderr, cmd, done, start, update, verbose}
+          print(params, callback)
         })
       }
 
