@@ -9,11 +9,8 @@ let fs = require('fs')
  *
  * @param {string} copying - one of: arcfile, shared, views, static
  */
-let inventory
 module.exports = function getBasePaths(copying, callback) {
-  if (!inventory) {
-    inventory = utils.inventory()
-  }
+  let inventory = utils.inventory()
   series(inventory.localPaths.map(base=> {
 
     let runtime = 'nodejs10.x'
