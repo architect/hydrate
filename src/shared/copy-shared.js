@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let cp = require('./copy')
 let rmrf = require('rimraf')
 let fs = require('fs')
@@ -27,7 +26,7 @@ module.exports = function copyShared(params, callback) {
     // Kick off logging
     let srcShared = `src${path.sep}shared`
     let done = `Hydrated app with ${srcShared}`
-    let start = update.start(chalk.cyan(`Hydrating app with ${srcShared}`))
+    let start = update.start(`Hydrating app with ${srcShared}`)
 
     function _done (err) {
       let cmd = 'copy'

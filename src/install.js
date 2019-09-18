@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let fs = require('fs')
@@ -110,7 +109,7 @@ module.exports = function install(params={}, callback) {
         cmd = command
         let relativePath = cwd !== '.' ? cwd : 'project root'
         let done = `Hydrated ${relativePath}`
-        start = update.start(chalk.cyan(`Hydrating ${relativePath}`))
+        start = update.start(`Hydrating ${relativePath}`)
 
         child.exec(cmd, opts,
         function (err, stdout, stderr) {

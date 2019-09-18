@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let glob = require('glob')
 let series = require('run-series')
 let path = require('path')
@@ -109,7 +108,7 @@ module.exports = function update(params={}, callback) {
         cmd = command
         let relativePath = cwd !== '.' ? cwd : 'project root'
         let done = `Updated ${relativePath}`
-        start = update.start(chalk.cyan(`Updating ${relativePath}`))
+        start = update.start(`Updating ${relativePath}`)
 
         child.exec(cmd, opts,
         function (err, stdout, stderr) {

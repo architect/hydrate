@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let parse = require('@architect/parser')
 let cp = require('./copy')
 let fs = require('fs')
@@ -24,7 +23,7 @@ module.exports = function copyArc(params, callback) {
   if (process.env.DEPRECATED) {
     // Kick off logging
     let done = `Hydrated app with Architect manifest`
-    let start = update.start(chalk.cyan(`Hydrating app with Architect manifest`))
+    let start = update.start(`Hydrating app with Architect manifest`)
 
     function _done (err) {
       let cmd = 'copy'

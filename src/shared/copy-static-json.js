@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let cp = require('./copy')
 let fs = require('fs')
 let path = require('path')
@@ -31,7 +30,7 @@ module.exports = function copyStatic(params, callback) {
   if (hasStatic) {
     // Kick off logging
     let done = `Hydrated app with static.json`
-    let start = update.start(chalk.cyan(`Hydrating app with static.json`))
+    let start = update.start(`Hydrating app with static.json`)
 
     function _done (err) {
       let cmd = 'copy'

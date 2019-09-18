@@ -1,4 +1,3 @@
-let chalk = require('chalk')
 let cp = require('./copy')
 let rmrf = require('rimraf')
 let fs = require('fs')
@@ -28,7 +27,7 @@ module.exports = function copyViews(params, callback) {
     // Kick off logging
     let srcViews = `src${path.sep}views`
     let done = `Hydrated app with ${srcViews}`
-    let start = update.start(chalk.cyan(`Hydrating app with ${srcViews}`))
+    let start = update.start(`Hydrating app with ${srcViews}`)
 
     let inv
     if (!inv)
