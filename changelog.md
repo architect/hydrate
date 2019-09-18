@@ -2,7 +2,7 @@
 
 ---
 
-## [1.4.2] 2019-09-17
+## [1.4.2 - 1.4.3] 2019-09-17
 
 ### Added
 
@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- Fixed issue where shared file copy destination paths may leak across Lambda executions
 - Fixed undefined message in init
 - Improved printer error bubbling
 - Formatting and line breaks in printer return should now more closely (or exactly) match console output
