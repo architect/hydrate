@@ -2,6 +2,27 @@
 
 ---
 
+## [1.4.2] 2019-09-17
+
+### Added
+
+- In `hydrate.install` and `hydrate.update` shared copying is still enabled by default on all operations, but now you can opt out by passing a `copyShared` param
+
+
+### Changed
+
+- Internal change: moved tests into specific unit + integration dirs
+
+
+### Fixed
+
+- Fixed undefined message in init
+- Improved printer error bubbling
+- Formatting and line breaks in printer return should now more closely (or exactly) match console output
+- Cleaned up printer API and implementation
+
+---
+
 ## [1.4.1] 2019-09-11
 
 ### Changed
