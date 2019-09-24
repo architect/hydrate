@@ -19,11 +19,12 @@ let {inventory} = require('@architect/utils')
  *
  */
 module.exports = function copyViews(params, callback) {
-  let {update} = params
+  let {update, only} = params
   let views = path.join(process.cwd(), 'src', 'views')
   let hasViews = fs.existsSync(views)
+  let skip = only === 'shared'
 
-  if (hasViews) {
+  if (hasViews && !skip) {
     // Kick off logging
     let srcViews = `src${path.sep}views`
     let done = `Hydrated app with ${srcViews}`
