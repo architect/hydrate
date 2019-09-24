@@ -18,9 +18,10 @@ let print = require('../_printer')
  *
  */
 module.exports = function copyArc(params, callback) {
-  let {update} = params
+  let {update, only} = params
+  let go = !only || only === 'arcFile' || only === 'shared'
 
-  if (process.env.DEPRECATED) {
+  if (process.env.DEPRECATED && go) {
     // Kick off logging
     let done = `Hydrated app with Architect manifest`
     let start = update.start(`Hydrating app with Architect manifest`)

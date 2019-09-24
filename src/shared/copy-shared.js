@@ -21,9 +21,9 @@ module.exports = function copyShared(params, callback) {
   let {update, only} = params
   let shared = path.join(process.cwd(), 'src', 'shared')
   let hasShared = fs.existsSync(shared)
-  let skip = only === 'views'
+  let go = !only || only === 'shared'
 
-  if (hasShared && !skip) {
+  if (hasShared && go) {
     // Kick off logging
     let srcShared = `src${path.sep}shared`
     let done = `Hydrated app with ${srcShared}`
