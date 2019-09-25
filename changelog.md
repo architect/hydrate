@@ -2,6 +2,20 @@
 
 ---
 
+## [1.4.4] 2019-09-25
+
+### Added
+
+- Adds ability to target specific shared file operations by passing an `only` param to `hydrate.shared`
+- This is largely just an internal change to make `sandbox` more efficient
+
+
+### Changed
+
+- Update dependencies
+
+---
+
 ## [1.4.2 - 1.4.3] 2019-09-17
 
 ### Added
