@@ -18,11 +18,12 @@ let print = require('../_printer')
  *
  */
 module.exports = function copyShared(params, callback) {
-  let {update} = params
+  let {update, only} = params
   let shared = path.join(process.cwd(), 'src', 'shared')
   let hasShared = fs.existsSync(shared)
+  let go = !only || only === 'shared'
 
-  if (hasShared) {
+  if (hasShared && go) {
     // Kick off logging
     let srcShared = `src${path.sep}shared`
     let done = `Hydrated app with ${srcShared}`
