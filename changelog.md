@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.5] 2019-09-29
+
+### Added
+
+- Added `hydrateShared` param (defaults `true`) to `install` and `update`; disabling deactivates hydrating `src/shared` and `src/views`, useful when only trying to hydrat dependencies for a single directory
+
+---
+
 ## [1.4.4] 2019-09-25
 
 ### Added
