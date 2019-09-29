@@ -14,24 +14,25 @@ let {inventory, updater} = require('@architect/utils')
  * - src/views
  */
 module.exports = function update(params={}, callback) {
-  let {basepath, copyShared=true, env, quiet, shell, timeout, verbose} = params
-  basepath = basepath || 'src'
+  let {
+    // Main params
+    basepath='src',
+    env,
+    shell,
+    timeout,
+    quiet,
+    verbose,
+    // Isolation / sandbox
+    copyShared=true,
+    hydrateShared=true
+  } = params
 
   /**
    * Find our dependency manifests
    */
   // eslint-disable-next-line
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
-  // Always hydrate src/shared + src/views
-  let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter(filePath) {
-    if (filePath.includes('node_modules') ||
-        filePath.includes('vendor/bundle'))
-      return false
-    if (filePath.includes('src/shared') ||
-        filePath.includes('src/views'))
-      return true
-  })
-  // Get everything else
+  // Get everything except shared
   let files = glob.sync(pattern(basepath)).filter(function filter(filePath) {
     if (filePath.includes('node_modules') ||
         filePath.includes('vendor/bundle') ||
@@ -40,7 +41,19 @@ module.exports = function update(params={}, callback) {
       return false
     return true
   })
-  files = files.concat(sharedFiles)
+  // Get src/shared + src/views
+  //   or disable if we're hydrating a single function in total isolation (e.g. sandbox startup)
+  if (hydrateShared) {
+    let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter(filePath) {
+      if (filePath.includes('node_modules') ||
+          filePath.includes('vendor/bundle'))
+        return false
+      if (filePath.includes('src/shared') ||
+          filePath.includes('src/views'))
+        return true
+    })
+    files = files.concat(sharedFiles)
+  }
 
   /**
    * Normalize paths
