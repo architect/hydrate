@@ -16,7 +16,7 @@ let {inventory, updater} = require('@architect/utils')
 module.exports = function update(params={}, callback) {
   let {
     // Main params
-    basepath='src',
+    basepath,
     env,
     shell,
     timeout,
@@ -26,6 +26,7 @@ module.exports = function update(params={}, callback) {
     copyShared=true,
     hydrateShared=true
   } = params
+  basepath = basepath || 'src'
 
   /**
    * Find our dependency manifests
