@@ -20,8 +20,10 @@ module.exports = function getBasePaths(copying, callback) {
     return function getPath(callback) {
       let paths = {
         'nodejs10.x': path.join(base, 'node_modules', '@architect'),
-        'ruby2.5': path.join(base, 'vendor'),
-        'python3.7': path.join(base, 'vendor'),
+        'nodejs8.10': path.join(base, 'node_modules', '@architect'),
+        'python3.7':  path.join(base, 'vendor'),
+        'python3.6':  path.join(base, 'vendor'),
+        'ruby2.5':    path.join(base, 'vendor')
       }
       // check for override
       if (fs.existsSync(arcConfigPath)) {
