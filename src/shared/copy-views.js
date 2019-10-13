@@ -14,8 +14,10 @@ let {inventory} = require('@architect/utils')
  * Runtime    | Function Path
  * ----------------------------------------------------------
  * nodejs10.x | node_modules/@architect/views/
- * ruby2.5    | vendor/views/
+ * nodejs8.10 | node_modules/@architect/views/
  * python3.7  | vendor/views/
+ * python3.6  | vendor/views/
+ * ruby2.5    | vendor/views/
  *
  */
 module.exports = function copyViews(params, callback) {

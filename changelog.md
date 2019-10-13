@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.9] 2019-10-12
+
+### Fixed
+
+- Fixes issue where legacy runtimes may not have been fully hydrated
+
+---
+
 ## [1.4.8] 2019-10-11
 
 ### Changed
