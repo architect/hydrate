@@ -32,7 +32,7 @@ jobs:
         ruby-version: '2.5'
     - name: Set up bundle
       run: |
-        gem install bundler
+        gem install bundler -v 1.17.3
         bundle config jobs 4
         bundle config retry 3
 
