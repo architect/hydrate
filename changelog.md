@@ -6,7 +6,7 @@
 
 ### Changed
 
-- Changes hydration result `raw.err` (an error message) to an object containing `raw.err.message` and `raw.err.code`
+- Changes hydration result `raw.err` (an error message) to an object containing `raw.err.message`, `raw.err.code`, and (if a signal was present in the error) `raw.err.signal`
 
 ---
 

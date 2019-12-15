@@ -44,6 +44,7 @@ module.exports = function print (params, callback) {
         message: stripAnsi(error),
         code: err.code || 1
       }
+      if (err.signal) result.raw.err.signal = err.signal
       result.term.err = error
       done = null // Prevent prepending to stdout in an error state
     }

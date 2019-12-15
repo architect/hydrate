@@ -111,6 +111,7 @@ test('Basic err', t => {
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
       t.equal(result.raw.err.code, 1, 'Error code set to 1 (by default if not present)')
+      t.notOk(result.raw.err.signal, 'No error signal present')
       t.ok(termStdout.includes(name), `Contents include: ${name}`)
       t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
       errLine.split('\n').forEach(o => t.ok(termErr.includes(o), `Contents include: ${o}`))
@@ -127,6 +128,7 @@ test('Basic err with code', t => {
   let startMsg = 'Start test'
   let err = Error('some errorings\nmore errorings')
   err.code = 2
+  err.signal = 'SIGINT'
   let errLine = err.message
   let cmd = 'cmd'
   let done = 'Finish test'
@@ -144,6 +146,7 @@ test('Basic err with code', t => {
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
       t.equal(result.raw.err.code, 2, 'Error code set to 2 (manually)')
+      t.equal(result.raw.err.signal, 'SIGINT', 'Error signal present')
       t.ok(termStdout.includes(name), `Contents include: ${name}`)
       t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
       errLine.split('\n').forEach(o => t.ok(termErr.includes(o), `Contents include: ${o}`))
