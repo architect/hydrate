@@ -93,8 +93,9 @@ test('Basic err', t => {
   // Messages
   let name = 'Testing err'
   let startMsg = 'Start test'
-  let err = 'some errorings\nmore errorings'
-  let errLine = err
+  let err = Error('some errorings\nmore errorings')
+  err.code = 1
+  let errLine = err.message
   let cmd = 'cmd'
   let done = 'Finish test'
   let update = updater(name, {quiet:true})
@@ -106,7 +107,7 @@ test('Basic err', t => {
       let termStdout = stripAnsi(result.term.stdout)
       let rawStdout = result.raw.stdout.replace(/\\n/g, '\n')
       let termErr = stripAnsi(result.term.err)
-      let rawErr = result.raw.err.replace(/\\n/g, '\n')
+      let rawErr = result.raw.err.message.replace(/\\n/g, '\n')
       console.log(termStdout, termErr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')

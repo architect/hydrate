@@ -27,7 +27,7 @@ module.exports = function print (params, callback) {
       }
     }
 
-    // Assemble multi-line output with corresponding command
+    // Assemble multi-line output with corresponding commands
     let format = input => {
       let command = chalk.cyan.dim(`${cmd}:`)
       let output = input.split('\n').map(l => `${command} ${l.trim()}`)
@@ -36,11 +36,13 @@ module.exports = function print (params, callback) {
     }
 
     /**
-     * err
+     * Error handling
      */
     if (err) {
       let error = update.error(err)
-      result.raw.err = stripAnsi(error)
+      result.raw.err = {}
+      result.raw.err.message = stripAnsi(error)
+      result.raw.err.code = err.code || 1
       result.term.err = error
       done = null // Prevent prepending to stdout in an error state
     }

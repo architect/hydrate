@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.12] 2019-12-14
+
+### Changed
+
+- Changes hydration result `raw.err` (an error message) to an object containing `raw.err.message` and `raw.err.code`
+
+---
+
 ## [1.4.11] 2019-11-19
 
 ### Changed
