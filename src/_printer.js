@@ -40,9 +40,10 @@ module.exports = function print (params, callback) {
      */
     if (err) {
       let error = update.error(err)
-      result.raw.err = {}
-      result.raw.err.message = stripAnsi(error)
-      result.raw.err.code = err.code || 1
+      result.raw.err = {
+        message: stripAnsi(error),
+        code: err.code || 1
+      }
       result.term.err = error
       done = null // Prevent prepending to stdout in an error state
     }
