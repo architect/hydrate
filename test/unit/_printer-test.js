@@ -93,8 +93,8 @@ test('Basic err', t => {
   // Messages
   let name = 'Testing err'
   let startMsg = 'Start test'
-  let err = 'some errorings\nmore errorings'
-  let errLine = err
+  let err = Error('some errorings\nmore errorings')
+  let errLine = err.message
   let cmd = 'cmd'
   let done = 'Finish test'
   let update = updater(name, {quiet:true})
@@ -106,10 +106,47 @@ test('Basic err', t => {
       let termStdout = stripAnsi(result.term.stdout)
       let rawStdout = result.raw.stdout.replace(/\\n/g, '\n')
       let termErr = stripAnsi(result.term.err)
-      let rawErr = result.raw.err.replace(/\\n/g, '\n')
+      let rawErr = result.raw.err.message.replace(/\\n/g, '\n')
       console.log(termStdout, termErr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
+      t.equal(result.raw.err.code, 1, 'Error code set to 1 (by default if not present)')
+      t.notOk(result.raw.err.signal, 'No error signal present')
+      t.ok(termStdout.includes(name), `Contents include: ${name}`)
+      t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
+      errLine.split('\n').forEach(o => t.ok(termErr.includes(o), `Contents include: ${o}`))
+      t.notOk(termErr.includes(cmd), `Contents include: ${cmd}`)
+      t.notOk(termStdout.includes(done), `Contents do not include: ${done}`)
+      t.end()
+    }
+  })
+})
+
+test('Basic err with code', t => {
+  // Messages
+  let name = 'Testing err'
+  let startMsg = 'Start test'
+  let err = Error('some errorings\nmore errorings')
+  err.code = 2
+  err.signal = 'SIGINT'
+  let errLine = err.message
+  let cmd = 'cmd'
+  let done = 'Finish test'
+  let update = updater(name, {quiet:true})
+  let start = update.start(startMsg)
+
+  print({err, cmd, start, done, update}, (err, result) => {
+    if (!err) t.fail('No error present')
+    else {
+      let termStdout = stripAnsi(result.term.stdout)
+      let rawStdout = result.raw.stdout.replace(/\\n/g, '\n')
+      let termErr = stripAnsi(result.term.err)
+      let rawErr = result.raw.err.message.replace(/\\n/g, '\n')
+      console.log(termStdout, termErr)
+      t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
+      t.equal(termErr, rawErr, 'Term + raw err contents match')
+      t.equal(result.raw.err.code, 2, 'Error code set to 2 (manually)')
+      t.equal(result.raw.err.signal, 'SIGINT', 'Error signal present')
       t.ok(termStdout.includes(name), `Contents include: ${name}`)
       t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
       errLine.split('\n').forEach(o => t.ok(termErr.includes(o), `Contents include: ${o}`))
