@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/architect/hydrate#readme",
   "dependencies": {
-    "@architect/parser": "1.2.2",
+    "@architect/parser": "2.0.1",
     "@architect/utils": "^1.4.4",
     "chalk": "^3.0.0",
     "cpr": "^3.0.1",
