@@ -19,6 +19,8 @@ module.exports = function getBasePaths(copying, callback) {
 
     return function getPath(callback) {
       let paths = {
+        // 'deno':       path.join(base, 'vendor'), // FIXME add Deno support!
+        'nodejs12.x': path.join(base, 'node_modules', '@architect'),
         'nodejs10.x': path.join(base, 'node_modules', '@architect'),
         'nodejs8.10': path.join(base, 'node_modules', '@architect'),
         'python3.7':  path.join(base, 'vendor'),

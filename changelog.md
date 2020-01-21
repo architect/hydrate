@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.14] 2020-01-21
+
+### Fixed
+
+- Fixed issue with hydration of `nodejs12.x` functions; thanks @bardbachmann!
+
+---
+
 ## [1.4.13] 2020-01-06
 
 ### Changed
