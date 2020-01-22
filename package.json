@@ -1,6 +1,6 @@
 {
   "name": "@architect/hydrate",
-  "version": "1.4.14",
+  "version": "1.4.15",
   "description": "Architect dependency hydrator and shared file manager",
   "main": "index.js",
   "scripts": {
