@@ -13,7 +13,7 @@ module.exports = function getBasePaths(copying, callback) {
   let inventory = utils.inventory()
   series(inventory.localPaths.map(base=> {
 
-    let runtime = 'nodejs10.x'
+    let runtime = 'nodejs12.x'
     let arcConfigPath = path.join(base, '.arc-config')
     let noop = false
 
