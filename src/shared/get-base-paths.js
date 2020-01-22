@@ -19,9 +19,11 @@ module.exports = function getBasePaths(copying, callback) {
 
     return function getPath(callback) {
       let paths = {
-        // 'deno':       path.join(base, 'vendor'), // FIXME add Deno support!
+        // FIXME add Deno support!
+        // 'deno':       path.join(base, 'vendor'),
         'nodejs12.x': path.join(base, 'node_modules', '@architect'),
         'nodejs10.x': path.join(base, 'node_modules', '@architect'),
+        // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 legacy support until mid 2020
         'nodejs8.10': path.join(base, 'node_modules', '@architect'),
         'python3.7':  path.join(base, 'vendor'),
         'python3.6':  path.join(base, 'vendor'),

@@ -12,8 +12,8 @@ let print = require('../_printer')
  *
  * Runtime    | Function Path
  * ----------------------------------------------------------
+ * nodejs12.x | node_modules/@architect/shared/
  * nodejs10.x | node_modules/@architect/shared/
- * nodejs8.10 | node_modules/@architect/shared/
  * python3.7  | vendor/shared/
  * python3.6  | vendor/shared/
  * ruby2.5    | vendor/shared/
