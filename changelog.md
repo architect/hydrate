@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.16] 2020-02-04
+
+### Fixed
+
+- Fixed issue with shared code hydration in `python3.8`; fixes #650, thanks @rbuckingham!
+
+---
+
 ## [1.4.15] 2020-01-22
 
 ### Changed

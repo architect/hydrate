@@ -12,12 +12,8 @@ let {readArc} = require('@architect/utils')
  *
  * Runtime    | Function Path
  * ----------------------------------------------------------
- * nodejs12.x | node_modules/@architect/shared/static.json
- * nodejs10.x | node_modules/@architect/shared/static.json
- * python3.7  | vendor/shared/static.json
- * python3.6  | vendor/shared/static.json
- * ruby2.5    | vendor/shared/static.json
- *
+ * nodejs*  | node_modules/@architect/shared/static.json
+ * else     | vendor/shared/static.json
  */
 module.exports = function copyStatic(params, callback) {
   let {update, only} = params

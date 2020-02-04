@@ -12,12 +12,8 @@ let print = require('../_printer')
  *
  * Runtime    | Function Path
  * ----------------------------------------------------------
- * nodejs12.x | node_modules/@architect/shared/
- * nodejs10.x | node_modules/@architect/shared/
- * python3.7  | vendor/shared/
- * python3.6  | vendor/shared/
- * ruby2.5    | vendor/shared/
- *
+ * nodejs*  | node_modules/@architect/shared/
+ * else     | vendor/shared/
  */
 module.exports = function copyShared(params, callback) {
   let {update, only} = params
