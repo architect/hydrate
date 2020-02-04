@@ -12,12 +12,8 @@ let print = require('../_printer')
  *
  * Runtime    | Function Path
  * ----------------------------------------------------------
- * nodejs12.x | node_modules/@architect/shared/.arc
- * nodejs10.x | node_modules/@architect/shared/.arc
- * python3.7  | vendor/shared/.arc
- * python3.6  | vendor/shared/.arc
- * ruby2.5    | vendor/shared/.arc
- *
+ * nodejs*  | node_modules/@architect/shared/.arc
+ * else     | vendor/shared/.arc
  */
 module.exports = function copyArc(params, callback) {
   let {update, only} = params

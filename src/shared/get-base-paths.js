@@ -1,5 +1,5 @@
 let parse = require('@architect/parser')
-let utils = require('@architect/utils')
+let {inventory, getRuntime} = require('@architect/utils')
 let series = require('run-series')
 let path = require('path')
 let fs = require('fs')
@@ -10,25 +10,22 @@ let fs = require('fs')
  * @param {string} copying - one of: arcfile, shared, views, static
  */
 module.exports = function getBasePaths(copying, callback) {
-  let inventory = utils.inventory()
-  series(inventory.localPaths.map(base=> {
+  let inv = inventory()
+  series(inv.localPaths.map(base=> {
 
-    let runtime = 'nodejs12.x'
+    let runtime = getRuntime() // Populates default
     let arcConfigPath = path.join(base, '.arc-config')
     let noop = false
 
+    /**
+     * Node: always copy into `node_modules/@architect/*`
+     * Else: always copy into `vendor/*`
+     */
+    let nodeModules = path.join(base, 'node_modules', '@architect')
+    let vendorDir = path.join(base, 'vendor')
+    let basePath = r => r.startsWith('nodejs') ? nodeModules : vendorDir
+
     return function getPath(callback) {
-      let paths = {
-        // FIXME add Deno support!
-        // 'deno':       path.join(base, 'vendor'),
-        'nodejs12.x': path.join(base, 'node_modules', '@architect'),
-        'nodejs10.x': path.join(base, 'node_modules', '@architect'),
-        // DEPRECATED by AWS Jan/Feb 2020; will retain Node 8 legacy support until mid 2020
-        'nodejs8.10': path.join(base, 'node_modules', '@architect'),
-        'python3.7':  path.join(base, 'vendor'),
-        'python3.6':  path.join(base, 'vendor'),
-        'ruby2.5':    path.join(base, 'vendor')
-      }
       // check for override
       if (fs.existsSync(arcConfigPath)) {
         let raw = fs.readFileSync(arcConfigPath).toString()
@@ -46,7 +43,7 @@ module.exports = function getBasePaths(copying, callback) {
         }
       }
       if (noop) callback()
-      else callback(null, paths[runtime])
+      else callback(null, basePath(runtime))
     }
   }),
   function done(err, results) {
