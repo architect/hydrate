@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.17] 2020-02-05
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.4.16] 2020-02-04
 
 ### Fixed
@@ -15,7 +23,7 @@
 ### Changed
 
 - Minor internal changes to ensure default runtime is now `nodejs12.x`
-- Update dependencies
+- Updated dependencies
 
 ---
 
