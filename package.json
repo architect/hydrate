@@ -3,6 +3,9 @@
   "version": "1.4.17",
   "description": "Architect dependency hydrator and shared file manager",
   "main": "index.js",
+  "bin": {
+    "hydrate": "./cli.js"
+  },
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
     "test:unit": "tape test/unit/*-test.js | tap-spec",
@@ -23,22 +26,22 @@
   },
   "homepage": "https://github.com/architect/hydrate#readme",
   "dependencies": {
-    "@architect/parser": "1.2.2",
-    "@architect/utils": "^1.4.7",
-    "chalk": "^3.0.0",
-    "cpr": "^3.0.1",
-    "glob": "^7.1.6",
-    "rimraf": "^3.0.1",
-    "run-series": "^1.1.8",
-    "strip-ansi": "^6.0.0"
+    "@architect/parser": "~2.1.0-RC.1",
+    "@architect/utils": "~1.4.7",
+    "chalk": "~3.0.0",
+    "cpr": "~3.0.1",
+    "glob": "~7.1.6",
+    "rimraf": "~3.0.2",
+    "run-series": "~1.1.8",
+    "strip-ansi": "~6.0.0"
   },
   "devDependencies": {
-    "codecov": "^3.6.4",
+    "codecov": "^3.6.5",
     "eslint": "^6.8.0",
     "mkdirp": "^1.0.3",
     "nyc": "^15.0.0",
-    "sinon": "^8.1.1",
+    "sinon": "^9.0.0",
     "tap-spec": "^5.0.0",
-    "tape": "^4.13.0"
+    "tape": "^4.13.2"
   }
 }
