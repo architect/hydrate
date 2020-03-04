@@ -3,9 +3,6 @@
   "version": "1.4.18-RC.1",
   "description": "Architect dependency hydrator and shared file manager",
   "main": "index.js",
-  "bin": {
-    "hydrate": "./cli.js"
-  },
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
     "test:unit": "tape test/unit/*-test.js | tap-spec",
