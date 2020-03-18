@@ -2,6 +2,14 @@
 
 ---
 
+## [1.4.18] 2020-03-02
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.4.17] 2020-02-05
 
 ### Changed
