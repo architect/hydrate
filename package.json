@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/architect/hydrate#readme",
   "dependencies": {
-    "@architect/parser": "~2.1.0-RC.1",
+    "@architect/parser": "~2.1.0",
     "@architect/utils": "~1.4.7",
     "chalk": "~3.0.0",
     "cpr": "~3.0.1",
@@ -37,7 +37,7 @@
     "eslint": "^6.8.0",
     "mkdirp": "^1.0.3",
     "nyc": "^15.0.0",
-    "sinon": "^9.0.0",
+    "sinon": "^9.0.1",
     "tap-spec": "^5.0.0",
     "tape": "^4.13.2"
   }
