@@ -1,5 +1,6 @@
 let glob = require('glob')
 let series = require('run-series')
+let fs = require('fs')
 let path = require('path')
 let print = require('./_printer')
 let child = require('child_process')
@@ -135,17 +136,24 @@ module.exports = function update(params={}, callback) {
       }
 
       if (file.includes('package.json')) {
-        exec(`npm update`, options, callback)
+        let exists = file => fs.existsSync(path.join(cwd, file))
+        if (exists('yarn.lock')) {
+          exec(`yarn upgrade`, options, callback)
+        }
+        else {
+          exec(`npm update`, options, callback)
+        }
       }
-
       // TODO: pip requires manual locking (via two requirements.txt files) so
       // we dont test update w/ python
       // it may not make sense to execute this at all
-      if (file.includes('requirements.txt'))
+      else if (file.includes('requirements.txt')) {
         exec(`pip3 install -r requirements.txt -t ./vendor -U --upgrade-strategy eager`, options, callback)
-
-      if (file.includes('Gemfile'))
+      }
+      else if (file.includes('Gemfile')) {
         exec(`bundle update`, options, callback)
+      }
+      else callback()
     }
   })
 
