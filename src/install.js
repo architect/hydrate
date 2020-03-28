@@ -150,12 +150,13 @@ module.exports = function install(params={}, callback) {
           exec(`npm i`, options, callback)
         }
       }
-
-      if (file.includes('requirements.txt'))
+      else if (file.includes('requirements.txt')) {
         exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
-
-      if (file.includes('Gemfile'))
+      }
+      else if (file.includes('Gemfile')) {
         exec(`bundle install --path vendor/bundle`, options, callback)
+      }
+      else callback()
     }
   })
 
