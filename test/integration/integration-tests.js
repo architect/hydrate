@@ -322,7 +322,7 @@ test(`install(undefined) hydrates all Functions', src/shared and src/views depen
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length
+    nodeViewsDependencies.length + 2
   t.plan(count)
   reset(function(err) {
     if (err) t.fail(err)
@@ -361,6 +361,12 @@ test(`install(undefined) hydrates all Functions', src/shared and src/views depen
               nodeViewsDependencies.forEach(p => {
                 t.ok(exists(p), `node views dependency exists at ${p}`)
               })
+              // Yarn-specific tests
+              let yarnFunction = path.join(mockTmp, 'src', 'http', 'put-on_your_boots')
+              let yarnIntFile = path.join(yarnFunction, 'node_modules', '.yarn-integrity')
+              let pkgLockFile = path.join(yarnFunction, 'package-lock.json')
+              t.ok(exists(yarnIntFile), 'Found yarn integrity file')
+              t.notOk(exists(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
             }
           })
         }
