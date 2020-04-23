@@ -322,7 +322,7 @@ test(`install(undefined) hydrates all Functions', src/shared and src/views depen
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length
+    nodeViewsDependencies.length + 2
   t.plan(count)
   reset(function(err) {
     if (err) t.fail(err)
@@ -361,6 +361,12 @@ test(`install(undefined) hydrates all Functions', src/shared and src/views depen
               nodeViewsDependencies.forEach(p => {
                 t.ok(exists(p), `node views dependency exists at ${p}`)
               })
+              // Yarn-specific tests
+              let yarnFunction = path.join(mockTmp, 'src', 'http', 'put-on_your_boots')
+              let yarnIntFile = path.join(yarnFunction, 'node_modules', '.yarn-integrity')
+              let pkgLockFile = path.join(yarnFunction, 'package-lock.json')
+              t.ok(exists(yarnIntFile), 'Found yarn integrity file')
+              t.notOk(exists(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
             }
           })
         }
@@ -426,7 +432,7 @@ test(`install() should not recurse into Functions dependencies and hydrate those
 })
 
 test(`update() bumps installed dependencies to newer versions`, t=> {
-  t.plan(2)
+  t.plan(3)
   reset(function(err) {
     if (err) t.fail(err)
     else {
@@ -437,9 +443,14 @@ test(`update() bumps installed dependencies to newer versions`, t=> {
         else {
           console.log(`noop log to help reset tap-spec lol`)
           // eslint-disable-next-line
-          let lock = require(path.join(mockTmp, nodeFunctions[0], 'package-lock.json'))
-          let newVersion = lock.dependencies['tiny-json-http'].version
+          let pkgLock = require(path.join(mockTmp, nodeFunctions[0], 'package-lock.json'))
+          let newVersion = pkgLock.dependencies['tiny-json-http'].version
           t.notEqual(newVersion, '7.0.2', `get-index tiny-json-http bumped to ${newVersion} from 7.0.2`)
+
+          let yarnLock = fs.readFileSync(path.join(mockTmp, nodeFunctions[2], 'yarn.lock'), 'utf-8')
+          let newYarn = yarnLock.split('\n').filter(t=>t.includes('  version "'))[0].split('  version "')[1].replace('"','')
+          t.notEqual(newYarn, '7.0.2', `put-on_your_boots tiny-json-http bumped to ${newVersion} from 7.0.2`)
+
           let gemfileLock = fs.readFileSync(path.join(mockTmp, rubyFunctions[0], 'Gemfile.lock'), 'utf-8')
           let newGem = gemfileLock.split('\n').filter(t=>t.includes('a (0'))[0].split('(')[1].split(')')[0]
           t.notEqual(newGem, '0.2.1', `delete-badness_in_life 'a' gem bumped to ${newGem} from 0.2.1`)

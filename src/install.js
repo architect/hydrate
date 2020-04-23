@@ -138,20 +138,25 @@ module.exports = function install(params={}, callback) {
       // TODO: I think we should consider what minimum version of node/npm this
       // module needs to use as the npm commands below have different behaviour
       // depending on npm version - and enshrine those in the package.json
+      let exists = file => fs.existsSync(path.join(cwd, file))
       if (file.includes('package.json')) {
-        if (fs.existsSync(path.join(cwd, 'package-lock.json'))) {
+        if (exists('package-lock.json')) {
           exec(`npm ci`, options, callback)
+        }
+        else if (exists('yarn.lock')) {
+          exec(`yarn`, options, callback)
         }
         else {
           exec(`npm i`, options, callback)
         }
       }
-
-      if (file.includes('requirements.txt'))
+      else if (file.includes('requirements.txt')) {
         exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
-
-      if (file.includes('Gemfile'))
+      }
+      else if (file.includes('Gemfile')) {
         exec(`bundle install --path vendor/bundle`, options, callback)
+      }
+      else callback()
     }
   })
 
