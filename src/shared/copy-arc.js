@@ -38,7 +38,7 @@ module.exports = function copyArc(params, callback) {
       else {
         series(paths.map(dest=> {
           return function copier(callback) {
-            copy(path.join(dest, 'shared'), callback)
+            copy(path.join(dest, 'shared'), params, callback)
           }
         }), _done)
       }
@@ -50,7 +50,7 @@ module.exports = function copyArc(params, callback) {
 /**
  * copy the current manifest into the destination dir
  */
-function copy(dest, callback) {
+function copy(dest, params, callback) {
   // path to destination
   let arcFileDest = path.join(dest, '.arc')
   // .arc in current working dir
@@ -63,10 +63,10 @@ function copy(dest, callback) {
   let arcJsonPath = path.join(process.cwd(), 'arc.json')
 
   if (fs.existsSync(arcFileSrc)) {
-    cp(arcFileSrc, arcFileDest, callback)
+    cp(arcFileSrc, arcFileDest, { sandbox: params.sandbox }, callback)
   }
   else if (fs.existsSync(arcAppDotArcPath)) {
-    cp(arcAppDotArcPath, arcFileDest, callback)
+    cp(arcAppDotArcPath, arcFileDest, { sandbox: params.sandbox }, callback)
   }
   else if (fs.existsSync(arcYamlPath)) {
     let raw = fs.readFileSync(arcYamlPath).toString()

@@ -44,7 +44,9 @@ module.exports = function copyShared(params, callback) {
             let finalDest = path.join(dest, 'shared')
             rmrf(finalDest, {glob:false}, function(err) {
               if (err) callback(err)
-              else cp(shared, finalDest, callback)
+              else {
+                cp(shared, finalDest, { sandbox: params.sandbox }, callback)
+              }
             })
           }
         }), _done)
