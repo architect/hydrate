@@ -46,7 +46,7 @@ module.exports = function copyStatic (params, callback) {
       else {
         series(paths.map(dest => {
           return function copier (callback) {
-            cp(static, path.join(dest, 'shared', 'static.json'), callback)
+            cp(static, path.join(dest, 'shared', 'static.json'), params, callback)
           }
         }), _done)
       }
