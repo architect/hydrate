@@ -1,9 +1,7 @@
 let path = require('path')
 let rm = require('rimraf')
-let fs = require('fs')
-let exists = fs.existsSync
+let { existsSync: exists, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } = require('fs')
 let cp = require('cpr')
-let mkdirp = require('mkdirp')
 let test = require('tape')
 let glob = require('glob')
 let hydrate = require('../../')
@@ -250,13 +248,13 @@ test(`shared() copies static.json with @static folder configured`, t => {
     else {
       // Rewrite .arc to include @static folder directive
       let arcFile = path.join(process.cwd(), '.arc')
-      let arc = fs.readFileSync(arcFile).toString()
+      let arc = readFileSync(arcFile).toString()
       arc += '@static\nfolder foo'
-      fs.writeFileSync(arcFile, arc)
+      writeFileSync(arcFile, arc)
       t.pass(`Added '@static folder foo' to .arc`)
       // Move public/ to foo/
-      fs.renameSync(path.join(process.cwd(), 'public'), path.join(process.cwd(), 'foo'))
-      t.ok(fs.existsSync(path.join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
+      renameSync(path.join(process.cwd(), 'public'), path.join(process.cwd(), 'foo'))
+      t.ok(exists(path.join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
       hydrate.shared({}, function done(err) {
         if (err) t.fail(err)
         else {
@@ -278,16 +276,16 @@ test(`shared() should remove files in functions that do not exist in src/shared 
     else {
       let sharedStragglers = sharedArtifacts.map((p) => {
         let dir = path.dirname(p)
-        mkdirp.sync(dir)
+        mkdirSync(dir, { recursive: true })
         let file = path.join(dir, 'straggler.json')
-        fs.writeFileSync(file, '{surprise:true}')
+        writeFileSync(file, '{surprise:true}')
         return file
       })
       let viewsStragglers = getViewsArtifacts.map((p) => {
         let dir = path.dirname(p)
-        mkdirp.sync(dir)
+        mkdirSync(dir, { recursive: true })
         let file = path.join(dir, 'straggler.json')
-        fs.writeFileSync(file, '{surprise:true}')
+        writeFileSync(file, '{surprise:true}')
         return file
       })
       cp('_optional', 'src', {overwrite: true}, function done(err) {
@@ -413,8 +411,8 @@ test(`install() should not recurse into Functions dependencies and hydrate those
     if (err) t.fail(err)
     else {
       let subdep = path.join(nodeFunctions[0], 'node_modules', 'poop')
-      mkdirp.sync(subdep)
-      fs.writeFileSync(path.join(subdep, 'package.json'), JSON.stringify({
+      mkdirSync(subdep, { recursive: true })
+      writeFileSync(path.join(subdep, 'package.json'), JSON.stringify({
         name: 'poop',
         dependencies: { 'tiny-json-http': '*' }
       }), 'utf-8')
@@ -447,11 +445,11 @@ test(`update() bumps installed dependencies to newer versions`, t=> {
           let newVersion = pkgLock.dependencies['tiny-json-http'].version
           t.notEqual(newVersion, '7.0.2', `get-index tiny-json-http bumped to ${newVersion} from 7.0.2`)
 
-          let yarnLock = fs.readFileSync(path.join(mockTmp, nodeFunctions[2], 'yarn.lock'), 'utf-8')
+          let yarnLock = readFileSync(path.join(mockTmp, nodeFunctions[2], 'yarn.lock'), 'utf-8')
           let newYarn = yarnLock.split('\n').filter(t=>t.includes('  version "'))[0].split('  version "')[1].replace('"','')
           t.notEqual(newYarn, '7.0.2', `put-on_your_boots tiny-json-http bumped to ${newVersion} from 7.0.2`)
 
-          let gemfileLock = fs.readFileSync(path.join(mockTmp, rubyFunctions[0], 'Gemfile.lock'), 'utf-8')
+          let gemfileLock = readFileSync(path.join(mockTmp, rubyFunctions[0], 'Gemfile.lock'), 'utf-8')
           let newGem = gemfileLock.split('\n').filter(t=>t.includes('a (0'))[0].split('(')[1].split(')')[0]
           t.notEqual(newGem, '0.2.1', `delete-badness_in_life 'a' gem bumped to ${newGem} from 0.2.1`)
         }
@@ -467,7 +465,7 @@ test('Corrupt package-lock.json fails hydrate.install', t=> {
     else {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
+      writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
       let basepath = nodeFunctions[0]
       hydrate.install({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
@@ -485,7 +483,7 @@ test('Corrupt package-lock.json fails hydrate.update', t=> {
     else {
       // Make missing the package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
+      writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
       hydrate.update(nodeFunctions[0], function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
@@ -501,8 +499,8 @@ test('Corrupt Gemfile fails hydrate.install', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
-      fs.writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
+      unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
+      writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
       let basepath = rubyFunctions[0]
       hydrate.install({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
@@ -519,8 +517,8 @@ test('Corrupt Gemfile fails hydrate.update', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
-      fs.writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
+      unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
+      writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
       let basepath = rubyFunctions[0]
       hydrate.update({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
@@ -537,7 +535,7 @@ test('Corrupt requirements.txt fails hydrate.install', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
+      writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
       let basepath = pythonFunctions[0]
       hydrate.install({basepath}, function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
@@ -554,7 +552,7 @@ test('Corrupt requirements.txt fails hydrate.update', t=> {
     if (err) t.fail(err)
     else {
       let corruptPackage = 'ohayo gozaimasu!'
-      fs.writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
+      writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
       hydrate.update(pythonFunctions[0], function done(err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
