@@ -17,7 +17,8 @@ let isUpdate = opt => opt === 'update' || opt === '--update' || opt === '-u' ||
                       opt === 'upgrade' || opt === '--upgrade' // jic
 let isVerbose = opt => opt === 'verbose' || opt === '--verbose' || opt === '-v'
 
-async function cmd(opts=[]) {
+// eslint-disable-next-line
+async function cmd (opts = []) {
 
   let args = {
     verbose: opts.some(isVerbose)
@@ -40,12 +41,12 @@ module.exports = cmd
 
 // allow direct invoke
 if (require.main === module) {
-  (async function() {
+  (async function () {
     try {
       await cmd(process.argv)
     }
     catch (err) {
       console.log(err)
     }
-  })();
+  })()
 }

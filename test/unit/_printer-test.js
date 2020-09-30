@@ -1,7 +1,7 @@
 let test = require('tape')
 let print = require('../../src/_printer')
 let stripAnsi = require('strip-ansi')
-let {updater} = require('@architect/utils')
+let { updater } = require('@architect/utils')
 // process.env.CI = true
 
 test('Set up env', t => {
@@ -15,17 +15,17 @@ test('Error on missing params', t => {
   let stdout = 'some info\nmore info'
   let cmd = 'cmd'
   let done = 'Finish test'
-  let update = updater(name, {quiet:true})
+  let update = updater(name, { quiet: true })
   let start = update.start(startMsg)
-  print({stdout, start, done, update}, (err, result) => {
+  print({ stdout, start, done, update }, (err, result) => {
     if (err) t.pass(err)
     if (result) t.fail('Got unexpected result')
   })
-  print({stdout, cmd, start, done}, (err, result) => {
+  print({ stdout, cmd, start, done }, (err, result) => {
     if (err) t.pass(err)
     if (result) t.fail('Got unexpected result')
   })
-  print({stdout, cmd, update}, (err, result) => {
+  print({ stdout, cmd, update }, (err, result) => {
     if (err) t.pass(err)
     if (result) t.fail('Got unexpected result')
   })
@@ -39,10 +39,10 @@ test('Basic stdout', t => {
   let stdout = 'some info\nmore info'
   let cmd = 'cmd'
   let done = 'Finish test'
-  let update = updater(name, {quiet:true})
+  let update = updater(name, { quiet: true })
   let start = update.start(startMsg)
 
-  print({stdout, cmd, start, done, update}, (err, result) => {
+  print({ stdout, cmd, start, done, update }, (err, result) => {
     if (err) t.fail(err)
     else {
       let term = stripAnsi(result.term.stdout)
@@ -66,10 +66,10 @@ test('Basic stderr', t => {
   let stderr = 'some warnings\nmore warnings'
   let cmd = 'cmd'
   let done = 'Finish test'
-  let update = updater(name, {quiet:true})
+  let update = updater(name, { quiet: true })
   let start = update.start(startMsg)
 
-  print({stderr, cmd, start, done, update}, (err, result) => {
+  print({ stderr, cmd, start, done, update }, (err, result) => {
     if (err) t.fail(err)
     else {
       let termStdout = stripAnsi(result.term.stdout)
@@ -97,10 +97,10 @@ test('Basic err', t => {
   let errLine = err.message
   let cmd = 'cmd'
   let done = 'Finish test'
-  let update = updater(name, {quiet:true})
+  let update = updater(name, { quiet: true })
   let start = update.start(startMsg)
 
-  print({err, cmd, start, done, update}, (err, result) => {
+  print({ err, cmd, start, done, update }, (err, result) => {
     if (!err) t.fail('No error present')
     else {
       let termStdout = stripAnsi(result.term.stdout)
@@ -132,10 +132,10 @@ test('Basic err with code', t => {
   let errLine = err.message
   let cmd = 'cmd'
   let done = 'Finish test'
-  let update = updater(name, {quiet:true})
+  let update = updater(name, { quiet: true })
   let start = update.start(startMsg)
 
-  print({err, cmd, start, done, update}, (err, result) => {
+  print({ err, cmd, start, done, update }, (err, result) => {
     if (!err) t.fail('No error present')
     else {
       let termStdout = stripAnsi(result.term.stdout)

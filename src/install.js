@@ -6,7 +6,7 @@ let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
 let stripAnsi = require('strip-ansi')
-let {inventory, updater} = require('@architect/utils')
+let { inventory, updater } = require('@architect/utils')
 
 /**
  * Installs deps into:
@@ -14,7 +14,7 @@ let {inventory, updater} = require('@architect/utils')
  * - src/shared
  * - src/views
  */
-module.exports = function install(params={}, callback) {
+module.exports = function install (params = {}, callback) {
   let {
     // Main params
     basepath,
@@ -24,8 +24,8 @@ module.exports = function install(params={}, callback) {
     quiet,
     verbose,
     // Isolation / sandbox
-    copyShared=true,
-    hydrateShared=true
+    copyShared = true,
+    hydrateShared = true
   } = params
   basepath = basepath || 'src'
 
@@ -35,7 +35,7 @@ module.exports = function install(params={}, callback) {
   // eslint-disable-next-line
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
   // Get everything except shared
-  let files = glob.sync(pattern(basepath)).filter(function filter(filePath) {
+  let files = glob.sync(pattern(basepath)).filter(function filter (filePath) {
     if (filePath.includes('node_modules') ||
         filePath.includes('vendor/bundle') ||
         filePath.includes('src/shared') ||
@@ -46,7 +46,7 @@ module.exports = function install(params={}, callback) {
   // Get src/shared + src/views
   //   or disable if we're hydrating a single function in total isolation (e.g. sandbox startup)
   if (hydrateShared) {
-    let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter(filePath) {
+    let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter (filePath) {
       if (filePath.includes('node_modules') ||
           filePath.includes('vendor/bundle'))
         return false
@@ -67,7 +67,7 @@ module.exports = function install(params={}, callback) {
   // Ensure all paths are relative; previous glob ops may be from absolute paths, producing absolute-pathed results
   files = files.map(file => {
     // Normalize to relative paths
-    file = file.replace(process.cwd(),'')
+    file = file.replace(process.cwd(), '')
     return file[0] === path.sep ? file.substr(1) : file // jiccya
   })
 
@@ -95,7 +95,7 @@ module.exports = function install(params={}, callback) {
    * Build out job queue
    */
   let deps = files.length
-  let updaterParams = {quiet}
+  let updaterParams = { quiet }
   let update = updater('Hydrate', updaterParams)
   let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
   let init = ''
@@ -105,34 +105,34 @@ module.exports = function install(params={}, callback) {
     init += update.status(`No dependencies found in: ${p}${path.sep}**`)
   if (init) {
     init = {
-      raw: {stdout: stripAnsi(init)},
-      term: {stdout: init}
+      raw: { stdout: stripAnsi(init) },
+      term: { stdout: init }
     }
   }
 
   let ops = files.map(file => {
     let cwd = path.dirname(file)
-    let options = {cwd, env, shell, timeout}
-    return function hydration(callback) {
+    let options = { cwd, env, shell, timeout }
+    return function hydration (callback) {
       let start
       let now = Date.now()
 
       // Prints and executes the command
-      function exec(cmd, opts, callback) {
+      function exec (cmd, opts, callback) {
         let relativePath = cwd !== '.' ? cwd : 'project root'
         let done = `Hydrated ${relativePath}`
         start = update.start(`Hydrating ${relativePath}`)
 
         child.exec(cmd, opts,
-        function (err, stdout, stderr) {
+          function (err, stdout, stderr) {
           // If zero output, acknowledge *something* happened
-          if (!err && !stdout && !stderr) {
-            update.cancel()
-            stdout = `Done in ${(Date.now() - now) / 1000}s`
-          }
-          let params = {err, stdout, stderr, cmd, done, start, update, verbose}
-          print(params, callback)
-        })
+            if (!err && !stdout && !stderr) {
+              update.cancel()
+              stdout = `Done in ${(Date.now() - now) / 1000}s`
+            }
+            let params = { err, stdout, stderr, cmd, done, start, update, verbose }
+            print(params, callback)
+          })
       }
 
       // TODO: I think we should consider what minimum version of node/npm this
@@ -176,15 +176,15 @@ module.exports = function install(params={}, callback) {
       if (deps && deps > 0) {
         let done = update.done('Success!', 'Finished hydrating dependencies')
         result.push({
-          raw: {stdout: stripAnsi(done)},
-          term: {stdout: done}
+          raw: { stdout: stripAnsi(done) },
+          term: { stdout: done }
         })
       }
       if (!deps && !quiet) {
         let done = update.done('Finished checks, nothing to hydrate')
         result.push({
-          raw: {stdout: stripAnsi(done)},
-          term: {stdout: done}
+          raw: { stdout: stripAnsi(done) },
+          term: { stdout: done }
         })
       }
       callback(null, result)

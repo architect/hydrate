@@ -15,8 +15,8 @@ let print = require('../_printer')
  * nodejs*  | node_modules/@architect/shared/
  * else     | vendor/shared/
  */
-module.exports = function copyShared(params, callback) {
-  let {update, only} = params
+module.exports = function copyShared (params, callback) {
+  let { update, only } = params
   let shared = path.join(process.cwd(), 'src', 'shared')
   let hasShared = fs.existsSync(shared)
   let go = !only || only === 'shared'
@@ -30,19 +30,19 @@ module.exports = function copyShared(params, callback) {
     function _done (err) {
       let cmd = 'copy'
       if (err) {
-        print({cmd, err, start, update}, callback)
+        print({ cmd, err, start, update }, callback)
       }
       else {
-        print({cmd, start, done, update}, callback)
+        print({ cmd, start, done, update }, callback)
       }
     }
-    getBasePaths('shared', function gotBasePaths(err, paths) {
+    getBasePaths('shared', function gotBasePaths (err, paths) {
       if (err) _done(err)
       else {
-        series(paths.map(dest=> {
-          return function copier(callback) {
+        series(paths.map(dest => {
+          return function copier (callback) {
             let finalDest = path.join(dest, 'shared')
-            rmrf(finalDest, {glob:false}, function(err) {
+            rmrf(finalDest, { glob: false }, function (err) {
               if (err) callback(err)
               else cp(shared, finalDest, callback)
             })
