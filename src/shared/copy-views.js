@@ -5,7 +5,7 @@ let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
 let print = require('../_printer')
-let {inventory} = require('@architect/utils')
+let { inventory } = require('@architect/utils')
 
 /**
  * copies src/views
@@ -16,8 +16,8 @@ let {inventory} = require('@architect/utils')
  * nodejs*  | node_modules/@architect/views/
  * else     | vendor/views/
  */
-module.exports = function copyViews(params, callback) {
-  let {update, only} = params
+module.exports = function copyViews (params, callback) {
+  let { update, only } = params
   let views = path.join(process.cwd(), 'src', 'views')
   let hasViews = fs.existsSync(views)
   let go = !only || only === 'views'
@@ -43,20 +43,20 @@ module.exports = function copyViews(params, callback) {
     function _done (err) {
       let cmd = 'copy'
       if (err) {
-        print({cmd, err, start, update}, callback)
+        print({ cmd, err, start, update }, callback)
       }
       else {
-        print({cmd, start, done, update}, callback)
+        print({ cmd, start, done, update }, callback)
       }
     }
-    getBasePaths('views', function gotBasePaths(err, paths) {
+    getBasePaths('views', function gotBasePaths (err, paths) {
       if (err) _done(err)
       else {
-        series(paths.map(dest=> {
-          return function copier(callback) {
+        series(paths.map(dest => {
+          return function copier (callback) {
             if (isView(dest)) {
               let finalDest = path.join(dest, 'views')
-              rmrf(finalDest, {glob:false}, function(err) {
+              rmrf(finalDest, { glob: false }, function (err) {
                 if (err) callback(err)
                 else cp(views, finalDest, callback)
               })

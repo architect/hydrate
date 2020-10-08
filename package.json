@@ -1,6 +1,6 @@
 {
   "name": "@architect/hydrate",
-  "version": "1.5.0",
+  "version": "1.5.1-RC.0",
   "description": "Architect dependency hydrator and shared file manager",
   "main": "index.js",
   "scripts": {
@@ -26,8 +26,8 @@
   },
   "homepage": "https://github.com/architect/hydrate#readme",
   "dependencies": {
-    "@architect/parser": "~2.2.0",
-    "@architect/utils": "~1.5.1",
+    "@architect/parser": "~2.2.1-RC.1",
+    "@architect/utils": "~1.5.12-RC.0",
     "chalk": "~4.1.0",
     "cpr": "~3.0.1",
     "glob": "~7.1.6",
@@ -36,13 +36,16 @@
     "strip-ansi": "~6.0.0"
   },
   "devDependencies": {
-    "codecov": "^3.6.5",
-    "eslint": "^7.0.0",
-    "mkdirp": "^1.0.3",
-    "nyc": "^15.0.0",
-    "sinon": "^9.0.1",
+    "@architect/eslint-config": "0.0.1",
+    "codecov": "^3.7.2",
+    "eslint": "^7.10.0",
+    "nyc": "^15.1.0",
+    "sinon": "^9.1.0",
     "tap-spec": "^5.0.0",
     "tape": "^5.0.1",
-    "yarn": "~1.22.4"
+    "yarn": "~1.22.10"
+  },
+  "eslintConfig": {
+    "extends": "@architect/eslint-config"
   }
 }

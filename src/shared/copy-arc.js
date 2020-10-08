@@ -15,8 +15,8 @@ let print = require('../_printer')
  * nodejs*  | node_modules/@architect/shared/.arc
  * else     | vendor/shared/.arc
  */
-module.exports = function copyArc(params, callback) {
-  let {update, only} = params
+module.exports = function copyArc (params, callback) {
+  let { update, only } = params
   let go = !only || only === 'arcFile' || only === 'shared'
 
   if (process.env.DEPRECATED && go) {
@@ -27,17 +27,17 @@ module.exports = function copyArc(params, callback) {
     function _done (err) {
       let cmd = 'copy'
       if (err) {
-        print({cmd, err, start, update}, callback)
+        print({ cmd, err, start, update }, callback)
       }
       else {
-        print({cmd, start, done, update}, callback)
+        print({ cmd, start, done, update }, callback)
       }
     }
-    getBasePaths('arcfile', function gotBasePaths(err, paths) {
+    getBasePaths('arcfile', function gotBasePaths (err, paths) {
       if (err) _done(err)
       else {
-        series(paths.map(dest=> {
-          return function copier(callback) {
+        series(paths.map(dest => {
+          return function copier (callback) {
             copy(path.join(dest, 'shared'), callback)
           }
         }), _done)
@@ -50,7 +50,7 @@ module.exports = function copyArc(params, callback) {
 /**
  * copy the current manifest into the destination dir
  */
-function copy(dest, callback) {
+function copy (dest, callback) {
   // path to destination
   let arcFileDest = path.join(dest, '.arc')
   // .arc in current working dir

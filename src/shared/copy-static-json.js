@@ -4,7 +4,7 @@ let path = require('path')
 let series = require('run-series')
 let getBasePaths = require('./get-base-paths')
 let print = require('../_printer')
-let {readArc} = require('@architect/utils')
+let { readArc } = require('@architect/utils')
 
 /**
  * copies public/static.json
@@ -15,11 +15,11 @@ let {readArc} = require('@architect/utils')
  * nodejs*  | node_modules/@architect/shared/static.json
  * else     | vendor/shared/static.json
  */
-module.exports = function copyStatic(params, callback) {
-  let {update, only} = params
+module.exports = function copyStatic (params, callback) {
+  let { update, only } = params
   let go = !only || only === 'staticJson' || only === 'shared'
 
-  let {arc} = readArc()
+  let { arc } = readArc()
   let staticDir = 'public'
   if (arc.static && arc.static.some(i => i[0] === 'folder')) {
     staticDir = arc.static[arc.static.findIndex(i => i[0] === 'folder')][1] || 'public'
@@ -35,17 +35,17 @@ module.exports = function copyStatic(params, callback) {
     function _done (err) {
       let cmd = 'copy'
       if (err) {
-        print({cmd, err, start, update}, callback)
+        print({ cmd, err, start, update }, callback)
       }
       else {
-        print({cmd, start, done, update}, callback)
+        print({ cmd, start, done, update }, callback)
       }
     }
-    getBasePaths('static', function gotBasePaths(err, paths) {
+    getBasePaths('static', function gotBasePaths (err, paths) {
       if (err) _done(err)
       else {
-        series(paths.map(dest=> {
-          return function copier(callback) {
+        series(paths.map(dest => {
+          return function copier (callback) {
             cp(static, path.join(dest, 'shared', 'static.json'), callback)
           }
         }), _done)
