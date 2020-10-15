@@ -121,6 +121,31 @@ function reset (callback) {
   })
 }
 
+// As of late 2020, this test passes GHCI in both windows-latest and windows-2016
+// This is strange, bc windows-2016 should be running a pre-Windows-symlink build (10.0.14393 Build 3930)
+// See: https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+test(`shared() uses symlinks in sandbox mode`, t => {
+  t.plan(1)
+  reset(function (err) {
+    if (err) t.fail(err)
+    else {
+      cp('_optional', 'src', { overwrite: true }, function done (err) {
+        if (err) t.fail(err)
+        else {
+          hydrate.shared({ sandbox: true }, function done (err) {
+            if (err) t.fail(err)
+            else {
+              console.log(`noop log to help reset tap-spec lol`)
+              let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
+              t.ok(stat, 'shared directory is a symlink')
+            }
+          })
+        }
+      })
+    }
+  })
+})
+
 test(`shared() copies src/shared and src/views to all (@views not specified)`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length)
   reset(function (err) {
@@ -129,7 +154,7 @@ test(`shared() copies src/shared and src/views to all (@views not specified)`, t
       cp('_optional', 'src', { overwrite: true }, function done (err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared({}, function done (err) {
+          hydrate.shared({ sandbox: true }, function done (err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -164,7 +189,7 @@ test(`shared() src/views to only @views`, t => {
           cp(path.join('src', '.arc-with-views'), path.join('.', '.arc'), { overwrite: true }, function done (err) {
             if (err) t.fail(err)
             else {
-              hydrate.shared({}, function done (err) {
+              hydrate.shared({ sandbox: true }, function done (err) {
                 if (err) t.fail(err)
                 else {
                   console.log(`noop log to help reset tap-spec lol`)
@@ -196,7 +221,7 @@ test(`shared() copies .arc file and static.json (Arc <5)`, t => {
       cp('_optional', 'src', { overwrite: true }, function done (err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared({}, function done (err) {
+          hydrate.shared({ sandbox: true }, function done (err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -224,7 +249,7 @@ test(`shared() copies static.json but not .arc (Arc v6+)`, t => {
       cp('_optional', 'src', { overwrite: true }, function done (err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared({}, function done (err) {
+          hydrate.shared({ sandbox: true }, function done (err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -257,7 +282,7 @@ test(`shared() copies static.json with @static folder configured`, t => {
       // Move public/ to foo/
       renameSync(path.join(process.cwd(), 'public'), path.join(process.cwd(), 'foo'))
       t.ok(exists(path.join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
-      hydrate.shared({}, function done (err) {
+      hydrate.shared({ sandbox: true }, function done (err) {
         if (err) t.fail(err)
         else {
           console.log(`noop log to help reset tap-spec lol`)
@@ -293,7 +318,7 @@ test(`shared() should remove files in functions that do not exist in src/shared 
       cp('_optional', 'src', { overwrite: true }, function done (err) {
         if (err) t.fail(err)
         else {
-          hydrate.shared({}, function done (err) {
+          hydrate.shared({ sandbox: true }, function done (err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -312,59 +337,7 @@ test(`shared() should remove files in functions that do not exist in src/shared 
   })
 })
 
-test(`shared() never uses symlinks by default`, t => {
-  t.plan(1)
-  reset(function (err) {
-    if (err) t.fail(err)
-    else {
-      cp('_optional', 'src', { overwrite: true }, function done (err) {
-        if (err) t.fail(err)
-        else {
-          hydrate.shared({}, function done (err) {
-            if (err) t.fail(err)
-            else {
-              console.log(`noop log to help reset tap-spec lol`)
-              let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
-              t.notOk(stat, 'shared directory was copied, and is not a symlink')
-            }
-          })
-        }
-      })
-    }
-  })
-})
-
-test(`shared() maybe uses symlinks in sandbox mode`, t => {
-  t.plan(1)
-  reset(function (err) {
-    if (err) t.fail(err)
-    else {
-      cp('_optional', 'src', { overwrite: true }, function done (err) {
-        if (err) t.fail(err)
-        else {
-          let isWin = process.platform === 'win32'
-          hydrate.shared({ sandbox: true }, function done (err) {
-            if (err) t.fail(err)
-            else {
-              console.log(`noop log to help reset tap-spec lol`)
-              let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
-              // TODO ↓ remove me! ↓
-              console.log(`stat:`, stat, process.env.CI_OS)
-              if (isWin) {
-                t.notOk(stat, 'shared directory was copied, and is not a symlink')
-              }
-              else {
-                t.ok(stat, 'shared directory is a symlink')
-              }
-            }
-          })
-        }
-      })
-    }
-  })
-})
-
-test(`install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t => {
+test(`install with symlink hydrates all Functions', src/shared and src/views dependencies`, t => {
   let count =
     pythonDependencies.length +
     rubyDependencies().length +
@@ -382,7 +355,7 @@ test(`install(undefined) hydrates all Functions', src/shared and src/views depen
       cp('_optional', 'src', { overwrite: true }, function done (err) {
         if (err) t.fail(err)
         else {
-          hydrate.install(undefined, function done (err) {
+          hydrate.install({ sandbox: true }, function done (err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -436,7 +409,7 @@ test(`install (specific path / single path) hydrates only Functions found in the
         if (err) t.fail(err)
         else {
           let basepath = nodeFunctions[0]
-          hydrate.install({ basepath }, function done (err) {
+          hydrate.install({ basepath, sandbox: true }, function done (err) {
             if (err) t.fail(err)
             else {
               console.log(`noop log to help reset tap-spec lol`)
@@ -471,7 +444,7 @@ test(`install() should not recurse into Functions dependencies and hydrate those
         dependencies: { 'tiny-json-http': '*' }
       }), 'utf-8')
       let basepath = nodeFunctions[0]
-      hydrate.install({ basepath }, function done (err) {
+      hydrate.install({ basepath, sandbox: true }, function done (err) {
         if (err) t.fail(err)
         else {
           console.log(`noop log to help reset tap-spec lol`)
@@ -490,7 +463,7 @@ test(`update() bumps installed dependencies to newer versions`, t => {
     else {
       // TODO: pip requires manual locking (via two requirements.txt files) so
       // we dont test update w/ python
-      hydrate.update(undefined, function done (err) {
+      hydrate.update({ sandbox: true }, function done (err) {
         if (err) t.fail(err)
         else {
           console.log(`noop log to help reset tap-spec lol`)
@@ -521,7 +494,7 @@ test('Corrupt package-lock.json fails hydrate.install', t => {
       let corruptPackage = 'ohayo gozaimasu!'
       writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
       let basepath = nodeFunctions[0]
-      hydrate.install({ basepath }, function done (err) {
+      hydrate.install({ basepath, sandbox: true }, function done (err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
@@ -556,7 +529,7 @@ test('Corrupt Gemfile fails hydrate.install', t => {
       unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
       writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
       let basepath = rubyFunctions[0]
-      hydrate.install({ basepath }, function done (err) {
+      hydrate.install({ basepath, sandbox: true }, function done (err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
@@ -574,7 +547,7 @@ test('Corrupt Gemfile fails hydrate.update', t => {
       unlinkSync(path.join(rubyFunctions[0], 'Gemfile.lock'))
       writeFileSync(path.join(rubyFunctions[0], 'Gemfile'), corruptPackage)
       let basepath = rubyFunctions[0]
-      hydrate.update({ basepath }, function done (err) {
+      hydrate.update({ basepath, sandbox: true }, function done (err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')
@@ -591,7 +564,7 @@ test('Corrupt requirements.txt fails hydrate.install', t => {
       let corruptPackage = 'ohayo gozaimasu!'
       writeFileSync(path.join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
       let basepath = pythonFunctions[0]
-      hydrate.install({ basepath }, function done (err) {
+      hydrate.install({ basepath, sandbox: true }, function done (err) {
         console.log(`noop log to help reset tap-spec lol`)
         if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
         else t.fail('Hydration did not fail')

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
     "test:unit": "cross-env tape 'test/unit/*-test.js' | tap-spec",
-    "test:integration": "cross-env tape test/integration/integration-tests.js | tap-spec",
+    "test:integration": "cross-env tape 'test/integration/**/*-tests.js' | tap-spec",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:unit",
     "lint": "eslint . --fix",
     "rc": "npm version prerelease --preid RC"
