@@ -45,7 +45,7 @@ module.exports = function copyShared (params, callback) {
             rmrf(finalDest, { glob: false }, function (err) {
               if (err) callback(err)
               else {
-                cp(shared, finalDest, { sandbox: params.sandbox }, callback)
+                cp(shared, finalDest, params, callback)
               }
             })
           }

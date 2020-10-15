@@ -1,17 +1,16 @@
 let cp = require('cpr')
-let fs = require('fs')
-let path = require('path')
+let { existsSync: exists, mkdirSync: mkdir } = require('fs')
+let { dirname } = require('path')
 let { sync: rm } = require('rimraf')
-let mkdirp = require('mkdirp')
 let { sync: symlinkOrCopy } = require('symlink-or-copy')
 
 module.exports = function copy (source, destination, params, callback) {
   if (params.sandbox) {
     try {
-      if (fs.existsSync(destination)) {
+      if (exists(destination)) {
         rm(destination)
       }
-      mkdirp.sync(path.dirname(destination))
+      mkdir(dirname(destination), { recursive: true })
       symlinkOrCopy(source, destination)
     }
     catch (err) {
