@@ -85,7 +85,7 @@ module.exports = function print (params, callback) {
       result.raw.stderr = stripAnsi(result.term.stderr)
     }
 
-    if (err) callback(Error('hydration_error'), result)
+    if (err) callback(err, result)
     else callback(null, result)
   }
 }
