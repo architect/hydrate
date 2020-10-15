@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         node-version: [ 10.x, 12.x, 14.x ]
-        os: [ windows-latest, ubuntu-latest, macOS-latest ]
+        os: [ windows-2016, ubuntu-latest, macOS-latest ] # windows-latest
 
     # Go
     steps:
@@ -54,6 +54,7 @@ jobs:
         echo "Git ref:    ${{ github.ref }}"
         echo "GH actor:   ${{ github.actor }}"
         echo "SHA:        ${{ github.sha }}"
+        echo "OS ver:     ${{ matrix.os }}"
         VER=`node --version`; echo "Node ver:   $VER"
         VER=`npm --version`; echo "npm ver:    $VER"
         VER=`python --version`; echo "Python ver: $VER"
@@ -68,6 +69,7 @@ jobs:
       run: npm test
       env:
         CI: true
+        CI_OS: ${{ matrix.os }}
 
     - name: Notify
       uses: homoluctus/slatify@master

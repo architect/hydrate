@@ -312,6 +312,28 @@ test(`shared() should remove files in functions that do not exist in src/shared 
   })
 })
 
+test(`shared() never uses symlinks by default`, t => {
+  t.plan(1)
+  reset(function (err) {
+    if (err) t.fail(err)
+    else {
+      cp('_optional', 'src', { overwrite: true }, function done (err) {
+        if (err) t.fail(err)
+        else {
+          hydrate.shared({}, function done (err) {
+            if (err) t.fail(err)
+            else {
+              console.log(`noop log to help reset tap-spec lol`)
+              let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
+              t.notOk(stat, 'shared directory was copied, and is not a symlink')
+            }
+          })
+        }
+      })
+    }
+  })
+})
+
 test(`shared() maybe uses symlinks in sandbox mode`, t => {
   t.plan(1)
   reset(function (err) {
@@ -326,6 +348,8 @@ test(`shared() maybe uses symlinks in sandbox mode`, t => {
             else {
               console.log(`noop log to help reset tap-spec lol`)
               let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
+              // TODO ↓ remove me! ↓
+              console.log(`stat:`, stat, process.env.CI_OS)
               if (isWin) {
                 t.notOk(stat, 'shared directory was copied, and is not a symlink')
               }
