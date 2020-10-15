@@ -312,51 +312,33 @@ test(`shared() should remove files in functions that do not exist in src/shared 
   })
 })
 
-if (process.platform !== 'win32') {
-  test(`shared() creates copies by default`, t => {
-    t.plan(1)
-    reset(function (err) {
-      if (err) t.fail(err)
-      else {
-        cp('_optional', 'src', { overwrite: true }, function done (err) {
-          if (err) t.fail(err)
-          else {
-            hydrate.shared({}, function done (err) {
-              if (err) t.fail(err)
-              else {
-                console.log(`noop log to help reset tap-spec lol`)
-                t.ok(!lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink(),
-                  'shared directory is a copy')
+test(`shared() maybe uses symlinks in sandbox mode`, t => {
+  t.plan(1)
+  reset(function (err) {
+    if (err) t.fail(err)
+    else {
+      cp('_optional', 'src', { overwrite: true }, function done (err) {
+        if (err) t.fail(err)
+        else {
+          let isWin = process.platform === 'win32'
+          hydrate.shared({ sandbox: true }, function done (err) {
+            if (err) t.fail(err)
+            else {
+              console.log(`noop log to help reset tap-spec lol`)
+              let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
+              if (isWin) {
+                t.notOk(stat, 'shared directory was copied, and is not a symlink')
               }
-            })
-          }
-        })
-      }
-    })
-  })
-
-  test(`shared() creates symlinks in sandbox mode`, t => {
-    t.plan(1)
-    reset(function (err) {
-      if (err) t.fail(err)
-      else {
-        cp('_optional', 'src', { overwrite: true }, function done (err) {
-          if (err) t.fail(err)
-          else {
-            hydrate.shared({ sandbox: true }, function done (err) {
-              if (err) t.fail(err)
               else {
-                console.log(`noop log to help reset tap-spec lol`)
-                t.ok(lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink(),
-                  'shared directory is a symlink')
+                t.ok(stat, 'shared directory is a symlink')
               }
-            })
-          }
-        })
-      }
-    })
+            }
+          })
+        }
+      })
+    }
   })
-}
+})
 
 test(`install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t => {
   let count =
