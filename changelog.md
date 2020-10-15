@@ -6,7 +6,7 @@
 
 ### Added
 
-- Added a `sandbox` flag, which causes files and directories to be symlinked instead of copied (whenever the filesystem supports it). This should significantly improve performance in local workflows, such as Sandbox. Thanks @joliss!
+- Added a `symlink` flag, which causes files and directories to be symlinked instead of copied (whenever the filesystem supports it). This should significantly improve performance in local workflows, such as Sandbox. Thanks @joliss!
 
 ---
 

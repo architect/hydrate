@@ -33,15 +33,15 @@ let {
 } = require('./_shared')
 let hydrate = require('../../')
 process.env.CI = true // Suppresses tape issues with progress indicator
-let sandbox = true
+let symlink = true
 
 // As of late 2020, this test passes GHCI in both windows-latest and windows-2016
 // This is strange, bc windows-2016 should be running a pre-Windows-symlink build (10.0.14393 Build 3930)
 // See: https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-test(`[Sandbox (symlinking)] shared() never uses symlinks by default`, t => {
+test(`[Symlinking] shared() never uses symlinks by default`, t => {
   t.plan(2)
   resetAndCopy(t, function () {
-    hydrate.shared({ sandbox }, function (err) {
+    hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -55,10 +55,10 @@ test(`[Sandbox (symlinking)] shared() never uses symlinks by default`, t => {
   })
 })
 
-test(`[Sandbox (symlinking)] shared() copies src/shared and src/views to all (@views not specified)`, t => {
+test(`[Symlinking] shared() copies src/shared and src/views to all (@views not specified)`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length)
   resetAndCopy(t, function () {
-    hydrate.shared({ sandbox }, function (err) {
+    hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -79,13 +79,13 @@ test(`[Sandbox (symlinking)] shared() copies src/shared and src/views to all (@v
   })
 })
 
-test(`[Sandbox (symlinking)] shared() src/views to only @views`, t => {
+test(`[Symlinking] shared() src/views to only @views`, t => {
   t.plan(viewsArtifacts.length)
   resetAndCopy(t, function () {
     cp(join('src', '.arc-with-views'), join('.', '.arc'), { overwrite: true }, function (err) {
       if (err) t.fail(err)
       else {
-        hydrate.shared({ sandbox }, function (err) {
+        hydrate.shared({ symlink }, function (err) {
           if (err) t.fail(err)
           else {
             // console.log(`noop log to help reset tap-spec lol`)
@@ -105,11 +105,11 @@ test(`[Sandbox (symlinking)] shared() src/views to only @views`, t => {
   })
 })
 
-test(`[Sandbox (symlinking)] shared() copies .arc file and static.json (Arc <5)`, t => {
+test(`[Symlinking] shared() copies .arc file and static.json (Arc <5)`, t => {
   t.plan(arcFileArtifacts.length + staticArtifacts.length)
   process.env.DEPRECATED = true
   resetAndCopy(t, function () {
-    hydrate.shared({ sandbox }, function (err) {
+    hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -126,10 +126,10 @@ test(`[Sandbox (symlinking)] shared() copies .arc file and static.json (Arc <5)`
   })
 })
 
-test(`[Sandbox (symlinking)] shared() copies static.json but not .arc (Arc v6+)`, t => {
+test(`[Symlinking] shared() copies static.json but not .arc (Arc v6+)`, t => {
   t.plan(arcFileArtifacts.length + staticArtifacts.length)
   resetAndCopy(t, function () {
-    hydrate.shared({ sandbox }, function (err) {
+    hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -145,7 +145,7 @@ test(`[Sandbox (symlinking)] shared() copies static.json but not .arc (Arc v6+)`
   })
 })
 
-test(`[Sandbox (symlinking)] shared() copies static.json with @static folder configured`, t => {
+test(`[Symlinking] shared() copies static.json with @static folder configured`, t => {
   t.plan(staticArtifacts.length + 2)
   resetAndCopy(t, function () {
     // Rewrite .arc to include @static folder directive
@@ -157,7 +157,7 @@ test(`[Sandbox (symlinking)] shared() copies static.json with @static folder con
     // Move public/ to foo/
     renameSync(join(process.cwd(), 'public'), join(process.cwd(), 'foo'))
     t.ok(existsSync(join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
-    hydrate.shared({ sandbox }, function (err) {
+    hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -170,7 +170,7 @@ test(`[Sandbox (symlinking)] shared() copies static.json with @static folder con
   })
 })
 
-test(`[Sandbox (symlinking)] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
+test(`[Symlinking] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length)
   resetAndCopy(t, function () {
     let sharedStragglers = sharedArtifacts.map((p) => {
@@ -187,7 +187,7 @@ test(`[Sandbox (symlinking)] shared() should remove files in functions that do n
       writeFileSync(file, '{surprise:true}')
       return file
     })
-    hydrate.shared({ sandbox }, function (err) {
+    hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -203,7 +203,7 @@ test(`[Sandbox (symlinking)] shared() should remove files in functions that do n
   })
 })
 
-test(`[Sandbox (symlinking)] install with symlink hydrates all Functions', src/shared and src/views dependencies`, t => {
+test(`[Symlinking] install with symlink hydrates all Functions', src/shared and src/views dependencies`, t => {
   let count =
     pythonDependencies.length +
     rubyDependencies().length +
@@ -216,7 +216,7 @@ test(`[Sandbox (symlinking)] install with symlink hydrates all Functions', src/s
     nodeViewsDependencies.length + 2
   t.plan(count)
   resetAndCopy(t, function () {
-    hydrate.install({ sandbox }, function (err) {
+    hydrate.install({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -258,11 +258,11 @@ test(`[Sandbox (symlinking)] install with symlink hydrates all Functions', src/s
   })
 })
 
-test(`[Sandbox (symlinking)] install (specific path / single path) hydrates only Functions found in the specified subpath`, t => {
+test(`[Symlinking] install (specific path / single path) hydrates only Functions found in the specified subpath`, t => {
   t.plan(7)
   resetAndCopy(t, function () {
     let basepath = nodeFunctions[0]
-    hydrate.install({ basepath, sandbox }, function (err) {
+    hydrate.install({ basepath, symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -282,7 +282,7 @@ test(`[Sandbox (symlinking)] install (specific path / single path) hydrates only
   })
 })
 
-test(`[Sandbox (symlinking)] install() should not recurse into Functions dependencies and hydrate those`, t => {
+test(`[Symlinking] install() should not recurse into Functions dependencies and hydrate those`, t => {
   t.plan(1)
   reset(t, function () {
     let subdep = join(nodeFunctions[0], 'node_modules', 'poop')
@@ -292,7 +292,7 @@ test(`[Sandbox (symlinking)] install() should not recurse into Functions depende
       dependencies: { 'tiny-json-http': '*' }
     }), 'utf-8')
     let basepath = nodeFunctions[0]
-    hydrate.install({ basepath, sandbox }, function (err) {
+    hydrate.install({ basepath, symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
@@ -303,12 +303,12 @@ test(`[Sandbox (symlinking)] install() should not recurse into Functions depende
   })
 })
 
-test(`[Sandbox (symlinking)] update() bumps installed dependencies to newer versions`, t => {
+test(`[Symlinking] update() bumps installed dependencies to newer versions`, t => {
   t.plan(3)
   reset(t, function () {
     // TODO: pip requires manual locking (via two requirements.txt files) so
     // we dont test update w/ python
-    hydrate.update({ sandbox }, function (err) {
+    hydrate.update({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)

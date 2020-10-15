@@ -19,19 +19,19 @@ module.exports = function hydrate (params = { install: true }, callback) {
       }
     })
   }
-  let { verbose = false, basepath = '', sandbox = false } = params
+  let { verbose = false, basepath = '', symlink = false } = params
   let tasks = []
   if (params.install)
     tasks.push(function install (callback) {
-      module.exports.install({ verbose, basepath, sandbox }, callback) // `install` includes `shared`
+      module.exports.install({ verbose, basepath, symlink }, callback) // `install` includes `shared`
     })
   else if (params.update)
     tasks.push(function update (callback) {
-      module.exports.update({ verbose, basepath, sandbox }, callback) // `update` includes `shared`
+      module.exports.update({ verbose, basepath, symlink }, callback) // `update` includes `shared`
     })
   else
     tasks.push(function shared (callback) {
-      module.exports.shared({ sandbox }, callback)
+      module.exports.shared({ symlink }, callback)
     })
 
   series(tasks, function done (err) {

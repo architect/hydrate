@@ -5,7 +5,7 @@ let { sync: rm } = require('rimraf')
 let { sync: symlinkOrCopy } = require('symlink-or-copy')
 
 module.exports = function copy (source, destination, params, callback) {
-  if (params.sandbox) {
+  if (params.symlink) {
     try {
       if (exists(destination)) {
         rm(destination)
