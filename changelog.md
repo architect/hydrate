@@ -1,10 +1,12 @@
 # Architect Hydrate changelog
 
-### Changed
+---
 
-- Added a `sandbox` flag, which causes files and directories to be symlinked
-  instead of copied, whenever the filesystem supports it. This improves
-  performance.
+## [1.6.0] 2020-10-15
+
+### Added
+
+- Added a `sandbox` flag, which causes files and directories to be symlinked instead of copied (whenever the filesystem supports it). This should significantly improve performance in local workflows, such as Sandbox. Thanks @joliss!
 
 ---
 
