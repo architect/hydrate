@@ -39,14 +39,17 @@ let sandbox = true
 // This is strange, bc windows-2016 should be running a pre-Windows-symlink build (10.0.14393 Build 3930)
 // See: https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
 test(`[Sandbox (symlinking)] shared() never uses symlinks by default`, t => {
-  t.plan(1)
+  t.plan(2)
   resetAndCopy(t, function () {
     hydrate.shared({ sandbox }, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
-        let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
+        let path = 'src/http/get-index/node_modules/@architect/shared'
+        let file = path + '/shared.md'
+        let stat = lstatSync(path).isSymbolicLink()
         t.ok(stat, 'shared directory is a symlink')
+        t.equal(readFileSync(file).toString(), 'It me!', 'Symlinked file is readable')
       }
     })
   })

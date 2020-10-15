@@ -35,14 +35,17 @@ let hydrate = require('../../')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
 test(`[Default (file copying)] shared() never uses symlinks by default`, t => {
-  t.plan(1)
+  t.plan(2)
   resetAndCopy(t, function () {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
         // console.log(`noop log to help reset tap-spec lol`)
-        let stat = lstatSync('src/http/get-index/node_modules/@architect/shared').isSymbolicLink()
+        let path = 'src/http/get-index/node_modules/@architect/shared'
+        let file = path + '/shared.md'
+        let stat = lstatSync(path).isSymbolicLink()
         t.notOk(stat, 'shared directory was copied, and is not a symlink')
+        t.equal(readFileSync(file).toString(), 'It me!', 'Copied file is readable')
       }
     })
   })
