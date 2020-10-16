@@ -314,7 +314,9 @@ test(`[Symlinking] update() bumps installed dependencies to newer versions`, t =
         // console.log(`noop log to help reset tap-spec lol`)
         // eslint-disable-next-line
         let pkgLock = require(join(mockTmp, nodeFunctions[0], 'package-lock.json'))
-        let newVersion = pkgLock.dependencies['tiny-json-http'].version
+        let newVersion = pkgLock.lockfileVersion === 2
+          ? pkgLock.packages['node_modules/tiny-json-http'].version
+          : pkgLock.dependencies['tiny-json-http'].version
         t.notEqual(newVersion, '7.0.2', `get-index tiny-json-http bumped to ${newVersion} from 7.0.2`)
 
         let yarnLock = readFileSync(join(mockTmp, nodeFunctions[2], 'yarn.lock'), 'utf-8')

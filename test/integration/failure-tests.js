@@ -3,6 +3,7 @@ let { join } = require('path')
 let { unlinkSync, writeFileSync } = require('fs')
 let { reset } = require('./_shared')
 let hydrate = require('../../')
+let { execSync } = require('child_process')
 
 let {
   pythonFunctions,
@@ -10,10 +11,12 @@ let {
   nodeFunctions,
 } = require('./_shared')
 
+let npmVer = execSync('npm --version').toString()
+
 test('Corrupt package-lock.json fails hydrate.install', t => {
   t.plan(1)
   reset(t, function () {
-    // Make missing the package-lock file
+    // Make a funky package-lock file
     let corruptPackage = 'ohayo gozaimasu!'
     writeFileSync(join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
     let basepath = nodeFunctions[0]
@@ -25,16 +28,23 @@ test('Corrupt package-lock.json fails hydrate.install', t => {
   })
 })
 
-test('Corrupt package-lock.json fails hydrate.update', t => {
+test('Corrupt package-lock.json may or amy not fail hydrate.update (depending on npm version)', t => {
   t.plan(1)
   reset(t, function () {
-    // Make missing the package-lock file
+    // Make a funky package-lock file
     let corruptPackage = 'ohayo gozaimasu!'
     writeFileSync(join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
-    hydrate.update(nodeFunctions[0], function done (err) {
+    let basepath = nodeFunctions[0]
+    hydrate.update({ basepath }, function done (err) {
       console.log(`noop log to help reset tap-spec lol`)
-      if (err) t.pass(`Successfully errored: ${err}`)
-      else t.fail('Hydration did not fail')
+      if (npmVer.startsWith('7')) {
+        if (err) t.fail(err)
+        else t.pass('Hydration did not fail in npm 7.x')
+      }
+      else {
+        if (err) t.pass(`Successfully errored: ${err}`)
+        else t.fail('Hydration did not fail')
+      }
     })
   })
 })
