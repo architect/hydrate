@@ -175,7 +175,8 @@ module.exports = function update (params = {}, callback) {
     if (err) callback(err, result)
     else {
       if (deps && deps > 0) {
-        let done = update.done('Success!', 'Finished updating dependencies')
+        let done = update.done('Successfully updated dependencies')
+
         result.push({
           raw: { stdout: stripAnsi(done) },
           term: { stdout: done }
