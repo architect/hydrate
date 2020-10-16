@@ -85,7 +85,9 @@ module.exports = function print (params, callback) {
       result.raw.stderr = stripAnsi(result.term.stderr)
     }
 
-    if (err) callback(err, result)
+    // Errors ere (presumably) already been printed by the logger by this point
+    // Passing along a keyed error prevents double-printing errors
+    if (err) callback(Error('hydration_error'), result)
     else callback(null, result)
   }
 }
