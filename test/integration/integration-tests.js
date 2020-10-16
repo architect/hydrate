@@ -6,6 +6,7 @@ let test = require('tape')
 let glob = require('glob')
 let hydrate = require('../../')
 process.env.CI = true // Suppresses tape issues with progress indicator
+let { exec } = require('child_process')
 
 let mockSource    = path.join(__dirname, 'mock')
 let mockTmp       = path.join(__dirname, 'tmp')
@@ -120,6 +121,18 @@ function reset (callback) {
     }
   })
 }
+
+let npmVer
+test('Get npm version', t => {
+  t.plan(1)
+  exec('npm --version', function (err, ver) {
+    if (err) t.fail(err)
+    else {
+      npmVer = ver
+      t.pass(`Got npm version: ${npmVer}`)
+    }
+  })
+})
 
 test(`shared() copies src/shared and src/views to all (@views not specified)`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length)
@@ -444,7 +457,9 @@ test(`update() bumps installed dependencies to newer versions`, t => {
           console.log(`noop log to help reset tap-spec lol`)
           // eslint-disable-next-line
           let pkgLock = require(path.join(mockTmp, nodeFunctions[0], 'package-lock.json'))
-          let newVersion = pkgLock.dependencies['tiny-json-http'].version
+          let newVersion = pkgLock.lockfileVersion === 2
+            ? pkgLock.packages['node_modules/tiny-json-http'].version
+            : pkgLock.dependencies['tiny-json-http'].version
           t.notEqual(newVersion, '7.0.2', `get-index tiny-json-http bumped to ${newVersion} from 7.0.2`)
 
           let yarnLock = readFileSync(path.join(mockTmp, nodeFunctions[2], 'yarn.lock'), 'utf-8')
@@ -465,7 +480,7 @@ test('Corrupt package-lock.json fails hydrate.install', t => {
   reset(function (err) {
     if (err) t.fail(err)
     else {
-      // Make missing the package-lock file
+      // Make a funky package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
       let basepath = nodeFunctions[0]
@@ -478,18 +493,26 @@ test('Corrupt package-lock.json fails hydrate.install', t => {
   })
 })
 
-test('Corrupt package-lock.json fails hydrate.update', t => {
+test('Corrupt package-lock.json may or amy not fail hydrate.update (depending on npm ersion)', t => {
   t.plan(1)
   reset(function (err) {
     if (err) t.fail(err)
     else {
-      // Make missing the package-lock file
+      // Make a funky package-lock file
       let corruptPackage = 'ohayo gozaimasu!'
       writeFileSync(path.join(nodeFunctions[0], 'package-lock.json'), corruptPackage)
-      hydrate.update(nodeFunctions[0], function done (err) {
+      console.log(readFileSync(path.join(nodeFunctions[0], 'package-lock.json')).toString())
+      let basepath = nodeFunctions[0]
+      hydrate.update({ basepath }, function done (err) {
         console.log(`noop log to help reset tap-spec lol`)
-        if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
-        else t.fail('Hydration did not fail')
+        if (npmVer.startsWith('7')) {
+          if (err) t.fail(err)
+          else t.pass('Hydration did not fail in npm 7.x')
+        }
+        else {
+          if (err) t.ok(true, `Successfully exited 1 with ${err}...`)
+          else t.fail('Hydration did not fail')
+        }
       })
     }
   })

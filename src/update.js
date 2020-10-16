@@ -125,7 +125,7 @@ module.exports = function update (params = {}, callback) {
 
         child.exec(cmd, opts,
           function (err, stdout, stderr) {
-          // If zero output, acknowledge *something* happened
+            // If zero output, acknowledge *something* happened
             if (!err && !stdout && !stderr) {
               update.cancel()
               stdout = `Done in ${(Date.now() - now) / 1000}s`
