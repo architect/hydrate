@@ -58,7 +58,7 @@ module.exports = function copyViews (params, callback) {
               let finalDest = path.join(dest, 'views')
               rmrf(finalDest, { glob: false }, function (err) {
                 if (err) callback(err)
-                else cp(views, finalDest, callback)
+                else cp(views, finalDest, params, callback)
               })
             }
             else {

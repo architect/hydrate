@@ -1,12 +1,13 @@
 let glob = require('glob')
 let series = require('run-series')
 let fs = require('fs')
-let path = require('path')
+let { dirname, join, sep } = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
 let stripAnsi = require('strip-ansi')
 let { inventory, updater } = require('@architect/utils')
+let rm = require('rimraf')
 
 /**
  * Installs deps into:
@@ -68,7 +69,7 @@ module.exports = function install (params = {}, callback) {
   files = files.map(file => {
     // Normalize to relative paths
     file = file.replace(process.cwd(), '')
-    return file[0] === path.sep ? file.substr(1) : file // jiccya
+    return file[0] === sep ? file.substr(1) : file // jiccya
   })
 
   /**
@@ -78,17 +79,17 @@ module.exports = function install (params = {}, callback) {
   files = files.filter(file => {
     // Allow root project hydration of process.cwd() if passed as basepath
     let hydrateBasepath = basepath === process.cwd()
-    if (hydrateBasepath && path.dirname(file) === '.')
+    if (hydrateBasepath && dirname(file) === '.')
       return true
 
     // Allow src/shared and src/views
-    let isShared = path.join('src', 'shared')
-    let isViews = path.join('src', 'views')
+    let isShared = join('src', 'shared')
+    let isViews = join('src', 'views')
     if (file.startsWith(isShared) || file.startsWith(isViews))
       return true
 
     // Hydrate functions, of course
-    return inv.localPaths.some(p => p === path.dirname(file))
+    return inv.localPaths.some(p => p === dirname(file))
   })
 
   /**
@@ -102,7 +103,7 @@ module.exports = function install (params = {}, callback) {
   if (deps && deps > 0)
     init += update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
   if (!deps && verbose)
-    init += update.status(`No dependencies found in: ${p}${path.sep}**`)
+    init += update.status(`No dependencies found in: ${p}${sep}**`)
   if (init) {
     init = {
       raw: { stdout: stripAnsi(init) },
@@ -111,7 +112,7 @@ module.exports = function install (params = {}, callback) {
   }
 
   let ops = files.map(file => {
-    let cwd = path.dirname(file)
+    let cwd = dirname(file)
     let options = { cwd, env, shell, timeout }
     return function hydration (callback) {
       let start
@@ -135,28 +136,44 @@ module.exports = function install (params = {}, callback) {
           })
       }
 
-      // TODO: I think we should consider what minimum version of node/npm this
-      // module needs to use as the npm commands below have different behaviour
-      // depending on npm version - and enshrine those in the package.json
-      let exists = file => fs.existsSync(path.join(cwd, file))
-      if (file.includes('package.json')) {
-        if (exists('package-lock.json')) {
-          exec(`npm ci`, options, callback)
+      let isJs = file.endsWith('package.json')
+      let isPy = file.endsWith('requirements.txt')
+      let isRb = file.endsWith('Gemfile')
+
+      series([
+        function clear (callback) {
+          // Remove existing package dir first to prevent side effects from symlinking
+          let dir
+          if (isJs) dir = join(cwd, 'node_modules')
+          if (isPy) dir = join(cwd, 'vendor')
+          if (isRb) dir = join(cwd, 'vendor', 'bundle')
+          rm(dir, callback)
+        },
+        function install (callback) {
+          // TODO: I think we should consider what minimum version of node/npm this
+          // module needs to use as the npm commands below have different behaviour
+          // depending on npm version - and enshrine those in the package.json
+          let exists = file => fs.existsSync(join(cwd, file))
+          if (isJs) {
+            if (exists('package-lock.json')) {
+              exec(`npm ci`, options, callback)
+            }
+            else if (exists('yarn.lock')) {
+              exec(`yarn`, options, callback)
+            }
+            else {
+              exec(`npm i`, options, callback)
+            }
+          }
+          else if (isPy) {
+            exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
+          }
+          else if (isRb) {
+            exec(`bundle install --path vendor/bundle`, options, callback)
+          }
+          else callback()
         }
-        else if (exists('yarn.lock')) {
-          exec(`yarn`, options, callback)
-        }
-        else {
-          exec(`npm i`, options, callback)
-        }
-      }
-      else if (file.includes('requirements.txt')) {
-        exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
-      }
-      else if (file.includes('Gemfile')) {
-        exec(`bundle install --path vendor/bundle`, options, callback)
-      }
-      else callback()
+      ], callback)
     }
   })
 
@@ -174,7 +191,7 @@ module.exports = function install (params = {}, callback) {
     if (err) callback(err, result)
     else {
       if (deps && deps > 0) {
-        let done = update.done('Success!', 'Finished hydrating dependencies')
+        let done = update.done('Successfully hydrated dependencies')
         result.push({
           raw: { stdout: stripAnsi(done) },
           term: { stdout: done }

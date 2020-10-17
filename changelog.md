@@ -2,6 +2,14 @@
 
 ---
 
+## [1.6.0] 2020-10-15
+
+### Added
+
+- Added a `symlink` flag, which causes files and directories to be symlinked instead of copied (whenever the filesystem supports it). This should significantly improve performance in local workflows, such as Sandbox. Thanks @joliss!
+
+---
+
 ## [1.5.1] 2020-09-30
 
 ### Added

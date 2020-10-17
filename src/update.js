@@ -135,7 +135,11 @@ module.exports = function update (params = {}, callback) {
           })
       }
 
-      if (file.includes('package.json')) {
+      let isJs = file.endsWith('package.json')
+      let isPy = file.endsWith('requirements.txt')
+      let isRb = file.endsWith('Gemfile')
+
+      if (isJs) {
         let exists = file => fs.existsSync(path.join(cwd, file))
         if (exists('yarn.lock')) {
           exec(`yarn upgrade`, options, callback)
@@ -147,10 +151,10 @@ module.exports = function update (params = {}, callback) {
       // TODO: pip requires manual locking (via two requirements.txt files) so
       // we dont test update w/ python
       // it may not make sense to execute this at all
-      else if (file.includes('requirements.txt')) {
+      else if (isPy) {
         exec(`pip3 install -r requirements.txt -t ./vendor -U --upgrade-strategy eager`, options, callback)
       }
-      else if (file.includes('Gemfile')) {
+      else if (isRb) {
         exec(`bundle update`, options, callback)
       }
       else callback()
@@ -171,7 +175,8 @@ module.exports = function update (params = {}, callback) {
     if (err) callback(err, result)
     else {
       if (deps && deps > 0) {
-        let done = update.done('Success!', 'Finished updating dependencies')
+        let done = update.done('Successfully updated dependencies')
+
         result.push({
           raw: { stdout: stripAnsi(done) },
           term: { stdout: done }
