@@ -2,6 +2,14 @@
 
 ---
 
+## [1.6.1] 2020-10-19
+
+### Fixed
+
+- Fixed weird side effects that can sometimes occur when toggling between symlink enabled/disabled with `@aws shared false` in a function config
+
+---
+
 ## [1.6.0] 2020-10-15
 
 ### Added
