@@ -5,24 +5,23 @@ let { sync: rm } = require('rimraf')
 let { sync: symlinkOrCopy } = require('symlink-or-copy')
 
 module.exports = function copy (source, destination, params, callback) {
-  if (params.symlink) {
-    try {
-      if (exists(destination)) {
-        rm(destination)
-      }
-      mkdir(dirname(destination), { recursive: true })
+  let { symlink } = params
+  try {
+    // Toggling between symlink enabled/disabled can create weird side effects
+    // Always try to remove the destination if it exists
+    if (exists(destination)) {
+      rm(destination)
+    }
+    mkdir(dirname(destination), { recursive: true })
+    if (symlink) {
       symlinkOrCopy(source, destination)
+      callback()
     }
-    catch (err) {
-      callback(err)
-      return
+    else {
+      cp(source, destination, { overwrite: true }, callback)
     }
-    callback()
   }
-  else {
-    cp(source, destination, { overwrite: true }, function done (err) {
-      if (err) callback(err)
-      else callback()
-    })
+  catch (err) {
+    callback(err)
   }
 }
