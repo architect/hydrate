@@ -7,6 +7,9 @@ get     /memories
 post    /up/tents
 put     /on_your_boots
 delete  /badness-in-life
+/in-the-clouds
+  method head
+  src src/head/in-the-clouds
 
 @events
 just-being-in-nature
@@ -20,4 +23,10 @@ parks-to-visit
 @tables
 trails
   trail *String
-  insert Lambda
+  stream true
+
+rivers
+  river *String
+
+@streams
+rivers

@@ -44,7 +44,6 @@ test(`[Symlinking] shared() never uses symlinks by default`, t => {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         let path = 'src/http/get-index/node_modules/@architect/shared'
         let file = path + '/shared.md'
         let stat = lstatSync(path).isSymbolicLink()
@@ -61,7 +60,6 @@ test(`[Symlinking] shared() copies src/shared and src/views to all (@views not s
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         sharedArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found shared file in ${path}`)
@@ -88,7 +86,6 @@ test(`[Symlinking] shared() src/views to only @views`, t => {
         hydrate.shared({ symlink }, function (err) {
           if (err) t.fail(err)
           else {
-            // console.log(`noop log to help reset tap-spec lol`)
             // Check to see if files that are supposed to be there are actually there
             viewsArtifacts.forEach(path => {
               if (path.includes('get-index') || path.includes('post-up-tents')) {
@@ -112,7 +109,6 @@ test(`[Symlinking] shared() copies .arc file and static.json (Arc <5)`, t => {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         delete process.env.DEPRECATED
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
@@ -132,7 +128,6 @@ test(`[Symlinking] shared() copies static.json but not .arc (Arc v6+)`, t => {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
           t.notOk(existsSync(path), `Did not find .arc file in ${path}`)
@@ -160,7 +155,6 @@ test(`[Symlinking] shared() copies static.json with @static folder configured`, 
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
@@ -190,7 +184,6 @@ test(`[Symlinking] shared() should remove files in functions that do not exist i
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         sharedStragglers.forEach(path => {
           t.notOk(existsSync(path), `shared straggler file removed from ${path}`)
@@ -219,7 +212,6 @@ test(`[Symlinking] install with symlink hydrates all Functions', src/shared and 
     hydrate.install({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         pythonDependencies.forEach(p => {
           t.ok(existsSync(p), `python dependency exists at ${p}`)
         })
@@ -265,7 +257,6 @@ test(`[Symlinking] install (specific path / single path) hydrates only Functions
     hydrate.install({ basepath, symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         t.ok(existsSync(nodeDependencies[0]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[0]}`)
         t.notOk(existsSync(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
@@ -295,7 +286,6 @@ test(`[Symlinking] install() should not recurse into Functions dependencies and 
     hydrate.install({ basepath, symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         let submod = join(subdep, 'node_modules')
         t.notOk(existsSync(), `install did not recurse into node subdependencies at ${submod}`)
       }
@@ -311,7 +301,6 @@ test(`[Symlinking] update() bumps installed dependencies to newer versions`, t =
     hydrate.update({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // eslint-disable-next-line
         let pkgLock = require(join(mockTmp, nodeFunctions[0], 'package-lock.json'))
         let newVersion = pkgLock.lockfileVersion === 2

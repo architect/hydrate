@@ -1,11 +1,8 @@
 let cp = require('./copy')
-let rmrf = require('rimraf')
-let fs = require('fs')
-let path = require('path')
+let { existsSync } = require('fs')
+let { join, sep } = require('path')
 let series = require('run-series')
-let getBasePaths = require('./get-base-paths')
 let print = require('../_printer')
-let { inventory } = require('@architect/utils')
 
 /**
  * copies src/views
@@ -16,58 +13,44 @@ let { inventory } = require('@architect/utils')
  * nodejs*  | node_modules/@architect/views/
  * else     | vendor/views/
  */
-module.exports = function copyViews (params, callback) {
-  let { update, only } = params
-  let views = path.join(process.cwd(), 'src', 'views')
-  let hasViews = fs.existsSync(views)
+module.exports = function copyViews (params, paths, callback) {
+  let { update, only, inventory } = params
+  let { inventory: inv, get } = inventory
+  let views = join(process.cwd(), 'src', 'views')
+  let hasViews = existsSync(views)
   let go = !only || only === 'views'
 
-  if (hasViews && go) {
+  if (hasViews && inv.http && go) {
     // Kick off logging
-    let srcViews = `src${path.sep}views`
+    let srcViews = `src${sep}views`
     let done = `Hydrated app with ${srcViews}`
     let start = update.start(`Hydrating app with ${srcViews}`)
 
-    let inv
-    if (!inv)
-      inv = inventory()
-
-    function isView (dest) {
-      let viewsConfig = inv && inv.views
-      let viewsPaths = viewsConfig && viewsConfig.map(v => path.join('src', 'http', v, path.sep))
-      if (viewsPaths)
-        return viewsPaths.some(p => dest.startsWith(p))
-      else return dest.startsWith(path.join('src', 'http', 'get-'))
-    }
+    // First look for items listed in @views
+    let viewsPaths = inv.views && inv.views.map(view => get.http(view) && get.http(view).src)
+    // If nothing, look for `get` + `any` routes
+    if (!viewsPaths.length) viewsPaths = inv.http.map(route => {
+      let { arcStaticAssetProxy, name } = route
+      return !arcStaticAssetProxy && (name.startsWith('get') || name.startsWith('any'))
+    })
+    let isView = (dest) => viewsPaths.some(p => dest.startsWith(p))
 
     function _done (err) {
       let cmd = 'copy'
-      if (err) {
-        print({ cmd, err, start, update }, callback)
-      }
-      else {
-        print({ cmd, start, done, update }, callback)
-      }
+      if (err) print({ cmd, err, start, update }, callback)
+      else print({ cmd, start, done, update }, callback)
     }
-    getBasePaths('views', function gotBasePaths (err, paths) {
-      if (err) _done(err)
-      else {
-        series(paths.map(dest => {
-          return function copier (callback) {
-            if (isView(dest)) {
-              let finalDest = path.join(dest, 'views')
-              rmrf(finalDest, { glob: false }, function (err) {
-                if (err) callback(err)
-                else cp(views, finalDest, params, callback)
-              })
-            }
-            else {
-              callback()
-            }
-          }
-        }), _done)
+    series(paths.map(dest => {
+      return function copier (callback) {
+        if (isView(dest)) {
+          let finalDest = join(dest, 'views')
+          cp(views, finalDest, params, callback)
+        }
+        else {
+          callback()
+        }
       }
-    })
+    }), _done)
   }
   else callback()
 }

@@ -40,7 +40,6 @@ test(`[Default (file copying)] shared() never uses symlinks by default`, t => {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         let path = 'src/http/get-index/node_modules/@architect/shared'
         let file = path + '/shared.md'
         let stat = lstatSync(path).isSymbolicLink()
@@ -57,7 +56,6 @@ test(`[Default (file copying)] shared() copies src/shared and src/views to all (
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         sharedArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found shared file in ${path}`)
@@ -84,7 +82,6 @@ test(`[Default (file copying)] shared() src/views to only @views`, t => {
         hydrate.shared({}, function (err) {
           if (err) t.fail(err)
           else {
-            // console.log(`noop log to help reset tap-spec lol`)
             // Check to see if files that are supposed to be there are actually there
             viewsArtifacts.forEach(path => {
               if (path.includes('get-index') || path.includes('post-up-tents')) {
@@ -108,7 +105,6 @@ test(`[Default (file copying)] shared() copies .arc file and static.json (Arc <5
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         delete process.env.DEPRECATED
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
@@ -128,7 +124,6 @@ test(`[Default (file copying)] shared() copies static.json but not .arc (Arc v6+
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
           t.notOk(existsSync(path), `Did not find .arc file in ${path}`)
@@ -156,7 +151,6 @@ test(`[Default (file copying)] shared() copies static.json with @static folder c
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
@@ -186,7 +180,6 @@ test(`[Default (file copying)] shared() should remove files in functions that do
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         sharedStragglers.forEach(path => {
           t.notOk(existsSync(path), `shared straggler file removed from ${path}`)
@@ -215,7 +208,6 @@ test(`[Default (file copying)] install(undefined) hydrates all Functions', src/s
     hydrate.install(undefined, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         pythonDependencies.forEach(p => {
           t.ok(existsSync(p), `python dependency exists at ${p}`)
         })
@@ -261,7 +253,6 @@ test(`[Default (file copying)] install (specific path / single path) hydrates on
     hydrate.install({ basepath }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         t.ok(existsSync(nodeDependencies[0]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[0]}`)
         t.notOk(existsSync(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
@@ -291,7 +282,6 @@ test(`[Default (file copying)] install() should not recurse into Functions depen
     hydrate.install({ basepath }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         let submod = join(subdep, 'node_modules')
         t.notOk(existsSync(), `install did not recurse into node subdependencies at ${submod}`)
       }
@@ -307,7 +297,6 @@ test(`[Default (file copying)] update() bumps installed dependencies to newer ve
     hydrate.update(undefined, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // eslint-disable-next-line
         let pkgLock = require(join(mockTmp, nodeFunctions[0], 'package-lock.json'))
         let newVersion = pkgLock.lockfileVersion === 2
