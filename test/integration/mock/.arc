@@ -10,6 +10,7 @@ delete  /badness-in-life
 /in-the-clouds
   method head
   src src/head/in-the-clouds
+any     /time-is-good/*
 
 @events
 just-being-in-nature

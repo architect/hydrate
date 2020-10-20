@@ -27,8 +27,10 @@ let {
   arcFileArtifacts,
   staticArtifacts,
   sharedArtifacts,
+  sharedArtifactsDisabled,
   getViewsArtifacts,
   viewsArtifacts,
+  viewsArtifactsDisabled,
   mockTmp,
 } = require('./_shared')
 let hydrate = require('../../')
@@ -50,8 +52,13 @@ test(`[Default (file copying)] shared() never uses symlinks by default`, t => {
   })
 })
 
-test(`[Default (file copying)] shared() copies src/shared and src/views to all (@views not specified)`, t => {
-  t.plan(sharedArtifacts.length + getViewsArtifacts.length)
+test(`[Default (file copying)] shared() copies src/shared and src/views (unless disabled; @views not specified)`, t => {
+  t.plan(
+    sharedArtifacts.length +
+    getViewsArtifacts.length +
+    sharedArtifactsDisabled.length +
+    viewsArtifactsDisabled.length
+  )
   resetAndCopy(t, function () {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
@@ -59,6 +66,9 @@ test(`[Default (file copying)] shared() copies src/shared and src/views to all (
         // Check to see if files that are supposed to be there are actually there
         sharedArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found shared file in ${path}`)
+        })
+        sharedArtifactsDisabled.forEach(path => {
+          t.notOk(existsSync(path), `Did not find shared file in function with @arc shared false ${path}`)
         })
         getViewsArtifacts.forEach(path => {
           if (path.includes('get-')) {
@@ -68,13 +78,16 @@ test(`[Default (file copying)] shared() copies src/shared and src/views to all (
             t.notOk(existsSync(path), `Did not find views file in non-GET function ${path}`)
           }
         })
+        viewsArtifactsDisabled.forEach(path => {
+          t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
+        })
       }
     })
   })
 })
 
-test(`[Default (file copying)] shared() src/views to only @views`, t => {
-  t.plan(viewsArtifacts.length)
+test(`[Default (file copying)] shared() src/views to only @views (unless disabled)`, t => {
+  t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length)
   resetAndCopy(t, function () {
     cp(join('src', '.arc-with-views'), join('.', '.arc'), { overwrite: true }, function (err) {
       if (err) t.fail(err)
@@ -90,6 +103,9 @@ test(`[Default (file copying)] shared() src/views to only @views`, t => {
               else {
                 t.notOk(existsSync(path), `Did not find views file in non-GET function ${path}`)
               }
+            })
+            viewsArtifactsDisabled.forEach(path => {
+              t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
             })
           }
         })

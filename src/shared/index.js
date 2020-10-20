@@ -47,11 +47,11 @@ module.exports = function shared (params = {}, callback) {
       copyViews(params, paths, callback)
     },
     function (callback) {
-      let paths = getPaths(inventory, 'static')
+      let paths = getPaths(inventory)
       copyStaticJSON(params, paths, callback)
     },
     function (callback) {
-      let paths = getPaths(inventory, 'arcfile')
+      let paths = getPaths(inventory)
       copyArc(params, paths, callback)
     },
   ], function done (err, result) {
