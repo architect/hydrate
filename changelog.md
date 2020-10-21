@@ -2,6 +2,19 @@
 
 ---
 
+## [1.7.0] 2020-10-20
+
+### Added
+
+- Added support for custom file paths
+
+
+### Changed
+
+- Implemented Inventory (`@architect/inventory`)
+
+---
+
 ## [1.6.1] 2020-10-19
 
 ### Fixed
