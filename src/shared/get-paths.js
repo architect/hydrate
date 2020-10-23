@@ -16,10 +16,10 @@ module.exports = function getPaths (inventory, copying) {
     if (!lambdas) return
     lambdas.forEach(lambda => {
       let { src, config } = lambda
-      let nodeModules = join(src, 'node_modules', '@architect')
-      let vendorDir = join(src, 'vendor')
-      // Allow opting out of shared/views via config.arc @arc
       if (!copying || config[copying] !== false) {
+        let nodeModules = join(src, 'node_modules', '@architect')
+        let vendorDir = join(src, 'vendor')
+        // Allow opting out of shared/views via config.arc @arc
         let path = config.runtime.startsWith('nodejs') ? nodeModules : vendorDir
         paths.push(path)
       }
