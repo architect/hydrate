@@ -15,7 +15,9 @@ module.exports = function getPaths (inventory, copying) {
   pragmas.forEach(lambdas => {
     if (!lambdas) return
     lambdas.forEach(lambda => {
-      let { src, config } = lambda
+      let { src, config, arcStaticAssetProxy } = lambda
+      // ASAP never gets shared files; Package directly writes static.json into ASAP dir
+      if (arcStaticAssetProxy) return
       if (!copying || config[copying] !== false) {
         let nodeModules = join(src, 'node_modules', '@architect')
         let vendorDir = join(src, 'vendor')
