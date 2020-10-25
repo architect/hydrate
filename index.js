@@ -35,10 +35,6 @@ function hydrate (params = { install: true }, callback) {
   return promise
 }
 
-// function getInventory (fn) {
-//   return fn.bind({})
-// }
-
 hydrate.install = run.install
 hydrate.update = run.update
 hydrate.shared = shared

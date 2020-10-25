@@ -7,7 +7,7 @@ let child = require('child_process')
 let shared = require('./shared')
 let stripAnsi = require('strip-ansi')
 let { updater } = require('@architect/utils')
-let inv = require('@architect/inventory')
+let inventory = require('@architect/inventory')
 let rm = require('rimraf')
 
 /**
@@ -18,21 +18,21 @@ let rm = require('rimraf')
  */
 module.exports = {
   install: function (params = {}, callback) {
-    inv({}, function (err, inventory) {
+    inventory({}, function (err, result) {
       if (err) callback(err)
-      else hydrator(inventory, true, params, callback)
+      else hydrator(result, true, params, callback)
     })
   },
   update: function (params = {}, callback) {
-    inv({}, function (err, inventory) {
+    inventory({}, function (err, result) {
       if (err) callback(err)
-      else hydrator(inventory, false, params, callback)
+      else hydrator(result, false, params, callback)
     })
   },
 }
 
 function hydrator (inventory, installing, params, callback) {
-  let { inventory: inv } = inventory
+  let { inv } = inventory
   let {
     // Main params
     basepath,

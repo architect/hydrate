@@ -15,7 +15,7 @@ let print = require('../_printer')
  */
 module.exports = function copyViews (params, paths, callback) {
   let { update, only, inventory } = params
-  let { inventory: inv, get } = inventory
+  let { inv, get } = inventory
   let views = join(process.cwd(), 'src', 'views')
   let hasViews = existsSync(views)
   let go = !only || only === 'views'

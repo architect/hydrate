@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/architect/hydrate#readme",
   "dependencies": {
-    "@architect/inventory": "~1.1.0-RC.2",
+    "@architect/inventory": "~1.1.0-RC.8",
     "@architect/parser": "~2.3.0",
     "@architect/utils": "~1.5.13",
     "chalk": "~4.1.0",

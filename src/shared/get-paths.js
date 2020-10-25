@@ -6,7 +6,7 @@ let { join } = require('path')
  * @param {string} copying - one of: arcfile, shared, views, static
  */
 module.exports = function getPaths (inventory, copying) {
-  let { inventory: inv } = inventory
+  let { inv } = inventory
   let paths = []
 
   // Inspect the following pragmas with Lambdae
