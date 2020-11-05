@@ -159,7 +159,9 @@ module.exports = function install (params = {}, callback) {
               exec(`npm ci`, options, callback)
             }
             else if (exists('yarn.lock')) {
-              exec(`yarn`, options, callback)
+              let local = join(cwd, 'node_modules', 'yarn')
+              let cmd = local ? 'npx yarn' : 'yarn'
+              exec(cmd, options, callback)
             }
             else {
               exec(`npm i`, options, callback)

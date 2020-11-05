@@ -142,7 +142,9 @@ module.exports = function update (params = {}, callback) {
       if (isJs) {
         let exists = file => fs.existsSync(path.join(cwd, file))
         if (exists('yarn.lock')) {
-          exec(`yarn upgrade`, options, callback)
+          let local = path.join(cwd, 'node_modules', 'yarn')
+          let cmd = local ? 'npx yarn upgrade' : 'yarn upgrade'
+          exec(cmd, options, callback)
         }
         else {
           exec(`npm update`, options, callback)
