@@ -15,6 +15,14 @@
 
 ---
 
+## [1.6.2] 2020-11-04
+
+### Fixed
+
+- When using Yarn, detect local vs global installs, and prefer local installs where found (via `npx` call)
+
+---
+
 ## [1.6.1] 2020-10-19
 
 ### Fixed

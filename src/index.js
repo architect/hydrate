@@ -186,7 +186,9 @@ function hydrator (inventory, installing, params, callback) {
               exec(`npm ci`, options, callback)
             }
             else if (exists('yarn.lock')) {
-              exec(`yarn`, options, callback)
+              let local = join(cwd, 'node_modules', 'yarn')
+              let cmd = local ? 'npx yarn' : 'yarn'
+              exec(cmd, options, callback)
             }
             else {
               exec(`npm i`, options, callback)
@@ -196,7 +198,9 @@ function hydrator (inventory, installing, params, callback) {
           // Update JS deps
           else if (isJs && !installing) {
             if (exists('yarn.lock')) {
-              exec(`yarn upgrade`, options, callback)
+              let local = join(cwd, 'node_modules', 'yarn')
+              let cmd = local ? 'npx yarn upgrade' : 'yarn upgrade'
+              exec(cmd, options, callback)
             }
             else {
               exec(`npm update`, options, callback)
