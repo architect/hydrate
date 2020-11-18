@@ -250,7 +250,7 @@ function hydrator (inventory, installing, params, callback) {
     if (err) callback(err, result)
     else {
       if (deps && deps > 0) {
-        let done = update.done(`Successfully ${action.toLowerCase()}d dependencies`)
+        let done = update.done(`Successfully ${action.toLowerCase()}ed dependencies`)
         result.push({
           raw: { stdout: stripAnsi(done) },
           term: { stdout: done }
