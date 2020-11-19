@@ -1,4 +1,5 @@
 let { dirname, join } = require('path')
+let { existsSync } = require('fs')
 let rm = require('rimraf')
 let cp = require('cpr')
 let glob = require('glob')
@@ -151,9 +152,14 @@ function resetAndCopy (t, callback) {
   })
 }
 
+// Ensure we don't create empty folders with copied files
+let checkFolderCreation = t => t.notOk(existsSync(join('src', 'events', 'silence')), `Did not copy and create function folder that should not exist`)
+
+
 module.exports = {
   reset,
   resetAndCopy,
+  checkFolderCreation,
 
   arcHttp,
   arcEvents,

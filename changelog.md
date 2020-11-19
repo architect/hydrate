@@ -13,6 +13,11 @@
 
 - Implemented Inventory (`@architect/inventory`)
 
+
+### Fixed
+
+- Ensure we don't create folders that don't already exist when copying shared / Arc files
+
 ---
 
 ## [1.6.2] 2020-11-04

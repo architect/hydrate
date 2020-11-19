@@ -12,6 +12,7 @@ let test = require('tape')
 let {
   reset,
   resetAndCopy,
+  checkFolderCreation,
   arcHttp,
   rubyFunctions,
   nodeFunctions,
@@ -56,12 +57,12 @@ test(`[Symlinking] shared() never uses symlinks by default`, t => {
   })
 })
 
-test(`[Symlinking] shared() copies src/shared and src/views (unless disabled; @views not specified)`, t => {
+test(`[Symlinking] shared() copies src/shared and src/views (unless disabled or folder not found; @views not specified)`, t => {
   t.plan(
     sharedArtifacts.length +
     getViewsArtifacts.length +
     sharedArtifactsDisabled.length +
-    viewsArtifactsDisabled.length
+    viewsArtifactsDisabled.length + 1
   )
   resetAndCopy(t, function () {
     hydrate.shared({ symlink }, function (err) {
@@ -85,13 +86,14 @@ test(`[Symlinking] shared() copies src/shared and src/views (unless disabled; @v
         viewsArtifactsDisabled.forEach(path => {
           t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] shared() src/views to only @views (unless disabled)`, t => {
-  t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length)
+  t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopy(t, function () {
     cp(join('src', '.arc-with-views'), join('.', '.arc'), { overwrite: true }, function (err) {
       if (err) t.fail(err)
@@ -111,6 +113,7 @@ test(`[Symlinking] shared() src/views to only @views (unless disabled)`, t => {
             viewsArtifactsDisabled.forEach(path => {
               t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
             })
+            checkFolderCreation(t)
           }
         })
       }
@@ -119,7 +122,7 @@ test(`[Symlinking] shared() src/views to only @views (unless disabled)`, t => {
 })
 
 test(`[Symlinking] shared() copies .arc file and static.json (Arc <5)`, t => {
-  t.plan(arcFileArtifacts.length + staticArtifacts.length)
+  t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
   process.env.DEPRECATED = true
   resetAndCopy(t, function () {
     hydrate.shared({ symlink }, function (err) {
@@ -133,13 +136,14 @@ test(`[Symlinking] shared() copies .arc file and static.json (Arc <5)`, t => {
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] shared() copies static.json but not .arc (Arc v6+)`, t => {
-  t.plan(arcFileArtifacts.length + staticArtifacts.length)
+  t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
   resetAndCopy(t, function () {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
@@ -151,13 +155,14 @@ test(`[Symlinking] shared() copies static.json but not .arc (Arc v6+)`, t => {
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] shared() copies static.json with @static folder configured`, t => {
-  t.plan(staticArtifacts.length + 2)
+  t.plan(staticArtifacts.length + 3)
   resetAndCopy(t, function () {
     // Rewrite .arc to include @static folder directive
     let arcFile = join(process.cwd(), '.arc')
@@ -175,13 +180,14 @@ test(`[Symlinking] shared() copies static.json with @static folder configured`, 
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
-  t.plan(sharedArtifacts.length + getViewsArtifacts.length)
+  t.plan(sharedArtifacts.length + getViewsArtifacts.length + 1)
   resetAndCopy(t, function () {
     let sharedStragglers = sharedArtifacts.map((p) => {
       let dir = dirname(p)
@@ -207,6 +213,7 @@ test(`[Symlinking] shared() should remove files in functions that do not exist i
         viewsStragglers.forEach(path => {
           t.notOk(existsSync(path), `views straggler file removed from ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
@@ -222,7 +229,7 @@ test(`[Symlinking] install with symlink hydrates all Functions', src/shared and 
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length + 2
+    nodeViewsDependencies.length + 3
   t.plan(count)
   resetAndCopy(t, function () {
     hydrate.install({ symlink }, function (err) {
@@ -261,13 +268,14 @@ test(`[Symlinking] install with symlink hydrates all Functions', src/shared and 
         let pkgLockFile = join(yarnFunction, 'package-lock.json')
         t.ok(existsSync(yarnIntFile), 'Found yarn integrity file')
         t.notOk(existsSync(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] install (specific path / single path) hydrates only Functions found in the specified subpath`, t => {
-  t.plan(7)
+  t.plan(8)
   resetAndCopy(t, function () {
     let basepath = nodeFunctions[0]
     hydrate.install({ basepath, symlink }, function (err) {
@@ -284,13 +292,14 @@ test(`[Symlinking] install (specific path / single path) hydrates only Functions
         t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
         t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
         t.ok(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] install() should not recurse into Functions dependencies and hydrate those`, t => {
-  t.plan(1)
+  t.plan(2)
   reset(t, function () {
     let subdep = join(nodeFunctions[0], 'node_modules', 'poop')
     mkdirSync(subdep, { recursive: true })
@@ -303,14 +312,15 @@ test(`[Symlinking] install() should not recurse into Functions dependencies and 
       if (err) t.fail(err)
       else {
         let submod = join(subdep, 'node_modules')
-        t.notOk(existsSync(), `install did not recurse into node subdependencies at ${submod}`)
+        t.notOk(existsSync(submod), `install did not recurse into node subdependencies at ${submod}`)
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Symlinking] update() bumps installed dependencies to newer versions`, t => {
-  t.plan(3)
+  t.plan(4)
   reset(t, function () {
     // TODO: pip requires manual locking (via two requirements.txt files) so
     // we dont test update w/ python
@@ -331,6 +341,7 @@ test(`[Symlinking] update() bumps installed dependencies to newer versions`, t =
         let gemfileLock = readFileSync(join(mockTmp, rubyFunctions[0], 'Gemfile.lock'), 'utf-8')
         let newGem = gemfileLock.split('\n').filter(t => t.includes('a (0'))[0].split('(')[1].split(')')[0]
         t.notEqual(newGem, '0.2.1', `delete-badness_in_life 'a' gem bumped to ${newGem} from 0.2.1`)
+        checkFolderCreation(t)
       }
     })
   })

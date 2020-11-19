@@ -1,4 +1,5 @@
 let { join } = require('path')
+let { existsSync } = require('fs')
 
 /**
  * reads the Architect manifest and returns base paths to function runtime deps base
@@ -18,6 +19,9 @@ module.exports = function getPaths (inventory, copying) {
       let { src, config, arcStaticAssetProxy } = lambda
       // ASAP never gets shared files; Package directly writes static.json into ASAP dir
       if (arcStaticAssetProxy) return
+      // Don't create dirs for functions that don't already exist
+      if (!existsSync(src)) return
+      // Ok, here we go
       if (!copying || config[copying] !== false) {
         let nodeModules = join(src, 'node_modules', '@architect')
         let vendorDir = join(src, 'vendor')

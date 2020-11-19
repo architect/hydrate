@@ -17,6 +17,7 @@ any     /time-is-good/*
 
 @events
 just-being-in-nature
+silence # intentionally does not exist
 
 @scheduled
 hikes-with-friends rate(7 days)
