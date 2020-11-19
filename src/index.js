@@ -80,8 +80,8 @@ function hydrator (inventory, installing, params, callback) {
   /**
    * Normalize paths
    */
-  // Relativize by stripping leading relative path and `.`, `/`, `./`
-  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?/, '')
+  // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
+  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
   // Windows
   if (process.platform.startsWith('win')) {
     files = files.map(file => file.replace(/\//gi, '\\'))

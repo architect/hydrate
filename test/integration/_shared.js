@@ -39,8 +39,6 @@ let arcStreams = [ 'rivers' ]
 let arcCustomPath = [ 'in-the-clouds' ]
   .map(route => join('src', 'head', route))
   .concat([ 'anywhere' ])
-// TODO ↓ remove me! ↓
-console.log(`arcCustomPath:`, arcCustomPath)
 
 /**
  * Functions by runtime
