@@ -92,7 +92,7 @@ test(`[Symlinking] shared() copies src/shared and src/views (unless disabled or 
   })
 })
 
-test(`[Symlinking] shared() src/views to only @views (unless disabled)`, t => {
+test(`[Symlinking] shared() src/views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopy(t, function () {
     cp(join('src', '.arc-with-views'), join('.', '.arc'), { overwrite: true }, function (err) {
