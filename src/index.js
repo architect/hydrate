@@ -45,7 +45,6 @@ function hydrator (inventory, installing, params, callback) {
     copyShared = true,
     hydrateShared = true
   } = params
-  basepath = basepath || 'src'
 
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
@@ -54,8 +53,9 @@ function hydrator (inventory, installing, params, callback) {
    */
   // eslint-disable-next-line
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
+  let dir = basepath || '.'
   // Get everything except shared
-  let files = glob.sync(pattern(basepath)).filter(function filter (filePath) {
+  let files = glob.sync(pattern(dir)).filter(function filter (filePath) {
     if (filePath.includes('node_modules') ||
         filePath.includes('vendor/bundle') ||
         filePath.includes('src/shared') ||
@@ -80,11 +80,8 @@ function hydrator (inventory, installing, params, callback) {
   /**
    * Normalize paths
    */
-  // Relative paths
-  let stripCwd = file => {
-    file = file.replace(process.cwd(), '')
-    return file[0] === sep ? file.substr(1) : file // jiccya
-  }
+  // Relativize by stripping leading relative path and `.`, `/`, `./`
+  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?/, '')
   // Windows
   if (process.platform.startsWith('win')) {
     files = files.map(file => file.replace(/\//gi, '\\'))
@@ -117,14 +114,13 @@ function hydrator (inventory, installing, params, callback) {
   let deps = files.length
   let updaterParams = { quiet }
   let update = updater('Hydrate', updaterParams)
-  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
   let init = ''
   if (deps && deps > 0) {
     let msg = `${action}ing dependencies in ${deps} path${deps > 1 ? 's' : ''}`
     init += update.status(msg)
   }
   if (!deps && verbose) {
-    init += update.status(`No dependencies found in: ${p}${sep}**`)
+    init += update.status(`No Lambda dependencies found`)
   }
   if (init) {
     init = {
@@ -143,8 +139,8 @@ function hydrator (inventory, installing, params, callback) {
       // Prints and executes the command
       function exec (cmd, opts, callback) {
         let relativePath = cwd !== '.' ? cwd : 'project root'
-        let done = `${action}ed ${relativePath}`
-        start = update.start(`${action}ing ${relativePath}`)
+        let done = `${action}ed ${relativePath}${sep}`
+        start = update.start(`${action}ing ${relativePath}${sep}`)
 
         child.exec(cmd, opts,
           function (err, stdout, stderr) {

@@ -11,6 +11,9 @@ delete  /badness-in-life
   method head
   src src/head/in-the-clouds
 any     /time-is-good/*
+/where
+  method any
+  src anywhere
 
 @events
 just-being-in-nature
