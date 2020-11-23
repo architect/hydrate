@@ -1,14 +1,16 @@
-let series = require('run-series')
+let run = require('./src')
+let shared = require('./src/shared')
 
 /**
  * populates or updates the deps for all lambdas. will always copy shared
  * resources into lambdas.
  *
  * @param {object} params
- * @param {boolean} params.install
- * @param {boolean} params.update
+ * @param {boolean} params.install - install dependencies
+ * @param {boolean} params.update - update dependencies; if also found with install, install takes priority
+ * @param {boolean} params.symlink - use shared code symlinks
  */
-module.exports = function hydrate (params = { install: true }, callback) {
+function hydrate (params = { install: true }, callback) {
   // if a callback isn't supplied return a promise
   let promise
   if (!callback) {
@@ -20,27 +22,21 @@ module.exports = function hydrate (params = { install: true }, callback) {
     })
   }
   let { verbose = false, basepath = '', symlink = false } = params
-  let tasks = []
-  if (params.install)
-    tasks.push(function install (callback) {
-      module.exports.install({ verbose, basepath, symlink }, callback) // `install` includes `shared`
-    })
-  else if (params.update)
-    tasks.push(function update (callback) {
-      module.exports.update({ verbose, basepath, symlink }, callback) // `update` includes `shared`
-    })
-  else
-    tasks.push(function shared (callback) {
-      module.exports.shared({ symlink }, callback)
-    })
+  if (params.install) {
+    run.install({ verbose, basepath, symlink }, callback) // `install` includes `shared`
+  }
+  else if (params.update) {
+    run.update({ verbose, basepath, symlink }, callback) // `update` includes `shared`
+  }
+  else {
+    shared({ symlink }, callback)
+  }
 
-  series(tasks, function done (err) {
-    if (err) callback(err)
-    else callback()
-  })
   return promise
 }
 
-module.exports.install = require('./src/install')
-module.exports.shared = require('./src/shared')
-module.exports.update = require('./src/update')
+hydrate.install = run.install
+hydrate.update = run.update
+hydrate.shared = shared
+
+module.exports = hydrate

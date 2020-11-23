@@ -1,21 +1,38 @@
 let glob = require('glob')
 let series = require('run-series')
-let fs = require('fs')
+let { existsSync } = require('fs')
 let { dirname, join, sep } = require('path')
 let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
 let stripAnsi = require('strip-ansi')
-let { inventory, updater } = require('@architect/utils')
+let { updater } = require('@architect/utils')
+let inventory = require('@architect/inventory')
 let rm = require('rimraf')
 
 /**
- * Installs deps into:
+ * Installs deps into or updates current deps in:
  * - functions
- * - src/shared
- * - src/views
+ * - shared
+ * - views
  */
-module.exports = function install (params = {}, callback) {
+module.exports = {
+  install: function (params = {}, callback) {
+    inventory({}, function (err, result) {
+      if (err) callback(err)
+      else hydrator(result, true, params, callback)
+    })
+  },
+  update: function (params = {}, callback) {
+    inventory({}, function (err, result) {
+      if (err) callback(err)
+      else hydrator(result, false, params, callback)
+    })
+  },
+}
+
+function hydrator (inventory, installing, params, callback) {
+  let { inv } = inventory
   let {
     // Main params
     basepath,
@@ -28,15 +45,17 @@ module.exports = function install (params = {}, callback) {
     copyShared = true,
     hydrateShared = true
   } = params
-  basepath = basepath || 'src'
+
+  let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
   /**
    * Find our dependency manifests
    */
   // eslint-disable-next-line
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
+  let dir = basepath || '.'
   // Get everything except shared
-  let files = glob.sync(pattern(basepath)).filter(function filter (filePath) {
+  let files = glob.sync(pattern(dir)).filter(function filter (filePath) {
     if (filePath.includes('node_modules') ||
         filePath.includes('vendor/bundle') ||
         filePath.includes('src/shared') ||
@@ -61,21 +80,18 @@ module.exports = function install (params = {}, callback) {
   /**
    * Normalize paths
    */
+  // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
+  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
   // Windows
   if (process.platform.startsWith('win')) {
     files = files.map(file => file.replace(/\//gi, '\\'))
   }
   // Ensure all paths are relative; previous glob ops may be from absolute paths, producing absolute-pathed results
-  files = files.map(file => {
-    // Normalize to relative paths
-    file = file.replace(process.cwd(), '')
-    return file[0] === sep ? file.substr(1) : file // jiccya
-  })
+  files = files.map(file => stripCwd(file))
 
   /**
    * Filter by active project paths (and root, if applicable)
    */
-  let inv = inventory()
   files = files.filter(file => {
     // Allow root project hydration of process.cwd() if passed as basepath
     let hydrateBasepath = basepath === process.cwd()
@@ -83,13 +99,13 @@ module.exports = function install (params = {}, callback) {
       return true
 
     // Allow src/shared and src/views
-    let isShared = join('src', 'shared')
-    let isViews = join('src', 'views')
+    let isShared = join('src', 'shared') // TODO add inventory-configured path
+    let isViews = join('src', 'views') // TODO add inventory-configured path
     if (file.startsWith(isShared) || file.startsWith(isViews))
       return true
 
     // Hydrate functions, of course
-    return inv.localPaths.some(p => p === dirname(file))
+    return inv.lambdaSrcDirs.some(p => stripCwd(p) === dirname(file))
   })
 
   /**
@@ -98,12 +114,14 @@ module.exports = function install (params = {}, callback) {
   let deps = files.length
   let updaterParams = { quiet }
   let update = updater('Hydrate', updaterParams)
-  let p = basepath.substr(-1) === '/' ? `${basepath}/` : basepath
   let init = ''
-  if (deps && deps > 0)
-    init += update.status(`Hydrating dependencies in ${deps} path${deps > 1 ? 's' : ''}`)
-  if (!deps && verbose)
-    init += update.status(`No dependencies found in: ${p}${sep}**`)
+  if (deps && deps > 0) {
+    let msg = `${action}ing dependencies in ${deps} path${deps > 1 ? 's' : ''}`
+    init += update.status(msg)
+  }
+  if (!deps && verbose) {
+    init += update.status(`No Lambda dependencies found`)
+  }
   if (init) {
     init = {
       raw: { stdout: stripAnsi(init) },
@@ -121,8 +139,8 @@ module.exports = function install (params = {}, callback) {
       // Prints and executes the command
       function exec (cmd, opts, callback) {
         let relativePath = cwd !== '.' ? cwd : 'project root'
-        let done = `Hydrated ${relativePath}`
-        start = update.start(`Hydrating ${relativePath}`)
+        let done = `${action}ed ${relativePath}${sep}`
+        start = update.start(`${action}ing ${relativePath}${sep}`)
 
         child.exec(cmd, opts,
           function (err, stdout, stderr) {
@@ -142,19 +160,24 @@ module.exports = function install (params = {}, callback) {
 
       series([
         function clear (callback) {
-          // Remove existing package dir first to prevent side effects from symlinking
-          let dir
-          if (isJs) dir = join(cwd, 'node_modules')
-          if (isPy) dir = join(cwd, 'vendor')
-          if (isRb) dir = join(cwd, 'vendor', 'bundle')
-          rm(dir, callback)
+          if (installing) {
+            // Remove existing package dir first to prevent side effects from symlinking
+            let dir
+            if (isJs) dir = join(cwd, 'node_modules')
+            if (isPy) dir = join(cwd, 'vendor')
+            if (isRb) dir = join(cwd, 'vendor', 'bundle')
+            rm(dir, callback)
+          }
+          else callback()
         },
         function install (callback) {
           // TODO: I think we should consider what minimum version of node/npm this
           // module needs to use as the npm commands below have different behaviour
           // depending on npm version - and enshrine those in the package.json
-          let exists = file => fs.existsSync(join(cwd, file))
-          if (isJs) {
+          let exists = file => existsSync(join(cwd, file))
+
+          // Install JS deps
+          if (isJs && installing) {
             if (exists('package-lock.json')) {
               exec(`npm ci`, options, callback)
             }
@@ -167,13 +190,44 @@ module.exports = function install (params = {}, callback) {
               exec(`npm i`, options, callback)
             }
           }
-          else if (isPy) {
+
+          // Update JS deps
+          else if (isJs && !installing) {
+            if (exists('yarn.lock')) {
+              let local = join(cwd, 'node_modules', 'yarn')
+              let cmd = local ? 'npx yarn upgrade' : 'yarn upgrade'
+              exec(cmd, options, callback)
+            }
+            else {
+              exec(`npm update`, options, callback)
+            }
+          }
+
+          // Install Python deps
+          else if (isPy && installing) {
             exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
           }
-          else if (isRb) {
+
+          // Update Python deps
+          // TODO: pip requires manual locking (via two requirements.txt files) so we dont test update w/ python
+          // ... thus, it may not make sense to execute this at all
+          else if (isPy && !installing) {
+            exec(`pip3 install -r requirements.txt -t ./vendor -U --upgrade-strategy eager`, options, callback)
+          }
+
+          // Install Ruby deps
+          else if (isRb && installing) {
             exec(`bundle install --path vendor/bundle`, options, callback)
           }
-          else callback()
+
+          // Update Ruby deps
+          else if (isRb && !installing) {
+            exec(`bundle update`, options, callback)
+          }
+
+          else {
+            callback()
+          }
         }
       ], callback)
     }
@@ -182,8 +236,7 @@ module.exports = function install (params = {}, callback) {
   // Usually run shared hydration
   if (copyShared) {
     ops.push(function (callback) {
-      params.update = update
-      shared(params, callback)
+      shared({ ...params, update, inventory }, callback)
     })
   }
 
@@ -193,14 +246,14 @@ module.exports = function install (params = {}, callback) {
     if (err) callback(err, result)
     else {
       if (deps && deps > 0) {
-        let done = update.done('Successfully hydrated dependencies')
+        let done = update.done(`Successfully ${action.toLowerCase()}ed dependencies`)
         result.push({
           raw: { stdout: stripAnsi(done) },
           term: { stdout: done }
         })
       }
       if (!deps && !quiet) {
-        let done = update.done('Finished checks, nothing to hydrate')
+        let done = update.done(`Finished checks, nothing to ${action.toLowerCase()}e`)
         result.push({
           raw: { stdout: stripAnsi(done) },
           term: { stdout: done }

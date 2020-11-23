@@ -2,6 +2,24 @@
 
 ---
 
+## [1.7.0] 2020-10-20
+
+### Added
+
+- Added support for custom file paths
+
+
+### Changed
+
+- Implemented Inventory (`@architect/inventory`)
+
+
+### Fixed
+
+- Ensure we don't create folders that don't already exist when copying shared / Arc files
+
+---
+
 ## [1.6.2] 2020-11-04
 
 ### Fixed

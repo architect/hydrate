@@ -12,6 +12,7 @@ let test = require('tape')
 let {
   reset,
   resetAndCopy,
+  checkFolderCreation,
   arcHttp,
   rubyFunctions,
   nodeFunctions,
@@ -27,8 +28,10 @@ let {
   arcFileArtifacts,
   staticArtifacts,
   sharedArtifacts,
+  sharedArtifactsDisabled,
   getViewsArtifacts,
   viewsArtifacts,
+  viewsArtifactsDisabled,
   mockTmp,
 } = require('./_shared')
 let hydrate = require('../../')
@@ -40,7 +43,6 @@ test(`[Default (file copying)] shared() never uses symlinks by default`, t => {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         let path = 'src/http/get-index/node_modules/@architect/shared'
         let file = path + '/shared.md'
         let stat = lstatSync(path).isSymbolicLink()
@@ -51,16 +53,23 @@ test(`[Default (file copying)] shared() never uses symlinks by default`, t => {
   })
 })
 
-test(`[Default (file copying)] shared() copies src/shared and src/views to all (@views not specified)`, t => {
-  t.plan(sharedArtifacts.length + getViewsArtifacts.length)
+test(`[Default (file copying)] shared() copies src/shared and src/views (unless disabled or folder not found; @views not specified)`, t => {
+  t.plan(
+    sharedArtifacts.length +
+    getViewsArtifacts.length +
+    sharedArtifactsDisabled.length +
+    viewsArtifactsDisabled.length + 1
+  )
   resetAndCopy(t, function () {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         sharedArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found shared file in ${path}`)
+        })
+        sharedArtifactsDisabled.forEach(path => {
+          t.notOk(existsSync(path), `Did not find shared file in function with @arc shared false ${path}`)
         })
         getViewsArtifacts.forEach(path => {
           if (path.includes('get-')) {
@@ -70,13 +79,17 @@ test(`[Default (file copying)] shared() copies src/shared and src/views to all (
             t.notOk(existsSync(path), `Did not find views file in non-GET function ${path}`)
           }
         })
+        viewsArtifactsDisabled.forEach(path => {
+          t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
+        })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
-test(`[Default (file copying)] shared() src/views to only @views`, t => {
-  t.plan(viewsArtifacts.length)
+test(`[Default (file copying)] shared() src/views to only @views (unless disabled or folder not found)`, t => {
+  t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopy(t, function () {
     cp(join('src', '.arc-with-views'), join('.', '.arc'), { overwrite: true }, function (err) {
       if (err) t.fail(err)
@@ -84,7 +97,6 @@ test(`[Default (file copying)] shared() src/views to only @views`, t => {
         hydrate.shared({}, function (err) {
           if (err) t.fail(err)
           else {
-            // console.log(`noop log to help reset tap-spec lol`)
             // Check to see if files that are supposed to be there are actually there
             viewsArtifacts.forEach(path => {
               if (path.includes('get-index') || path.includes('post-up-tents')) {
@@ -94,6 +106,10 @@ test(`[Default (file copying)] shared() src/views to only @views`, t => {
                 t.notOk(existsSync(path), `Did not find views file in non-GET function ${path}`)
               }
             })
+            viewsArtifactsDisabled.forEach(path => {
+              t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
+            })
+            checkFolderCreation(t)
           }
         })
       }
@@ -102,13 +118,12 @@ test(`[Default (file copying)] shared() src/views to only @views`, t => {
 })
 
 test(`[Default (file copying)] shared() copies .arc file and static.json (Arc <5)`, t => {
-  t.plan(arcFileArtifacts.length + staticArtifacts.length)
+  t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
   process.env.DEPRECATED = true
   resetAndCopy(t, function () {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         delete process.env.DEPRECATED
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
@@ -117,18 +132,18 @@ test(`[Default (file copying)] shared() copies .arc file and static.json (Arc <5
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Default (file copying)] shared() copies static.json but not .arc (Arc v6+)`, t => {
-  t.plan(arcFileArtifacts.length + staticArtifacts.length)
+  t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
   resetAndCopy(t, function () {
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
           t.notOk(existsSync(path), `Did not find .arc file in ${path}`)
@@ -136,13 +151,14 @@ test(`[Default (file copying)] shared() copies static.json but not .arc (Arc v6+
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Default (file copying)] shared() copies static.json with @static folder configured`, t => {
-  t.plan(staticArtifacts.length + 2)
+  t.plan(staticArtifacts.length + 3)
   resetAndCopy(t, function () {
     // Rewrite .arc to include @static folder directive
     let arcFile = join(process.cwd(), '.arc')
@@ -156,18 +172,18 @@ test(`[Default (file copying)] shared() copies static.json with @static folder c
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Default (file copying)] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
-  t.plan(sharedArtifacts.length + getViewsArtifacts.length)
+  t.plan(sharedArtifacts.length + getViewsArtifacts.length + 1)
   resetAndCopy(t, function () {
     let sharedStragglers = sharedArtifacts.map((p) => {
       let dir = dirname(p)
@@ -186,7 +202,6 @@ test(`[Default (file copying)] shared() should remove files in functions that do
     hydrate.shared({}, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         sharedStragglers.forEach(path => {
           t.notOk(existsSync(path), `shared straggler file removed from ${path}`)
@@ -194,6 +209,7 @@ test(`[Default (file copying)] shared() should remove files in functions that do
         viewsStragglers.forEach(path => {
           t.notOk(existsSync(path), `views straggler file removed from ${path}`)
         })
+        checkFolderCreation(t)
       }
     })
   })
@@ -209,13 +225,12 @@ test(`[Default (file copying)] install(undefined) hydrates all Functions', src/s
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length + 2
+    nodeViewsDependencies.length + 3
   t.plan(count)
   resetAndCopy(t, function () {
     hydrate.install(undefined, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         pythonDependencies.forEach(p => {
           t.ok(existsSync(p), `python dependency exists at ${p}`)
         })
@@ -249,19 +264,19 @@ test(`[Default (file copying)] install(undefined) hydrates all Functions', src/s
         let pkgLockFile = join(yarnFunction, 'package-lock.json')
         t.ok(existsSync(yarnIntFile), 'Found yarn integrity file')
         t.notOk(existsSync(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Default (file copying)] install (specific path / single path) hydrates only Functions found in the specified subpath`, t => {
-  t.plan(7)
+  t.plan(8)
   resetAndCopy(t, function () {
     let basepath = nodeFunctions[0]
     hydrate.install({ basepath }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // Check to see if files that are supposed to be there are actually there
         t.ok(existsSync(nodeDependencies[0]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[0]}`)
         t.notOk(existsSync(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
@@ -273,13 +288,14 @@ test(`[Default (file copying)] install (specific path / single path) hydrates on
         t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
         t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
         t.ok(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Default (file copying)] install() should not recurse into Functions dependencies and hydrate those`, t => {
-  t.plan(1)
+  t.plan(2)
   reset(t, function () {
     let subdep = join(nodeFunctions[0], 'node_modules', 'poop')
     mkdirSync(subdep, { recursive: true })
@@ -291,23 +307,22 @@ test(`[Default (file copying)] install() should not recurse into Functions depen
     hydrate.install({ basepath }, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         let submod = join(subdep, 'node_modules')
-        t.notOk(existsSync(), `install did not recurse into node subdependencies at ${submod}`)
+        t.notOk(existsSync(submod), `install did not recurse into node subdependencies at ${submod}`)
+        checkFolderCreation(t)
       }
     })
   })
 })
 
 test(`[Default (file copying)] update() bumps installed dependencies to newer versions`, t => {
-  t.plan(3)
+  t.plan(4)
   reset(t, function () {
     // TODO: pip requires manual locking (via two requirements.txt files) so
     // we dont test update w/ python
     hydrate.update(undefined, function (err) {
       if (err) t.fail(err)
       else {
-        // console.log(`noop log to help reset tap-spec lol`)
         // eslint-disable-next-line
         let pkgLock = require(join(mockTmp, nodeFunctions[0], 'package-lock.json'))
         let newVersion = pkgLock.lockfileVersion === 2
@@ -322,6 +337,7 @@ test(`[Default (file copying)] update() bumps installed dependencies to newer ve
         let gemfileLock = readFileSync(join(mockTmp, rubyFunctions[0], 'Gemfile.lock'), 'utf-8')
         let newGem = gemfileLock.split('\n').filter(t => t.includes('a (0'))[0].split('(')[1].split(')')[0]
         t.notEqual(newGem, '0.2.1', `delete-badness_in_life 'a' gem bumped to ${newGem} from 0.2.1`)
+        checkFolderCreation(t)
       }
     })
   })

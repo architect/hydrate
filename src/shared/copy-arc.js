@@ -1,9 +1,8 @@
 let parse = require('@architect/parser')
 let cp = require('./copy')
-let fs = require('fs')
-let path = require('path')
+let { existsSync, readFileSync, writeFileSync } = require('fs')
+let { join } = require('path')
 let series = require('run-series')
-let getBasePaths = require('./get-base-paths')
 let print = require('../_printer')
 
 /**
@@ -15,7 +14,7 @@ let print = require('../_printer')
  * nodejs*  | node_modules/@architect/shared/.arc
  * else     | vendor/shared/.arc
  */
-module.exports = function copyArc (params, callback) {
+module.exports = function copyArc (params, paths, callback) {
   let { update, only } = params
   let go = !only || only === 'arcFile' || only === 'shared'
 
@@ -26,23 +25,14 @@ module.exports = function copyArc (params, callback) {
 
     function _done (err) {
       let cmd = 'copy'
-      if (err) {
-        print({ cmd, err, start, update }, callback)
-      }
-      else {
-        print({ cmd, start, done, update }, callback)
-      }
+      if (err) print({ cmd, err, start, update }, callback)
+      else print({ cmd, start, done, update }, callback)
     }
-    getBasePaths('arcfile', function gotBasePaths (err, paths) {
-      if (err) _done(err)
-      else {
-        series(paths.map(dest => {
-          return function copier (callback) {
-            copy(path.join(dest, 'shared'), params, callback)
-          }
-        }), _done)
+    series(paths.map(dest => {
+      return function copier (callback) {
+        copy(join(dest, 'shared'), params, callback)
       }
-    })
+    }), _done)
   }
   else callback()
 }
@@ -51,33 +41,34 @@ module.exports = function copyArc (params, callback) {
  * copy the current manifest into the destination dir
  */
 function copy (dest, params, callback) {
+  let cwd = process.cwd()
   // path to destination
-  let arcFileDest = path.join(dest, '.arc')
+  let arcFileDest = join(dest, '.arc')
   // .arc in current working dir
-  let arcFileSrc = path.join(process.cwd(), '.arc')
+  let arcFileSrc = join(cwd, '.arc')
   // fallback: app.arc in current working dir
-  let arcAppDotArcPath = path.join(process.cwd(), 'app.arc')
+  let arcAppDotArcPath = join(cwd, 'app.arc')
   // fallback: arc.yaml in current working dir
-  let arcYamlPath = path.join(process.cwd(), 'arc.yaml')
+  let arcYamlPath = join(cwd, 'arc.yaml')
   // fallback: arc.json in current working dir
-  let arcJsonPath = path.join(process.cwd(), 'arc.json')
+  let arcJsonPath = join(cwd, 'arc.json')
 
-  if (fs.existsSync(arcFileSrc)) {
+  if (existsSync(arcFileSrc)) {
     cp(arcFileSrc, arcFileDest, params, callback)
   }
-  else if (fs.existsSync(arcAppDotArcPath)) {
+  else if (existsSync(arcAppDotArcPath)) {
     cp(arcAppDotArcPath, arcFileDest, params, callback)
   }
-  else if (fs.existsSync(arcYamlPath)) {
-    let raw = fs.readFileSync(arcYamlPath).toString()
+  else if (existsSync(arcYamlPath)) {
+    let raw = readFileSync(arcYamlPath).toString()
     let arc = parse.yaml.stringify(raw)
-    fs.writeFileSync(arcFileDest, arc)
+    writeFileSync(arcFileDest, arc)
     callback()
   }
-  else if (fs.existsSync(arcJsonPath)) {
-    let raw = fs.readFileSync(arcJsonPath).toString()
+  else if (existsSync(arcJsonPath)) {
+    let raw = readFileSync(arcJsonPath).toString()
     let arc = parse.json.stringify(raw)
-    fs.writeFileSync(arcFileDest, arc)
+    writeFileSync(arcFileDest, arc)
     callback()
   }
 }

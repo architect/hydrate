@@ -46,7 +46,7 @@ test('Basic stdout', t => {
     if (err) t.fail(err)
     else {
       let term = stripAnsi(result.term.stdout)
-      let raw = result.raw.stdout.replace(/\\n/g, '\n')
+      let raw = result.raw.stdout
       console.log(term)
       t.equal(term, raw, 'Term + raw output contents match')
       t.ok(term.includes(name), `Contents include: ${name}`)
@@ -73,9 +73,9 @@ test('Basic stderr', t => {
     if (err) t.fail(err)
     else {
       let termStdout = stripAnsi(result.term.stdout)
-      let rawStdout = result.raw.stdout.replace(/\\n/g, '\n')
+      let rawStdout = result.raw.stdout
       let termStderr = stripAnsi(result.term.stderr)
-      let rawStderr = result.raw.stderr.replace(/\\n/g, '\n')
+      let rawStderr = result.raw.stderr
       console.log(termStdout, termStderr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termStderr, rawStderr, 'Term + raw stderr contents match')
@@ -104,9 +104,9 @@ test('Basic err', t => {
     if (!err) t.fail('No error present')
     else {
       let termStdout = stripAnsi(result.term.stdout)
-      let rawStdout = result.raw.stdout.replace(/\\n/g, '\n')
+      let rawStdout = result.raw.stdout
       let termErr = stripAnsi(result.term.err)
-      let rawErr = result.raw.err.message.replace(/\\n/g, '\n')
+      let rawErr = result.raw.err.message
       console.log(termStdout, termErr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
@@ -139,9 +139,9 @@ test('Basic err with code', t => {
     if (!err) t.fail('No error present')
     else {
       let termStdout = stripAnsi(result.term.stdout)
-      let rawStdout = result.raw.stdout.replace(/\\n/g, '\n')
+      let rawStdout = result.raw.stdout
       let termErr = stripAnsi(result.term.err)
-      let rawErr = result.raw.err.message.replace(/\\n/g, '\n')
+      let rawErr = result.raw.err.message
       console.log(termStdout, termErr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
