@@ -1,3 +1,5 @@
+# _shared-custom + specified views
+
 @app
 hydrate
 
@@ -36,6 +38,10 @@ rivers
 @streams
 rivers
 
+@shared
+src custom-shared-folder
+
 @views
+src custom-views-folder
 get /
 post /up/tents

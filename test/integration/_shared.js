@@ -129,7 +129,7 @@ let viewsArtifactsDisabled = [
 
 // Test resetters
 function reset (t, callback) {
-  process.chdir(__dirname)
+  process.chdir(join(__dirname, '..'))
   rm(mockTmp, { glob: false, maxBusyTries: 30 }, function (err) {
     if (err) t.fail(err)
     else {
