@@ -9,6 +9,12 @@
 - Added support for new `@shared` pragma with selective shared code, uh, sharing
 - Added support for custom shared + views file paths
 
+
+### Fixed
+
+- Fixed obscure circumstance where moving or deleting a symlinked shared/views folder can crash hydration
+  - Shared file copier now always deletes destination file dirs before writing instead of checking existence (which may result in false negatives for existence)
+
 ---
 
 ## [1.7.0] 2020-11-23
