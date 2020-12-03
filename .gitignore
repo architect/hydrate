@@ -2,5 +2,5 @@
 coverage/
 node_modules/
 package-lock.json
-test/integration/tmp
+test/tmp
 vendor/

@@ -6,8 +6,8 @@
 
 ### Added
 
-- Added support for custom shared + views file paths
 - Added support for new `@shared` pragma with selective shared code, uh, sharing
+- Added support for custom shared + views file paths
 
 ---
 
