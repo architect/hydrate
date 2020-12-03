@@ -2,6 +2,15 @@
 
 ---
 
+## [1.8.0] 2020-12-03
+
+### Added
+
+- Added support for custom shared + views file paths
+- Added support for new `@shared` pragma with selective shared code, uh, sharing
+
+---
+
 ## [1.7.0] 2020-11-23
 
 ### Added

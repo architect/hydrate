@@ -1,6 +1,5 @@
 let cp = require('./copy')
-let { existsSync } = require('fs')
-let { join, sep } = require('path')
+let { join } = require('path')
 let series = require('run-series')
 let print = require('../_printer')
 
@@ -15,42 +14,29 @@ let print = require('../_printer')
  */
 module.exports = function copyViews (params, paths, callback) {
   let { update, only, inventory } = params
-  let { inv, get } = inventory
-  let views = join(process.cwd(), 'src', 'views')
-  let hasViews = existsSync(views)
+  let { inv } = inventory
+  let hasViews = inv.views && inv.views.views.length
   let go = !only || only === 'views'
 
-  if (hasViews && inv.http && go) {
+  if (hasViews && go) {
+    let { src, views } = inv.views
     // Kick off logging
-    let srcViews = `src${sep}views`
-    let done = `Hydrated app with ${srcViews}`
-    let start = update.start(`Hydrating app with ${srcViews}`)
+    let done = `Hydrated app with views: ${src}`
+    let start = update.start(`Hydrating app with ${src}`)
 
-    // First look for items listed in @views
-    let viewsPaths = inv.views && inv.views.map(view => get.http(view) && get.http(view).src)
-    // If nothing, look for `get` + `any` routes
-    if (!viewsPaths.length) viewsPaths = inv.http.map(route => {
-      let { arcStaticAssetProxy, name } = route
-      return !arcStaticAssetProxy && (name.startsWith('get') || name.startsWith('any'))
-    })
-    let isView = (dest) => viewsPaths.some(p => dest.startsWith(p))
-
-    function _done (err) {
+    series(views.map(view => {
+      return function copier (callback) {
+        if (paths[view]) {
+          let finalDest = join(paths[view], 'views')
+          cp(src, finalDest, params, callback)
+        }
+        else callback()
+      }
+    }), function _done (err) {
       let cmd = 'copy'
       if (err) print({ cmd, err, start, update }, callback)
       else print({ cmd, start, done, update }, callback)
-    }
-    series(paths.map(dest => {
-      return function copier (callback) {
-        if (isView(dest)) {
-          let finalDest = join(dest, 'views')
-          cp(views, finalDest, params, callback)
-        }
-        else {
-          callback()
-        }
-      }
-    }), _done)
+    })
   }
   else callback()
 }

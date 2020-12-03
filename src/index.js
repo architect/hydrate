@@ -46,7 +46,12 @@ function hydrator (inventory, installing, params, callback) {
     hydrateShared = true
   } = params
 
+  // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
+  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
+
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
+  let sharedDir = inv.shared && inv.shared.src && stripCwd(inv.shared.src)
+  let viewsDir = inv.views && inv.views.src && stripCwd(inv.views.src)
 
   /**
    * Find our dependency manifests
@@ -55,24 +60,23 @@ function hydrator (inventory, installing, params, callback) {
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
   let dir = basepath || '.'
   // Get everything except shared
-  let files = glob.sync(pattern(dir)).filter(function filter (filePath) {
-    if (filePath.includes('node_modules') ||
-        filePath.includes('vendor/bundle') ||
-        filePath.includes('src/shared') ||
-        filePath.includes('src/views'))
+  let files = glob.sync(pattern(dir)).filter(function filter (file) {
+    if (file.includes('node_modules') ||
+        file.includes('vendor/bundle'))
       return false
+    if (sharedDir && file.includes(sharedDir)) return false
+    if (viewsDir && file.includes(viewsDir)) return false
     return true
   })
   // Get src/shared + src/views
   //   or disable if we're hydrating a single function in total isolation (e.g. sandbox startup)
   if (hydrateShared) {
-    let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter (filePath) {
-      if (filePath.includes('node_modules') ||
-          filePath.includes('vendor/bundle'))
+    let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter (file) {
+      if (file.includes('node_modules') ||
+          file.includes('vendor/bundle'))
         return false
-      if (filePath.includes('src/shared') ||
-          filePath.includes('src/views'))
-        return true
+      if (sharedDir && file.includes(sharedDir)) return true
+      if (viewsDir && file.includes(viewsDir)) return true
     })
     files = files.concat(sharedFiles)
   }
@@ -80,8 +84,6 @@ function hydrator (inventory, installing, params, callback) {
   /**
    * Normalize paths
    */
-  // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
-  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
   // Windows
   if (process.platform.startsWith('win')) {
     files = files.map(file => file.replace(/\//gi, '\\'))
@@ -98,11 +100,9 @@ function hydrator (inventory, installing, params, callback) {
     if (hydrateBasepath && dirname(file) === '.')
       return true
 
-    // Allow src/shared and src/views
-    let isShared = join('src', 'shared') // TODO add inventory-configured path
-    let isViews = join('src', 'views') // TODO add inventory-configured path
-    if (file.startsWith(isShared) || file.startsWith(isViews))
-      return true
+    // Allow shared and views
+    if (sharedDir && file.includes(sharedDir)) return true
+    if (viewsDir && file.includes(viewsDir)) return true
 
     // Hydrate functions, of course
     return inv.lambdaSrcDirs.some(p => stripCwd(p) === dirname(file))
