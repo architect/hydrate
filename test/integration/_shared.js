@@ -143,9 +143,17 @@ function reset (t, callback) {
     }
   })
 }
-function resetAndCopy (t, callback) {
+function resetAndCopyShared (t, callback) {
   reset(t, function () {
-    cp('_optional', 'src', { overwrite: true }, function done (err) {
+    cp('_shared', 'src', { overwrite: true }, function done (err) {
+      if (err) t.fail(err)
+      else callback()
+    })
+  })
+}
+function resetAndCopySharedCustom (t, callback) {
+  reset(t, function () {
+    cp('_shared-custom', '.', { overwrite: true }, function done (err) {
       if (err) t.fail(err)
       else callback()
     })
@@ -158,7 +166,8 @@ let checkFolderCreation = t => t.notOk(existsSync(join('src', 'events', 'silence
 
 module.exports = {
   reset,
-  resetAndCopy,
+  resetAndCopyShared,
+  resetAndCopySharedCustom,
   checkFolderCreation,
 
   arcHttp,

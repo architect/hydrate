@@ -26,16 +26,16 @@ module.exports = function copyStatic (params, paths, callback) {
     let done = `Hydrated app with static.json`
     let start = update.start(`Hydrating app with static.json`)
 
-    function _done (err) {
-      let cmd = 'copy'
-      if (err) print({ cmd, err, start, update }, callback)
-      else print({ cmd, start, done, update }, callback)
-    }
-    series(paths.map(dest => {
+    let destinations = Object.entries(paths).map(p => p[1])
+    series(destinations.map(dest => {
       return function copier (callback) {
         cp(static, join(dest, 'shared', 'static.json'), params, callback)
       }
-    }), _done)
+    }), function _done (err) {
+      let cmd = 'copy'
+      if (err) print({ cmd, err, start, update }, callback)
+      else print({ cmd, start, done, update }, callback)
+    })
   }
   else callback()
 }

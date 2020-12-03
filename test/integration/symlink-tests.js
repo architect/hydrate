@@ -11,7 +11,7 @@ let cp = require('cpr')
 let test = require('tape')
 let {
   reset,
-  resetAndCopy,
+  resetAndCopyShared,
   checkFolderCreation,
   arcHttp,
   rubyFunctions,
@@ -43,7 +43,7 @@ let symlink = true
 // See: https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
 test(`[Symlinking] shared() never uses symlinks by default`, t => {
   t.plan(2)
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
@@ -64,7 +64,7 @@ test(`[Symlinking] shared() copies src/shared and src/views (unless disabled or 
     sharedArtifactsDisabled.length +
     viewsArtifactsDisabled.length + 1
   )
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
@@ -94,8 +94,8 @@ test(`[Symlinking] shared() copies src/shared and src/views (unless disabled or 
 
 test(`[Symlinking] shared() src/views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
-  resetAndCopy(t, function () {
-    cp(join('src', '.arc-with-views'), join('.', '.arc'), { overwrite: true }, function (err) {
+  resetAndCopyShared(t, function () {
+    cp(join('src', 'app.arc-with-views'), join('.', 'app.arc'), { overwrite: true }, function (err) {
       if (err) t.fail(err)
       else {
         hydrate.shared({ symlink }, function (err) {
@@ -121,17 +121,17 @@ test(`[Symlinking] shared() src/views to only @views (unless disabled or folder 
   })
 })
 
-test(`[Symlinking] shared() copies .arc file and static.json (Arc <5)`, t => {
+test(`[Symlinking] shared() copies app.arc file and static.json (Arc <5)`, t => {
   t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
   process.env.DEPRECATED = true
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         delete process.env.DEPRECATED
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
-          t.ok(existsSync(path), `Found .arc file in ${path}`)
+          t.ok(existsSync(path), `Found app.arc file in ${path}`)
         })
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
@@ -142,15 +142,15 @@ test(`[Symlinking] shared() copies .arc file and static.json (Arc <5)`, t => {
   })
 })
 
-test(`[Symlinking] shared() copies static.json but not .arc (Arc v6+)`, t => {
+test(`[Symlinking] shared() copies static.json but not app.arc (Arc v6+)`, t => {
   t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     hydrate.shared({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
         // Check to see if files that are supposed to be there are actually there
         arcFileArtifacts.forEach(path => {
-          t.notOk(existsSync(path), `Did not find .arc file in ${path}`)
+          t.notOk(existsSync(path), `Did not find app.arc file in ${path}`)
         })
         staticArtifacts.forEach(path => {
           t.ok(existsSync(path), `Found static.json file in ${path}`)
@@ -163,13 +163,13 @@ test(`[Symlinking] shared() copies static.json but not .arc (Arc v6+)`, t => {
 
 test(`[Symlinking] shared() copies static.json with @static folder configured`, t => {
   t.plan(staticArtifacts.length + 3)
-  resetAndCopy(t, function () {
-    // Rewrite .arc to include @static folder directive
-    let arcFile = join(process.cwd(), '.arc')
+  resetAndCopyShared(t, function () {
+    // Rewrite app.arc to include @static folder directive
+    let arcFile = join(process.cwd(), 'app.arc')
     let arc = readFileSync(arcFile).toString()
     arc += '@static\nfolder foo'
     writeFileSync(arcFile, arc)
-    t.pass(`Added '@static folder foo' to .arc`)
+    t.pass(`Added '@static folder foo' to app.arc`)
     // Move public/ to foo/
     renameSync(join(process.cwd(), 'public'), join(process.cwd(), 'foo'))
     t.ok(existsSync(join(process.cwd(), 'foo', 'static.json')), 'public/static.json moved into foo/static.json')
@@ -188,7 +188,7 @@ test(`[Symlinking] shared() copies static.json with @static folder configured`, 
 
 test(`[Symlinking] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length + 1)
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     let sharedStragglers = sharedArtifacts.map((p) => {
       let dir = dirname(p)
       mkdirSync(dir, { recursive: true })
@@ -231,7 +231,7 @@ test(`[Symlinking] install with symlink hydrates all Functions', src/shared and 
     nodeSharedDependencies.length +
     nodeViewsDependencies.length + 3
   t.plan(count)
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     hydrate.install({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
@@ -276,7 +276,7 @@ test(`[Symlinking] install with symlink hydrates all Functions', src/shared and 
 
 test(`[Symlinking] install (specific path / single path) hydrates only Functions found in the specified subpath`, t => {
   t.plan(8)
-  resetAndCopy(t, function () {
+  resetAndCopyShared(t, function () {
     let basepath = nodeFunctions[0]
     hydrate.install({ basepath, symlink }, function (err) {
       if (err) t.fail(err)
