@@ -60,7 +60,7 @@ test(`[Shared file symlinking (custom paths)] shared() never uses symlinks by de
   })
 })
 
-test(`[Shared file symlinking (default paths)] shared() copies src/shared and src/views (unless disabled or folder not found; @views not specified)`, t => {
+test(`[Shared file symlinking (default paths)] shared() copies shared and views (unless disabled or folder not found; @views not specified)`, t => {
   t.plan(
     sharedArtifacts.length +
     getViewsArtifacts.length +
@@ -95,7 +95,7 @@ test(`[Shared file symlinking (default paths)] shared() copies src/shared and sr
   })
 })
 
-test(`[Shared file symlinking (custom paths)] shared() copies src/shared and src/views (unless disabled or folder not found; @views not specified)`, t => {
+test(`[Shared file symlinking (custom paths)] shared() copies shared and views (unless disabled or folder not found; @views not specified)`, t => {
   t.plan(
     sharedArtifacts.length +
     getViewsArtifacts.length +
@@ -130,7 +130,7 @@ test(`[Shared file symlinking (custom paths)] shared() copies src/shared and src
   })
 })
 
-test(`[Shared file symlinking (default paths)] shared() src/views to only @views (unless disabled or folder not found)`, t => {
+test(`[Shared file symlinking (default paths)] shared() views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopyShared(t, function () {
     cp(join('src', 'app.arc-views'), join('.', 'app.arc'), { overwrite: true }, function (err) {
@@ -159,7 +159,7 @@ test(`[Shared file symlinking (default paths)] shared() src/views to only @views
   })
 })
 
-test(`[Shared file symlinking (custom paths)] shared() src/views to only @views (unless disabled or folder not found)`, t => {
+test(`[Shared file symlinking (custom paths)] shared() views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopySharedCustom(t, function () {
     cp(join('_shared-custom', 'app.arc-views'), join('.', 'app.arc'), { overwrite: true }, function (err) {
@@ -318,7 +318,7 @@ test(`[Shared file symlinking (custom paths)] shared() copies static.json with @
   })
 })
 
-test(`[Shared file symlinking (default paths)] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
+test(`[Shared file symlinking (default paths)] shared() should remove files in functions that do not exist in shared and views`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length + 1)
   resetAndCopyShared(t, function () {
     let sharedStragglers = sharedArtifacts.map((p) => {
@@ -351,7 +351,7 @@ test(`[Shared file symlinking (default paths)] shared() should remove files in f
   })
 })
 
-test(`[Shared file symlinking (custom paths)] shared() should remove files in functions that do not exist in src/shared and src/views`, t => {
+test(`[Shared file symlinking (custom paths)] shared() should remove files in functions that do not exist in shared and views`, t => {
   t.plan(sharedArtifacts.length + getViewsArtifacts.length + 1)
   resetAndCopySharedCustom(t, function () {
     let sharedStragglers = sharedArtifacts.map((p) => {

@@ -28,7 +28,7 @@ let {
 let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
-test(`[Default (file copying)] install(undefined) hydrates all Functions', src/shared and src/views dependencies`, t => {
+test(`[Default (file copying)] install(undefined) hydrates all Functions', shared and views dependencies`, t => {
   let count =
     pythonDependencies.length +
     rubyDependencies().length +
