@@ -6,7 +6,7 @@ let print = require('./_printer')
 let child = require('child_process')
 let shared = require('./shared')
 let stripAnsi = require('strip-ansi')
-let { updater } = require('@architect/utils')
+let { pathToUnix, updater } = require('@architect/utils')
 let inventory = require('@architect/inventory')
 let rm = require('rimraf')
 
@@ -50,8 +50,10 @@ function hydrator (inventory, installing, params, callback) {
   let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
 
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
-  let sharedDir = inv.shared && inv.shared.src && stripCwd(inv.shared.src)
-  let viewsDir = inv.views && inv.views.src && stripCwd(inv.views.src)
+
+  // From here on out normalize all file comparisons to Unix paths
+  let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src))
+  let viewsDir = inv.views && inv.views.src && pathToUnix(stripCwd(inv.views.src))
 
   /**
    * Find our dependency manifests
@@ -61,20 +63,18 @@ function hydrator (inventory, installing, params, callback) {
   let dir = basepath || '.'
   // Get everything except shared
   let files = glob.sync(pattern(dir)).filter(function filter (file) {
-    if (file.includes('node_modules') ||
-        file.includes('vendor/bundle'))
-      return false
+    file = pathToUnix(file)
+    if (file.includes('node_modules') || file.includes('vendor/bundle')) return false
     if (sharedDir && file.includes(sharedDir)) return false
     if (viewsDir && file.includes(viewsDir)) return false
     return true
   })
-  // Get src/shared + src/views
+  // Get shared + views
   //   or disable if we're hydrating a single function in total isolation (e.g. sandbox startup)
   if (hydrateShared) {
     let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter (file) {
-      if (file.includes('node_modules') ||
-          file.includes('vendor/bundle'))
-        return false
+      file = pathToUnix(file)
+      if (file.includes('node_modules') || file.includes('vendor/bundle')) return false
       if (sharedDir && file.includes(sharedDir)) return true
       if (viewsDir && file.includes(viewsDir)) return true
     })
@@ -82,30 +82,27 @@ function hydrator (inventory, installing, params, callback) {
   }
 
   /**
-   * Normalize paths
+   * Relativize paths
+   * Previous glob ops may be from absolute paths, producing absolute-pathed results
    */
-  // Windows
-  if (process.platform.startsWith('win')) {
-    files = files.map(file => file.replace(/\//gi, '\\'))
-  }
-  // Ensure all paths are relative; previous glob ops may be from absolute paths, producing absolute-pathed results
   files = files.map(file => stripCwd(file))
 
   /**
    * Filter by active project paths (and root, if applicable)
    */
   files = files.filter(file => {
+    let dir = pathToUnix(dirname(file))
+
     // Allow root project hydration of process.cwd() if passed as basepath
     let hydrateBasepath = basepath === process.cwd()
-    if (hydrateBasepath && dirname(file) === '.')
-      return true
+    if (hydrateBasepath && dir === '.') return true
 
     // Allow shared and views
     if (sharedDir && file.includes(sharedDir)) return true
     if (viewsDir && file.includes(viewsDir)) return true
 
     // Hydrate functions, of course
-    return inv.lambdaSrcDirs.some(p => stripCwd(p) === dirname(file))
+    return inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p)) === dir)
   })
 
   /**

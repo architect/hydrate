@@ -4,7 +4,7 @@ let series = require('run-series')
 let print = require('../_printer')
 
 /**
- * copies src/views
+ * copies views
  * into function runtime discoverable directory
  *
  * Runtime    | Function Path
