@@ -1,4 +1,4 @@
-let glob = require('glob')
+let { sync: glob } = require('glob')
 let series = require('run-series')
 let { dirname } = require('path')
 let stripAnsi = require('strip-ansi')
@@ -55,7 +55,7 @@ function hydrator (inventory, installing, params, callback) {
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
   let dir = basepath || '.'
   // Get everything except shared
-  let files = glob.sync(pattern(dir)).filter(file => {
+  let files = glob(pattern(dir)).filter(file => {
     file = pathToUnix(file)
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
@@ -64,9 +64,8 @@ function hydrator (inventory, installing, params, callback) {
   })
   // Get shared + views (or skip if hydrating a single isolated function, e.g. sandbox startup)
   if (hydrateShared) {
-
-    let sharedManifest = (sharedDir && glob.sync(pattern(sharedDir)).filter(ignoreDeps)) || []
-    let viewsManifest = (viewsDir && glob.sync(pattern(viewsDir)).filter(ignoreDeps)) || []
+    let sharedManifest = (sharedDir && glob(pattern(sharedDir)).filter(ignoreDeps)) || []
+    let viewsManifest = (viewsDir && glob(pattern(viewsDir)).filter(ignoreDeps)) || []
     files = files.concat(sharedManifest, viewsManifest)
   }
 
