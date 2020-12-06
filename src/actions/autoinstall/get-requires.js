@@ -13,16 +13,18 @@ module.exports = function getRequires ({ dir, file, update }) {
   // Exit early if module doesn't require any dependencies
   if (!hasRequire) return
 
+  // Loose is a little gentler on userland code; we aren't here to judge code quality!
   let ast = loose.parse(contents, opts)
 
   let called = []
   let requires = esquery.query(ast, `[callee.name='require']`)
 
+  // Traverse into require() args to get their (hopefully) static values
   function getIdentifier (id) {
     let ids = esquery.query(ast, `[id.name='${id}']`) || []
     ids.forEach(r => {
       if (r.init.value) called.push(r.init.value)
-      else update.warn(`Found dynamic require, dependency may not be installed: ${dir} requires '${id}'`)
+      else update.warn(`Dynamic requires are not supported, dependency may not be installed: ${dir} requires '${id}'`)
     })
   }
 
@@ -32,6 +34,7 @@ module.exports = function getRequires ({ dir, file, update }) {
     if (arg.type === 'Literal') called.push(arg.value)
   })
 
+  // Filter invalid package calls, Architect shared + views, and Node.js builtins
   let isPkg = /^(\w|@)/
   let isArcShared = /^@architect(\/|\\)(shared|views)/
   let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !builtins.includes(r))
