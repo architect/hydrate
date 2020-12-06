@@ -1,7 +1,8 @@
+.arc-autoinstall
 .nyc_output/
 coverage/
 node_modules/
 package-lock.json
-test/tmp
 test/integration/tmp
+test/tmp
 vendor/

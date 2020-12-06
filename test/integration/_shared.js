@@ -17,10 +17,12 @@ let nodeViews     = join('node_modules', '@architect', 'views')
 let arcHttp = [
   'get-index',
   'get-memories',
-  'post-up-tents',
+  'post-up-tents', // autoinstall target
   'put-on_your_boots',
   'delete-badness_in_life'
 ].map(route => join('src', 'http', route))
+
+let arcAutoinstall = [ arcHttp[2] ]
 
 let arcEvents = [ 'just-being-in-nature' ]
   .map(route => join('src', 'events', route))
@@ -93,6 +95,7 @@ let arcFileArtifacts = []
   .concat(rubyFunctions.map(p => join(p, rubyShared, '.arc')))
   .concat(nodeFunctions.map(p => join(p, nodeShared, '.arc')))
   .concat(arcCustomPath.map(p => join(p, nodeShared, '.arc')))
+  .concat(arcAutoinstall.map(p => join(p, nodeShared, '.arc')))
 
 let staticArtifacts = arcFileArtifacts
   .map(p => join(dirname(p), 'static.json'))
@@ -102,6 +105,7 @@ let sharedArtifacts = []
   .concat(rubyFunctions.map(p => join(p, rubyShared, 'shared.md')))
   .concat(nodeFunctions.map(p => join(p, nodeShared, 'shared.md')))
   .concat(arcCustomPath.map(p => join(p, nodeShared, 'shared.md')))
+  .concat(arcAutoinstall.map(p => join(p, nodeShared, 'shared.md')))
 
 let sharedArtifactsDisabled = [
   join('src', 'http', 'any-time_is_good-catchall', nodeShared, 'shared.md')
@@ -176,6 +180,8 @@ module.exports = {
   arcScheduled,
   arcTables,
   arcStreams,
+
+  arcAutoinstall,
 
   pythonFunctions,
   rubyFunctions,
