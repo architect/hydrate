@@ -32,7 +32,9 @@ module.exports = function getRequires ({ dir, file, update }) {
     if (arg.type === 'Literal') called.push(arg.value)
   })
 
-  let deps = called.filter(r => /^(\w|@)/.test(r) && !builtins.includes(r))
+  let isPkg = /^(\w|@)/
+  let isArcShared = /^@architect(\/|\\)(shared|views)/
+  let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !builtins.includes(r))
 
   return deps
 }
