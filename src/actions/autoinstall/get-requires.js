@@ -1,15 +1,19 @@
 let { readFileSync } = require('fs')
 let { builtinModules: builtins } = require('module')
-let esprima = require('esprima')
+let acorn = require('acorn')
+let loose = require('acorn-loose')
 let esquery = require('esquery')
 
 module.exports = function getRequires ({ dir, file, update }) {
   let contents = readFileSync(file).toString()
-  let ast = esprima.parse(contents, { tokens: true })
-  let hasRequire = ast.tokens.some(({ value }) => value === 'require')
+  let opts = { ecmaVersion: 'latest' }
+  var tokens = [ ...acorn.tokenizer(contents, opts) ]
+  let hasRequire = tokens.some(({ value }) => value === 'require')
 
-  // Exit early if module doesn't have any dependencies
+  // Exit early if module doesn't require any dependencies
   if (!hasRequire) return
+
+  let ast = loose.parse(contents, opts)
 
   let called = []
   let requires = esquery.query(ast, `[callee.name='require']`)
