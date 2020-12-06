@@ -1,3 +1,5 @@
+let tiny = require('tiny-json-http')
+
 exports.handler = async function http (req) {
   console.log(req)
   return {

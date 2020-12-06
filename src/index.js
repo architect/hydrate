@@ -1,14 +1,12 @@
 let glob = require('glob')
 let series = require('run-series')
-let { existsSync } = require('fs')
-let { dirname, join, sep } = require('path')
-let print = require('./_printer')
-let child = require('child_process')
-let shared = require('./shared')
+let { dirname } = require('path')
 let stripAnsi = require('strip-ansi')
 let { pathToUnix, updater } = require('@architect/utils')
 let inventory = require('@architect/inventory')
-let rm = require('rimraf')
+let { isDep, ignoreDeps, stripCwd } = require('./lib')
+let shared = require('./shared')
+let actions = require('./actions')
 
 /**
  * Installs deps into or updates current deps in:
@@ -35,19 +33,14 @@ function hydrator (inventory, installing, params, callback) {
   let { inv } = inventory
   let {
     // Main params
+    autoinstall = false,
     basepath,
-    env,
-    shell,
-    timeout,
     quiet,
     verbose,
     // Isolation / sandbox
     copyShared = true,
     hydrateShared = true
   } = params
-
-  // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
-  let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
 
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
@@ -62,23 +55,19 @@ function hydrator (inventory, installing, params, callback) {
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
   let dir = basepath || '.'
   // Get everything except shared
-  let files = glob.sync(pattern(dir)).filter(function filter (file) {
+  let files = glob.sync(pattern(dir)).filter(file => {
     file = pathToUnix(file)
-    if (file.includes('node_modules') || file.includes('vendor/bundle')) return false
+    if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
     if (viewsDir && file.includes(viewsDir)) return false
     return true
   })
-  // Get shared + views
-  //   or disable if we're hydrating a single function in total isolation (e.g. sandbox startup)
+  // Get shared + views (or skip if hydrating a single isolated function, e.g. sandbox startup)
   if (hydrateShared) {
-    let sharedFiles = glob.sync(pattern(process.cwd())).filter(function filter (file) {
-      file = pathToUnix(file)
-      if (file.includes('node_modules') || file.includes('vendor/bundle')) return false
-      if (sharedDir && file.includes(sharedDir)) return true
-      if (viewsDir && file.includes(viewsDir)) return true
-    })
-    files = files.concat(sharedFiles)
+
+    let sharedManifest = (sharedDir && glob.sync(pattern(sharedDir)).filter(ignoreDeps)) || []
+    let viewsManifest = (viewsDir && glob.sync(pattern(viewsDir)).filter(ignoreDeps)) || []
+    files = files.concat(sharedManifest, viewsManifest)
   }
 
   /**
@@ -125,116 +114,36 @@ function hydrator (inventory, installing, params, callback) {
       term: { stdout: init }
     }
   }
+  // The job queue
+  let ops = []
 
-  let ops = files.map(file => {
-    let cwd = dirname(file)
-    let options = { cwd, env, shell, timeout }
-    return function hydration (callback) {
-      let start
-      let now = Date.now()
+  // Run the autoinstaller first in case we need to add any new manifests to the ops
+  if (autoinstall) {
+    let checks = [ ...inv.lambdaSrcDirs ]
+    if (sharedDir) checks.push(sharedDir)
+    if (viewsDir) checks.push(viewsDir)
+    // Ignore directories already known to have a manifest
+    let dirs = checks.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
+    // Allow scoping to a single directory
+    if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d)) === pathToUnix(stripCwd(basepath)))
+    let installing = actions.autoinstall({ dirs, update, inventory, ...params })
+    files = files.concat(installing)
+  }
 
-      // Prints and executes the command
-      function exec (cmd, opts, callback) {
-        let relativePath = cwd !== '.' ? cwd : 'project root'
-        let done = `${action}ed ${relativePath}${sep}`
-        start = update.start(`${action}ing ${relativePath}${sep}`)
-
-        child.exec(cmd, opts,
-          function (err, stdout, stderr) {
-          // If zero output, acknowledge *something* happened
-            if (!err && !stdout && !stderr) {
-              update.cancel()
-              stdout = `Done in ${(Date.now() - now) / 1000}s`
-            }
-            let params = { err, stdout, stderr, cmd, done, start, update, verbose }
-            print(params, callback)
-          })
-      }
-
-      let isJs = file.endsWith('package.json')
-      let isPy = file.endsWith('requirements.txt')
-      let isRb = file.endsWith('Gemfile')
-
-      series([
-        function clear (callback) {
-          if (installing) {
-            // Remove existing package dir first to prevent side effects from symlinking
-            let dir
-            if (isJs) dir = join(cwd, 'node_modules')
-            if (isPy) dir = join(cwd, 'vendor')
-            if (isRb) dir = join(cwd, 'vendor', 'bundle')
-            rm(dir, callback)
-          }
-          else callback()
-        },
-        function install (callback) {
-          // TODO: I think we should consider what minimum version of node/npm this
-          // module needs to use as the npm commands below have different behaviour
-          // depending on npm version - and enshrine those in the package.json
-          let exists = file => existsSync(join(cwd, file))
-
-          // Install JS deps
-          if (isJs && installing) {
-            if (exists('package-lock.json')) {
-              exec(`npm ci`, options, callback)
-            }
-            else if (exists('yarn.lock')) {
-              let local = join(cwd, 'node_modules', 'yarn')
-              let cmd = local ? 'npx yarn' : 'yarn'
-              exec(cmd, options, callback)
-            }
-            else {
-              exec(`npm i`, options, callback)
-            }
-          }
-
-          // Update JS deps
-          else if (isJs && !installing) {
-            if (exists('yarn.lock')) {
-              let local = join(cwd, 'node_modules', 'yarn')
-              let cmd = local ? 'npx yarn upgrade' : 'yarn upgrade'
-              exec(cmd, options, callback)
-            }
-            else {
-              exec(`npm update`, options, callback)
-            }
-          }
-
-          // Install Python deps
-          else if (isPy && installing) {
-            exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
-          }
-
-          // Update Python deps
-          // TODO: pip requires manual locking (via two requirements.txt files) so we dont test update w/ python
-          // ... thus, it may not make sense to execute this at all
-          else if (isPy && !installing) {
-            exec(`pip3 install -r requirements.txt -t ./vendor -U --upgrade-strategy eager`, options, callback)
-          }
-
-          // Install Ruby deps
-          else if (isRb && installing) {
-            exec(`bundle install --path vendor/bundle`, options, callback)
-          }
-
-          // Update Ruby deps
-          else if (isRb && !installing) {
-            exec(`bundle update`, options, callback)
-          }
-
-          else {
-            callback()
-          }
-        }
-      ], callback)
-    }
+  // Install + update
+  files.sort().forEach(file => {
+    ops.push(callback => actions.hydrate({
+      action,
+      file,
+      installing,
+      update,
+      ...params
+    }, callback))
   })
 
   // Usually run shared hydration
   if (copyShared) {
-    ops.push(function (callback) {
-      shared({ ...params, update, inventory }, callback)
-    })
+    ops.push(callback => shared({ update, inventory, ...params }, callback))
   }
 
   series(ops, function done (err, result) {

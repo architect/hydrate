@@ -10,6 +10,7 @@ let {
   resetAndCopyShared,
   checkFolderCreation,
   arcHttp,
+  arcAutoinstall,
   nodeFunctions,
   pythonDependencies,
   rubyDependencies,
@@ -32,7 +33,7 @@ let symlink = true
 // As of late 2020, this test passes GHCI in both windows-latest and windows-2016
 // This is strange, bc windows-2016 should be running a pre-Windows-symlink build (10.0.14393 Build 3930)
 // See: https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-test(`[Symlinking] install with symlink hydrates all Functions', shared and views dependencies`, t => {
+test(`[Symlinking] install() with symlink hydrates all Functions', shared and views dependencies (autoinstall enabled)`, t => {
   let count =
     pythonDependencies.length +
     rubyDependencies().length +
@@ -42,10 +43,10 @@ test(`[Symlinking] install with symlink hydrates all Functions', shared and view
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length + 3
+    nodeViewsDependencies.length + 4
   t.plan(count)
   resetAndCopyShared(t, function () {
-    hydrate.install({ symlink }, function (err) {
+    hydrate.install({ symlink, autoinstall: true }, function (err) {
       if (err) t.fail(err)
       else {
         pythonDependencies.forEach(p => {
@@ -75,6 +76,9 @@ test(`[Symlinking] install with symlink hydrates all Functions', shared and view
         nodeViewsDependencies.forEach(p => {
           t.ok(existsSync(p), `node views dependency exists at ${p}`)
         })
+        // Autoinstall-specific tests
+        let marker = join(arcAutoinstall[0], '.arc-autoinstall')
+        t.ok(existsSync(marker), 'Found autoinstall marker file')
         // Yarn-specific tests
         let yarnFunction = join(mockTmp, 'src', 'http', 'put-on_your_boots')
         let yarnIntFile = join(yarnFunction, 'node_modules', '.yarn-integrity')
@@ -105,6 +109,52 @@ test(`[Symlinking] install (specific path / single path) hydrates only Functions
         t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
         t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
         t.ok(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+        checkFolderCreation(t)
+      }
+    })
+  })
+})
+
+test(`[Symlinking] install (specific path / single path) in a manifest-free function adds missing deps with autoinstall enabled`, t => {
+  t.plan(7)
+  resetAndCopyShared(t, function () {
+    let basepath = nodeFunctions[1]
+    hydrate.install({ basepath, symlink, autoinstall: true }, function (err) {
+      if (err) t.fail(err)
+      else {
+        // Check to see if files that are supposed to be there are actually there
+        t.ok(existsSync(nodeDependencies[1]), `scoped install for ${nodeFunctions[1]} installed dependencies in ${nodeDependencies[1]}`)
+        t.notOk(existsSync(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
+        let arcFileArtifact = arcFileArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let sharedArtifact = sharedArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let viewsArtifact = viewsArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        t.ok(existsSync(nodeSharedDependencies[1]), `node shared dependency exists at ${nodeSharedDependencies[1]}`)
+        t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
+        t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
+        t.notOk(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+        checkFolderCreation(t)
+      }
+    })
+  })
+})
+
+test(`[Symlinking] install (specific path / single path) in a manifest-free function does not add missing deps with autoinstall disabled`, t => {
+  t.plan(7)
+  resetAndCopyShared(t, function () {
+    let basepath = nodeFunctions[1]
+    hydrate.install({ basepath, symlink, autoinstall: false }, function (err) {
+      if (err) t.fail(err)
+      else {
+        // Check to see if files that are supposed to be there are actually there
+        t.notOk(existsSync(nodeDependencies[1]), `scoped install for ${nodeFunctions[1]} installed dependencies in ${nodeDependencies[1]}`)
+        t.notOk(existsSync(pythonDependencies[0]), `scoped install did not install dependencies for unspecified function at ${pythonDependencies[0]}`)
+        let arcFileArtifact = arcFileArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let sharedArtifact = sharedArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let viewsArtifact = viewsArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        t.ok(existsSync(nodeSharedDependencies[1]), `node shared dependency exists at ${nodeSharedDependencies[1]}`)
+        t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
+        t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
+        t.notOk(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
         checkFolderCreation(t)
       }
     })
