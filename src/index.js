@@ -118,11 +118,8 @@ function hydrator (inventory, installing, params, callback) {
 
   // Run the autoinstaller first in case we need to add any new manifests to the ops
   if (autoinstall) {
-    let checks = [ ...inv.lambdaSrcDirs ]
-    if (sharedDir) checks.push(sharedDir)
-    if (viewsDir) checks.push(viewsDir)
     // Ignore directories already known to have a manifest
-    let dirs = checks.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
+    let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
     // Allow scoping to a single directory
     if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d)) === pathToUnix(stripCwd(basepath)))
     let installing = actions.autoinstall({ dirs, update, inventory, ...params })
