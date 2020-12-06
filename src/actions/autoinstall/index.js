@@ -32,7 +32,7 @@ module.exports = function autoinstaller (params) {
       files.forEach(f => {
         let deps = getRequires({ dir, file: join(dir, f), update })
         if (deps) {
-          deps = deps.filter(d => d === 'aws-sdk') // Already present at runtime
+          deps = deps.filter(d => d !== 'aws-sdk') // Already present at runtime
           deps = [ ...new Set(deps.sort()) ] // Dedupe
           let dependencies = {}
           deps.forEach(dep => dependencies[dep] = packageJsonDeps[dep] || 'latest')
