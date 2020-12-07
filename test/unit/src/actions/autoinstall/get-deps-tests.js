@@ -12,6 +12,12 @@ function pkgify (deps, devDeps, lock) {
   return JSON.stringify(tmpl, null, 2)
 }
 let inventory = { inv: { _project: { src: process.cwd() } } }
+let run = fs => {
+  mockFs(fs)
+  let result = getDeps(inventory)
+  mockFs.restore()
+  return result
+}
 
 test('Set up env', t => {
   t.plan(1)
@@ -22,8 +28,7 @@ test('package.json', t => {
   t.plan(4)
   let result
 
-  mockFs({})
-  result = getDeps(inventory)
+  result = run({})
   t.deepEqual(result, {}, 'Got back empty object with no package.json present')
   console.log(result)
 
@@ -31,8 +36,7 @@ test('package.json', t => {
     foo: '1.0.0',
     bar: '2.0.0',
   }
-  mockFs({ 'package.json': pkgify(deps) })
-  result = getDeps(inventory)
+  result = run({ 'package.json': pkgify(deps) })
   t.deepEqual(result, deps, 'Got back dependencies (only)')
   console.log(result)
 
@@ -40,17 +44,13 @@ test('package.json', t => {
     foo: '3.0.0',
     bar: '4.0.0',
   }
-  mockFs({ 'package.json': pkgify(null, devDeps) })
-  result = getDeps(inventory)
+  result = run({ 'package.json': pkgify(null, devDeps) })
   t.deepEqual(result, devDeps, 'Got back devDependencies (only)')
   console.log(result)
 
-  mockFs({ 'package.json': pkgify(deps, devDeps) })
-  result = getDeps(inventory)
+  result = run({ 'package.json': pkgify(deps, devDeps) })
   t.deepEqual(result, deps, 'Dependencies won over devDependencies')
   console.log(result)
-
-  mockFs.restore()
 })
 
 test('package.json + package-lock.json', t => {
@@ -68,11 +68,10 @@ test('package.json + package-lock.json', t => {
     foo: { version: '1.2.3' },
     bar: { version: '2.3.4' },
   }
-  mockFs({
+  result = run({
     'package.json': pkgify(deps),
     'package-lock.json': pkgify(lockDeps, null, 1),
   })
-  result = getDeps(inventory)
   correct = deps = {
     foo: '1.2.3',
     bar: '2.3.4',
@@ -88,11 +87,10 @@ test('package.json + package-lock.json', t => {
     bar: { version: '2.3.4' },
     baz: { version: '3.4.5' },
   }
-  mockFs({
+  result = run({
     'package.json': pkgify(deps),
     'package-lock.json': pkgify(lockDeps, null, 1),
   })
-  result = getDeps(inventory)
   correct = deps = {
     foo: '^1.0.0',
     bar: '2.3.4',
