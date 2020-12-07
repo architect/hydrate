@@ -37,7 +37,7 @@ module.exports = function shared (params = {}, callback) {
       if (shared || views) {
         start = update.status('Hydrating app with shared files')
       }
-      paths = getPaths(inventory, 'shared')
+      paths = getPaths(inventory)
       callback()
     },
     function (callback) {

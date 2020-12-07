@@ -16,12 +16,14 @@ let isShared = opt => opt === 'shared' || opt === '--shared' || opt === '-s'
 let isUpdate = opt => opt === 'update' || opt === '--update' || opt === '-u' ||
                       opt === 'upgrade' || opt === '--upgrade' // jic
 let isVerbose = opt => opt === 'verbose' || opt === '--verbose' || opt === '-v'
+let isAutoinstall = opt => opt === 'autoinstall' || opt === '--autoinstall'
 
 // eslint-disable-next-line
 async function cmd (opts = []) {
 
   let args = {
-    verbose: opts.some(isVerbose)
+    verbose: opts.some(isVerbose),
+    autoinstall: opts.some(isAutoinstall),
   }
 
   if (opts.some(isShared)) {

@@ -1,12 +1,13 @@
 let { sync: glob } = require('glob')
 let series = require('run-series')
-let { dirname } = require('path')
+let { dirname, join } = require('path')
 let stripAnsi = require('strip-ansi')
 let { pathToUnix, updater } = require('@architect/utils')
 let inventory = require('@architect/inventory')
 let { isDep, ignoreDeps, stripCwd } = require('./lib')
 let shared = require('./shared')
 let actions = require('./actions')
+let cleanup = require('./_cleanup')
 
 /**
  * Installs deps into or updates current deps in:
@@ -41,7 +42,7 @@ function hydrator (inventory, installing, params, callback) {
     copyShared = true,
     hydrateShared = true
   } = params
-
+  let autoinstalled // Assigned later
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
   // From here on out normalize all file comparisons to Unix paths
@@ -117,13 +118,17 @@ function hydrator (inventory, installing, params, callback) {
   let ops = []
 
   // Run the autoinstaller first in case we need to add any new manifests to the ops
-  if (autoinstall) {
+  if (autoinstall && installing) {
     // Ignore directories already known to have a manifest
     let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
     // Allow scoping to a single directory
     if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d)) === pathToUnix(stripCwd(basepath)))
-    let installing = actions.autoinstall({ dirs, update, inventory, ...params })
-    files = files.concat(installing)
+    let result = actions.autoinstall({ dirs, update, inventory, ...params })
+    if (result.length) {
+      autoinstalled = result
+      let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file)))
+      files = files.concat(install)
+    }
   }
 
   // Install + update
@@ -143,6 +148,9 @@ function hydrator (inventory, installing, params, callback) {
   }
 
   series(ops, function done (err, result) {
+    // Tidy up before exiting
+    cleanup(autoinstalled)
+
     result = [].concat.apply([], result) // Flatten the nested shared array
     if (init) result.unshift(init) // Bump init logging to the top
     if (err) callback(err, result)

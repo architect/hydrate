@@ -77,8 +77,8 @@ test(`[Symlinking] install() with symlink hydrates all Functions', shared and vi
           t.ok(existsSync(p), `node views dependency exists at ${p}`)
         })
         // Autoinstall-specific tests
-        let marker = join(arcAutoinstall[0], '.arc-autoinstall')
-        t.ok(existsSync(marker), 'Found autoinstall marker file')
+        let package = join(arcAutoinstall[0], 'node_modules', '_arc-autoinstall', 'package.json')
+        t.ok(existsSync(package), 'Found autoinstall package.json')
         // Yarn-specific tests
         let yarnFunction = join(mockTmp, 'src', 'http', 'put-on_your_boots')
         let yarnIntFile = join(yarnFunction, 'node_modules', '.yarn-integrity')

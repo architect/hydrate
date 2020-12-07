@@ -6,7 +6,7 @@
 
 ### Added
 
-- TBA
+- Added support for automated dependency management (`autoinstall`)
 
 ---
 
