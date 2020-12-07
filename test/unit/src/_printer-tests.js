@@ -1,5 +1,5 @@
 let test = require('tape')
-let print = require('../../src/_printer')
+let print = require('../../../src/_printer')
 let stripAnsi = require('strip-ansi')
 let { updater } = require('@architect/utils')
 // process.env.CI = true
