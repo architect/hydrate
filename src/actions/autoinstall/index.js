@@ -1,8 +1,9 @@
-let { existsSync, readFileSync, writeFileSync } = require('fs')
+let { writeFileSync } = require('fs')
 let { join } = require('path')
 let { sync: glob } = require('glob')
 let rm = require('rimraf').sync
 let { ignoreDeps } = require('../../lib')
+let getDeps = require('./get-deps')
 let getRequires = require('./get-requires')
 
 module.exports = function autoinstaller (params) {
@@ -12,10 +13,8 @@ module.exports = function autoinstaller (params) {
   let installing = [] // Generated manifests to be hydrated later (if there are no parsing failures)
   let failures = []   // Userland files that could not be parsed
 
-  // Get package.json contents and map out root dependencies
-  let packageJson = join(process.cwd(), 'package.json')
-  let package = existsSync(packageJson) && JSON.parse(readFileSync(packageJson)) || {}
-  let packageJsonDeps = Object.assign(package.devDependencies || {}, package.dependencies || {})
+  // Get package[-lock] dependencies
+  let allDeps = getDeps(inventory)
 
   update.start('Finding dependencies')
   // Stats
@@ -61,7 +60,7 @@ module.exports = function autoinstaller (params) {
 
       // Build the manifest
       let dependencies = {}
-      dirDeps.forEach(dep => dependencies[dep] = packageJsonDeps[dep] || 'latest')
+      dirDeps.forEach(dep => dependencies[dep] = allDeps[dep] || 'latest')
       let lambdaPackage = {
         _arc: 'autoinstall',
         _module: 'hydrate',
