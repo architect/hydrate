@@ -8,6 +8,11 @@
 
 - Added support for automated dependency management (`autoinstall`)
 
+
+### Fixed
+
+- Fixed `npm` + `yarn` calls installing developer dependencies in Lambdas; fixes #1034, thanks @BenoitAverty!
+
 ---
 
 ## [1.8.0] 2020-12-03
