@@ -11,10 +11,11 @@ module.exports = function hydrator (params, callback) {
   let options = { cwd, env, shell, timeout }
   let start
   let now = Date.now()
+  let isRoot = cwd === '.'
 
   // Prints and executes the command
   function exec (cmd, opts, callback) {
-    let relativePath = cwd !== '.' ? cwd : 'project root'
+    let relativePath = isRoot ? 'project root' : cwd
     let done = `${action}ed ${relativePath}${sep}`
     start = update.start(`${action}ing ${relativePath}${sep}`)
 
@@ -54,16 +55,17 @@ module.exports = function hydrator (params, callback) {
 
       // Install JS deps
       if (isJs && installing) {
+        let prodFlag = isRoot ? '' : '--production'
         if (exists('package-lock.json')) {
-          exec(`npm ci`, options, callback)
+          exec(`npm ci ${prodFlag}`, options, callback)
         }
         else if (exists('yarn.lock')) {
           let local = join(cwd, 'node_modules', 'yarn')
-          let cmd = local ? 'npx yarn' : 'yarn'
+          let cmd = local ? `npx yarn ${prodFlag}` : `yarn ${prodFlag}`
           exec(cmd, options, callback)
         }
         else {
-          exec(`npm i`, options, callback)
+          exec(`npm i ${prodFlag}`, options, callback)
         }
       }
 
