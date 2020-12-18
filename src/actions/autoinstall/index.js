@@ -1,20 +1,20 @@
 let { writeFileSync } = require('fs')
 let { join } = require('path')
-let { sync: glob } = require('glob')
-let rm = require('rimraf').sync
-let { ignoreDeps } = require('../../lib')
-let getDeps = require('./get-root-deps')
-let getRequires = require('./get-requires')
+let getRootDeps = require('./get-root-deps')
+let getDirDeps = require('./get-dir-deps')
 
 module.exports = function autoinstaller (params) {
   let { dirs, inventory, update, verbose } = params
   if (!dirs.length) return []
 
-  let installing = [] // Generated manifests to be hydrated later (if there are no parsing failures)
-  let failures = []   // Userland files that could not be parsed
+  // Generated manifests to be hydrated later (if there are no parsing failures)
+  let installing = []
+
+  // Userland files that could not be parsed
+  let failures = []
 
   // Get package[-lock] dependencies
-  let allDeps = getDeps(inventory)
+  let allDeps = getRootDeps(inventory)
 
   update.start('Finding dependencies')
   // Stats
@@ -31,36 +31,18 @@ module.exports = function autoinstaller (params) {
     // Autoinstall is currently Node.js only - exit early if it's another runtime
     if (!lambda.config.runtime.startsWith('nodejs')) return
     try {
-      // Clean everything out bebefore we get going jic
-      rm(join(dir, 'node_modules'))
-
-      // Collection of all dependencies from all files in this directory
-      let dirDeps = []
-
-      // Gather ye business logic while ye may
-      let files = glob('**/*.js', { cwd: dir }).filter(ignoreDeps)
-      files.forEach(f => {
-        projectFiles++
-        try {
-          let deps = getRequires({ dir, file: join(dir, f), update })
-          if (deps) dirDeps = dirDeps.concat(deps)
-        }
-        catch (error) {
-          failures.push({ file: join(dir, f), error })
-        }
-      })
-
-      // Tidy up the dependencies
-      dirDeps = [ ...new Set(dirDeps.sort()) ] // Dedupe
-      dirDeps = dirDeps.filter(d => d !== 'aws-sdk') // Already present at runtime
+      let result = getDirDeps({ dir, update })
+      let { deps, files } = result
+      projectFiles += files.length
+      failures = failures.concat(result.failures)
 
       // Exit now if there are no deps to write
-      if (!dirDeps.length) return
-      totalDeps += dirDeps.length
+      if (!deps.length) return
+      totalDeps += deps.length
 
       // Build the manifest
       let dependencies = {}
-      dirDeps.forEach(dep => dependencies[dep] = allDeps[dep] || 'latest')
+      deps.forEach(dep => dependencies[dep] = allDeps[dep] || 'latest')
       let lambdaPackage = {
         _arc: 'autoinstall',
         _module: 'hydrate',
