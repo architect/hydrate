@@ -3,7 +3,7 @@ let { join } = require('path')
 let { sync: glob } = require('glob')
 let rm = require('rimraf').sync
 let { ignoreDeps } = require('../../lib')
-let getDeps = require('./get-deps')
+let getDeps = require('./get-root-deps')
 let getRequires = require('./get-requires')
 
 module.exports = function autoinstaller (params) {

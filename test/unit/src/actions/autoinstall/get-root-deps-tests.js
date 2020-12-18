@@ -1,7 +1,7 @@
 let { join } = require('path')
 let test = require('tape')
 let mockFs = require('mock-fs')
-let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'get-deps')
+let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'get-root-deps')
 let getDeps = require(sut)
 
 function pkgify (deps, devDeps, lock) {
