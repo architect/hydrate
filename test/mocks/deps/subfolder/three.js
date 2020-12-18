@@ -1,3 +1,3 @@
 let something = {
-  c: require('c')
+  f: require('f')
 }

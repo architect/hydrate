@@ -20,14 +20,14 @@ test(`Walk a folder's deps`, t => {
   }
   let { deps, failures, files } = getLambdaDeps({ dir: mock, update })
   process.stdout.write = stdout
-  let correct = [ 'a', 'b', 'c', 'd', 'e' ]
+  let correct = [ '@a/package', '@b/package', 'c', 'd', 'e', 'f', 'g', 'h' ]
 
-  t.deepEqual(deps.sort(), correct, `Got correct deps`)
+  t.deepEqual(deps.sort((a) => a.startsWith('@') ? 1 : 1), correct, `Got correct deps`)
   console.log(correct)
 
   t.notOk(failures.length, 'Got no failures')
 
-  t.equal(files.length, 6, 'Scanned walked six js files')
+  t.equal(files.length, 6, 'Walked 6 js files')
   console.log(files.sort())
 
   t.ok(data.includes(`'something'`), 'Warned about dynamic require')

@@ -1,3 +1,3 @@
 function idk () {
-  let b = require('b')
+  let e = require('e')
 }
