@@ -2,7 +2,7 @@ let { join } = require('path')
 let test = require('tape')
 let mockFs = require('mock-fs')
 let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'get-root-deps')
-let getDeps = require(sut)
+let getRootDeps = require(sut)
 
 function pkgify (deps, devDeps, lock) {
   let tmpl = { name: 'app' }
@@ -14,14 +14,14 @@ function pkgify (deps, devDeps, lock) {
 let inventory = { inv: { _project: { src: process.cwd() } } }
 let run = fs => {
   mockFs(fs)
-  let result = getDeps(inventory)
+  let result = getRootDeps(inventory)
   mockFs.restore()
   return result
 }
 
 test('Set up env', t => {
   t.plan(1)
-  t.ok(getDeps, 'Dependency getter module is present')
+  t.ok(getRootDeps, 'Dependency getter module is present')
 })
 
 test('package.json', t => {
