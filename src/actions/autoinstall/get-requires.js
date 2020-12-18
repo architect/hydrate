@@ -1,4 +1,5 @@
 let { readFileSync } = require('fs')
+let { sep } = require('path')
 let { builtinModules: builtins } = require('module')
 let loose = require('acorn-loose')
 let esquery = require('esquery')
@@ -36,6 +37,12 @@ module.exports = function getRequires ({ dir, file, update }) {
   let isPkg = /^(\w|@)/
   let isArcShared = /^@architect(\/|\\)(shared|views)/
   let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !builtins.includes(r))
+  deps = deps.map(dep => {
+    if (dep.includes(sep)) return dep.startsWith('@')
+      ? dep.split(sep).slice(0, 2).join(sep)
+      : dep.split(sep)[0]
+    return dep
+  })
 
   return deps
 }
