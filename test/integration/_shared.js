@@ -4,7 +4,7 @@ let rm = require('rimraf')
 let cp = require('cpr')
 let glob = require('glob')
 
-let mockSource    = join(__dirname, '..', 'mock')
+let mockSource    = join(__dirname, '..', 'mocks', 'normal')
 let mockTmp       = join(__dirname, '..', 'tmp')
 let pythonShared  = join('vendor', 'shared')
 let rubyShared    = join('vendor', 'shared')
