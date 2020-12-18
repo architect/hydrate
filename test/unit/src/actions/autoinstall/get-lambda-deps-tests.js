@@ -1,14 +1,14 @@
 let { join } = require('path')
 let test = require('tape')
-let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'get-dir-deps')
-let getDirDeps = require(sut)
+let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'get-lambda-deps')
+let getLambdaDeps = require(sut)
 let mock = join(process.cwd(), 'test', 'mocks', 'deps')
 let { updater } = require('@architect/utils')
 let update = updater('Hydrate')
 
 test('Set up env', t => {
   t.plan(1)
-  t.ok(getDirDeps, 'Dependency getter module is present')
+  t.ok(getLambdaDeps, 'Dependency getter module is present')
 })
 
 test(`Walk a folder's deps`, t => {
@@ -18,7 +18,7 @@ test(`Walk a folder's deps`, t => {
   process.stdout.write = write => {
     data += write
   }
-  let { deps, failures, files } = getDirDeps({ dir: mock, update })
+  let { deps, failures, files } = getLambdaDeps({ dir: mock, update })
   process.stdout.write = stdout
   let correct = [ 'a', 'b', 'c', 'd', 'e' ]
 
