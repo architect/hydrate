@@ -1,4 +1,3 @@
-.arc-autoinstall
 .nyc_output/
 coverage/
 node_modules/
