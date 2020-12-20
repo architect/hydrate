@@ -2,6 +2,7 @@ let cp = require('./copy')
 let { join } = require('path')
 let series = require('run-series')
 let print = require('../_printer')
+let { stripCwd } = require('../lib')
 
 /**
  * copies shared
@@ -21,8 +22,8 @@ module.exports = function copyShared (params, paths, callback) {
   if (hasShared && go) {
     let { src, shared } = inv.shared
     // Kick off logging
-    let done = `Hydrated app with ${src}`
-    let start = update.start(`Hydrating app with ${src}`)
+    let done = `Hydrated app with shared: ${stripCwd(src)}`
+    let start = update.start(`Hydrating app with shared: ${stripCwd(src)}`)
 
     series(shared.map(share => {
       return function copier (callback) {

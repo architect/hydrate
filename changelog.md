@@ -2,7 +2,7 @@
 
 ---
 
-## [1.9.0 - 1.9.1] 2020-12-05
+## [1.9.0 - 1.9.2] 2020-12-05
 
 ### Added
 
@@ -13,6 +13,7 @@
 ### Fixed
 
 - Fixed `npm` + `yarn` calls installing developer dependencies in Lambdas; fixes #1034, thanks @BenoitAverty!
+- Fixed shared/views autoinstall package.json paths and path printing
 
 ---
 

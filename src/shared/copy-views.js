@@ -2,6 +2,7 @@ let cp = require('./copy')
 let { join } = require('path')
 let series = require('run-series')
 let print = require('../_printer')
+let { stripCwd } = require('../lib')
 
 /**
  * copies views
@@ -21,8 +22,8 @@ module.exports = function copyViews (params, paths, callback) {
   if (hasViews && go) {
     let { src, views } = inv.views
     // Kick off logging
-    let done = `Hydrated app with views: ${src}`
-    let start = update.start(`Hydrating app with ${src}`)
+    let done = `Hydrated app with views: ${stripCwd(src)}`
+    let start = update.start(`Hydrating app with views: ${stripCwd(src)}`)
 
     series(views.map(view => {
       return function copier (callback) {
