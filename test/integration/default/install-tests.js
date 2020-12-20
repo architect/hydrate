@@ -2,12 +2,14 @@ let { join } = require('path')
 let {
   existsSync,
   mkdirSync,
+  readFileSync,
   writeFileSync
 } = require('fs')
 let test = require('tape')
 let {
   reset,
   resetAndCopyShared,
+  resetAndCopySharedAutoinstall,
   checkFolderCreation,
   arcHttp,
   arcAutoinstall,
@@ -81,6 +83,41 @@ test(`[Default (file copying)] install() hydrates all Functions', shared and vie
         let pkgLockFile = join(yarnFunction, 'package-lock.json')
         t.ok(existsSync(yarnIntFile), 'Found yarn integrity file')
         t.notOk(existsSync(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
+        checkFolderCreation(t)
+      }
+    })
+  })
+})
+
+test(`[Default (file copying)] install() hydrates all Functions', shared and views dependencies (autoinstall enabled, no package files in shared)`, t => {
+  t.plan(7)
+  resetAndCopySharedAutoinstall(t, function () {
+    hydrate.install({ autoinstall: true }, function (err) {
+      if (err) t.fail(err)
+      else {
+        // Autoinstall-specific tests
+        let package = join(arcAutoinstall[0], 'node_modules', '_arc-autoinstall', 'package.json')
+        t.ok(existsSync(package), 'Found autoinstall package.json')
+        let autoinstall = JSON.parse(readFileSync(package))
+        let _parsed = [
+          'index.js',
+          'src/shared/shared.js',
+          'src/views/views.js'
+        ]
+        let dependencies = {
+          cpr: 'latest',
+          'run-series': 'latest',
+          'tiny-json-http': 'latest'
+        }
+        t.deepEqual(autoinstall._parsed, _parsed, 'Autoinstall walked shared + views')
+        t.deepEqual(autoinstall.dependencies, dependencies, 'Autoinstall installed shared + views deps')
+        // Check to see if files that are supposed to be there are actually there
+        t.ok(existsSync(nodeDependencies[1]), `scoped install for ${nodeFunctions[0]} installed dependencies in ${nodeDependencies[1]}`)
+        let path = join(arcHttp[2], 'node_modules')
+        let sharedDep = join(path, 'cpr')
+        let viewsDep = join(path, 'run-series')
+        t.ok(existsSync(sharedDep), 'Autoinstalled shared dependency')
+        t.ok(existsSync(viewsDep), 'Autoinstalled views dependency')
         checkFolderCreation(t)
       }
     })

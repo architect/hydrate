@@ -155,6 +155,14 @@ function resetAndCopyShared (t, callback) {
     })
   })
 }
+function resetAndCopySharedAutoinstall (t, callback) {
+  reset(t, function () {
+    cp('_shared-autoinstall', '.', { overwrite: true }, function done (err) {
+      if (err) t.fail(err)
+      else callback()
+    })
+  })
+}
 function resetAndCopySharedCustom (t, callback) {
   reset(t, function () {
     cp('_shared-custom', '.', { overwrite: true }, function done (err) {
@@ -171,6 +179,7 @@ let checkFolderCreation = t => t.notOk(existsSync(join('src', 'events', 'silence
 module.exports = {
   reset,
   resetAndCopyShared,
+  resetAndCopySharedAutoinstall,
   resetAndCopySharedCustom,
   checkFolderCreation,
 
