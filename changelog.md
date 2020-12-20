@@ -6,7 +6,8 @@
 
 ### Added
 
-- Added support for automated dependency management (`autoinstall`)
+- Added support for automated dependency management (aka Lambda treeshaking) via `autoinstall` param
+  - This feature currently only supports Node.js dependencies
 
 
 ### Fixed

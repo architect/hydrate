@@ -25,9 +25,10 @@ using the following package managers:
 
 `options` object can include the following properties:
 
-- `basepath`: What path hydrate should consider as the root for searching for functions to hydrate. Useful if you want to hydrate a subset of functions. Defaults to `src` in the current working directory.
-- `install`: If truthy, will invoke [`hydrate.install()`][install].
-- `update`: If truthy, will invoke [`hydrate.update()`][update].
+- `basepath`: filesystem path hydrate should consider as the root for searching for functions to hydrate Useful if you want to hydrate a subset of functions; defaults the current working directory
+- `autoinstall`: if truthy, enables automated Lambda dependency treeshaking via static code analysis; defaults to `false`
+- `install`: if truthy, will invoke [`hydrate.install()`][install]
+- `update`: if truthy, will invoke [`hydrate.update()`][update]
 
 By default, invokes [`hydrate.shared()`][shared].
 
