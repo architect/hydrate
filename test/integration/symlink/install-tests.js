@@ -1,4 +1,4 @@
-let { join } = require('path')
+let { join, sep } = require('path')
 let {
   existsSync,
   mkdirSync,
@@ -105,8 +105,8 @@ test(`[Symlinking] install() hydrates all Functions', shared and views dependenc
         let autoinstall = JSON.parse(readFileSync(package))
         let _parsed = [
           'index.js',
-          'src/shared/shared.js',
-          'src/views/views.js'
+          `src${sep}shared${sep}shared.js`,
+          `src${sep}views${sep}views.js`,
         ]
         let dependencies = {
           cpr: 'latest',
