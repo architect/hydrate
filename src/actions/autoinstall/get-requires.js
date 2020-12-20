@@ -39,7 +39,9 @@ module.exports = function getRequires ({ dir, file, update }) {
   let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !builtins.includes(r))
   deps = deps.map(dep => {
     if (dep.includes(sep)) return dep.startsWith('@')
+      // Get '@foo/bar' from `@foo/bar' or '@foo/bar/baz/buz'
       ? dep.split(sep).slice(0, 2).join(sep)
+      // Get 'foo' from `foo/bar' or 'foo/bar/baz'
       : dep.split(sep)[0]
     return dep
   })

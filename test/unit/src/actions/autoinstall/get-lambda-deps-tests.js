@@ -22,7 +22,7 @@ test(`Walk a folder's deps`, t => {
   process.stdout.write = stdout
   let correct = [ '@a/package', '@b/package', 'c', 'd', 'e', 'f', 'g', 'h' ]
 
-  t.deepEqual(deps.sort((a) => a.startsWith('@') ? 1 : 1), correct, `Got correct deps`)
+  t.deepEqual(deps.sort(), correct, `Got correct deps`)
   console.log(correct)
 
   t.notOk(failures.length, 'Got no failures')
