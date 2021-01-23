@@ -2,6 +2,20 @@
 
 ---
 
+## [1.9.3] 2021-01-23
+
+### Added
+
+- Added `installRoot` param to explicitly include the root directory in hydration operations
+
+
+### Fixed
+
+- Fixed printing correct number of functions to hydrate when Lambda treeshaking is involved
+
+---
+
+
 ## [1.9.0 - 1.9.2] 2020-12-05
 
 ### Added

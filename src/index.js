@@ -35,6 +35,7 @@ function hydrator (inventory, installing, params, callback) {
   let {
     // Main params
     autoinstall = false,
+    installRoot = false,
     basepath,
     quiet,
     verbose,
@@ -42,6 +43,8 @@ function hydrator (inventory, installing, params, callback) {
     copyShared = true,
     hydrateShared = true
   } = params
+  let updaterParams = { quiet }
+  let update = updater('Hydrate', updaterParams)
   let autoinstalled // Assigned later
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
@@ -85,6 +88,7 @@ function hydrator (inventory, installing, params, callback) {
     // Allow root project hydration of process.cwd() if passed as basepath
     let hydrateBasepath = basepath === process.cwd()
     if (hydrateBasepath && dir === '.') return true
+    if (installRoot) return true
 
     // Allow shared and views
     if (sharedDir && file.includes(sharedDir)) return true
@@ -94,12 +98,24 @@ function hydrator (inventory, installing, params, callback) {
     return inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p)) === dir)
   })
 
+  // Run the autoinstaller first in case we need to add any new manifests to the ops
+  if (autoinstall && installing) {
+    // Ignore directories already known to have a manifest
+    let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
+    // Allow scoping to a single directory
+    if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d)) === pathToUnix(stripCwd(basepath)))
+    let result = actions.autoinstall({ dirs, update, inventory, ...params })
+    if (result.length) {
+      autoinstalled = result
+      let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file)))
+      files = files.concat(install)
+    }
+  }
+
   /**
    * Build out job queue
    */
   let deps = files.length
-  let updaterParams = { quiet }
-  let update = updater('Hydrate', updaterParams)
   let init = ''
   if (deps && deps > 0) {
     let msg = `${action}ing dependencies in ${deps} path${deps > 1 ? 's' : ''}`
@@ -116,20 +132,6 @@ function hydrator (inventory, installing, params, callback) {
   }
   // The job queue
   let ops = []
-
-  // Run the autoinstaller first in case we need to add any new manifests to the ops
-  if (autoinstall && installing) {
-    // Ignore directories already known to have a manifest
-    let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
-    // Allow scoping to a single directory
-    if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d)) === pathToUnix(stripCwd(basepath)))
-    let result = actions.autoinstall({ dirs, update, inventory, ...params })
-    if (result.length) {
-      autoinstalled = result
-      let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file)))
-      files = files.concat(install)
-    }
-  }
 
   // Install + update
   files.sort().forEach(file => {
