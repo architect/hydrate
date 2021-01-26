@@ -48,6 +48,9 @@ function hydrator (inventory, installing, params, callback) {
   let autoinstalled // Assigned later
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
+  // Does this project have any Lambdae?
+  let hasLambdae = inv.lambdaSrcDirs && inv.lambdaSrcDirs.length
+
   // From here on out normalize all file comparisons to Unix paths
   let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src))
   let viewsDir = inv.views && inv.views.src && pathToUnix(stripCwd(inv.views.src))
@@ -95,11 +98,11 @@ function hydrator (inventory, installing, params, callback) {
     if (viewsDir && file.includes(viewsDir)) return true
 
     // Hydrate functions, of course
-    return inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p)) === dir)
+    return hasLambdae && inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p)) === dir)
   })
 
   // Run the autoinstaller first in case we need to add any new manifests to the ops
-  if (autoinstall && installing) {
+  if (autoinstall && installing && hasLambdae) {
     // Ignore directories already known to have a manifest
     let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
     // Allow scoping to a single directory
