@@ -2,7 +2,7 @@
 
 ---
 
-## [1.9.4] 2021-01-27
+## [1.9.4 - 1.9.5] 2021-01-27
 
 ### Added
 
@@ -12,6 +12,7 @@
 ### Fixed
 
 - Fixed `--autoinstall` flag not being detected by CLI
+- Fixed autoinstall cleanup on machines that globally disable `package-lock.json`
 
 ---
 
