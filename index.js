@@ -21,9 +21,9 @@ function hydrate (params = { install: true }, callback) {
       }
     })
   }
-  let { verbose = false, basepath = '', symlink = false } = params
+  let { autoinstall, verbose = false, basepath = '', symlink = false } = params
   if (params.install) {
-    run.install({ verbose, basepath, symlink }, callback) // `install` includes `shared`
+    run.install({ autoinstall, verbose, basepath, symlink }, callback) // `install` includes `shared`
   }
   else if (params.update) {
     run.update({ verbose, basepath, symlink }, callback) // `update` includes `shared`

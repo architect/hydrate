@@ -3,6 +3,9 @@
   "version": "1.9.3",
   "description": "Architect dependency hydrator and shared file manager",
   "main": "index.js",
+  "bin": {
+    "arc-hydrate": "./cli.js"
+  },
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
     "test:unit": "cross-env tape 'test/unit/**/*-tests.js' | tap-spec",

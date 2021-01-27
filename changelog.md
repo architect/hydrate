@@ -2,6 +2,19 @@
 
 ---
 
+## [1.9.4] 2021-01-27
+
+### Added
+
+- Added `npx` bin for standalone CLI usage (`npx arc-hydrate`)
+
+
+### Fixed
+
+- Fixed `--autoinstall` flag not being detected by CLI
+
+---
+
 ## [1.9.3] 2021-01-23
 
 ### Added
