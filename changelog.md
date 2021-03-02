@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.6] 2021-03-02
+
+### Added
+
+- Add support for Lambdas created via `@plugins` to be hydrated
+
+---
+
 ## [1.9.4 - 1.9.5] 2021-01-27
 
 ### Added
