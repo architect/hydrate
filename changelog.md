@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.7] 2021-04-12
+
+### Fixed
+
+- Fixed support for Lambdas created via `@plugins` to be hydrated with `src/shared`
+
+---
+
 ## [1.9.6] 2021-03-02
 
 ### Added

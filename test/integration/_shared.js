@@ -43,12 +43,15 @@ let arcCustomPath = [ 'in-the-clouds' ]
   .map(route => join('src', 'head', route))
   .concat([ 'anywhere' ])
 
+let arcPluginLambda = [ 'newlambda' ]
+  .map(route => join('src', 'myplugin', route))
+
 /**
  * Functions by runtime
  */
 let pythonFunctions = [ join('src', 'http', 'get-memories') ]
 let rubyFunctions = [ join('src', 'http', 'delete-badness_in_life') ]
-let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTables, arcStreams, arcCustomPath)
+let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTables, arcStreams, arcCustomPath, arcPluginLambda)
   .filter(p => !pythonFunctions.includes(p) && !rubyFunctions.includes(p))
 
 /**
