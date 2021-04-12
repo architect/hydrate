@@ -45,3 +45,9 @@ src custom-shared-folder
 src custom-views-folder
 get /
 post /up/tents
+
+@plugins
+myplugin
+
+@myplugin
+newlambda

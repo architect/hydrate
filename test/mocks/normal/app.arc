@@ -35,3 +35,9 @@ rivers
 
 @streams
 rivers
+
+@plugins
+myplugin
+
+@myplugin
+newlambda

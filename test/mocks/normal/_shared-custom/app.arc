@@ -43,3 +43,9 @@ src custom-shared-folder
 
 @views
 src custom-views-folder
+
+@plugins
+myplugin
+
+@myplugin
+newlambda

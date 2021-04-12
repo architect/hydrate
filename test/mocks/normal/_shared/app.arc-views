@@ -41,3 +41,9 @@ rivers
 @views
 get /
 post /up/tents
+
+@plugins
+myplugin
+
+@myplugin
+newlambda
