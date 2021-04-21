@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.8] 2021-04-21
+
+### Fixed
+
+- Fixed issue where multiple lambdas aliased to the same source path would cause an error when hydrating `src/shared`; fixes [#1124](https://github.com/architect/architect/issues/1124)
+
+---
+
 ## [1.9.7] 2021-04-12
 
 ### Fixed

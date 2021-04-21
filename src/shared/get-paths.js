@@ -12,12 +12,16 @@ module.exports = function getPaths (inventory) {
     // Don't create dirs for functions that don't already exist
     if (!existsSync(src)) return
     // Ok, here we go
-    let { config } = inv.lambdasBySrcDir[src]
-    let nodeModules = join(src, 'node_modules', '@architect')
-    let vendorDir = join(src, 'vendor')
-    // Allow opting out of shared/views via config.arc @arc
-    let path = config.runtime.startsWith('nodejs') ? nodeModules : vendorDir
-    paths[src] = path
+    let lambdae = inv.lambdasBySrcDir[src]
+    if (!Array.isArray(lambdae)) lambdae = [ lambdae ]
+    lambdae.forEach(lambda => {
+      let { config } = lambda
+      let nodeModules = join(src, 'node_modules', '@architect')
+      let vendorDir = join(src, 'vendor')
+      // Allow opting out of shared/views via config.arc @arc
+      let path = config.runtime.startsWith('nodejs') ? nodeModules : vendorDir
+      paths[src] = path
+    })
   })
 
   return paths
