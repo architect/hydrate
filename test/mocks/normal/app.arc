@@ -14,6 +14,15 @@ any     /time-is-good/*
 /where
   method any
   src anywhere
+/multiples
+  method get
+  src src/http/multiples
+/api/v1/multiples
+  method get
+  src src/http/multiples
+/api/v2/multiples
+  method get
+  src src/http/multiples
 
 @events
 just-being-in-nature
