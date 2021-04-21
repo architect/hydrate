@@ -13,15 +13,16 @@ module.exports = function getPaths (inventory) {
     if (!existsSync(src)) return
     // Ok, here we go
     let lambdae = inv.lambdasBySrcDir[src]
+    // lambdasBySrcDir may be an object or array, depending on how many project lambdas are "aliased" to the same source path
+    // in either case, the underlying source dir will have a single config with a single runtime defined, so we only need to check the runtime once
     if (!Array.isArray(lambdae)) lambdae = [ lambdae ]
-    lambdae.forEach(lambda => {
-      let { config } = lambda
-      let nodeModules = join(src, 'node_modules', '@architect')
-      let vendorDir = join(src, 'vendor')
-      // Allow opting out of shared/views via config.arc @arc
-      let path = config.runtime.startsWith('nodejs') ? nodeModules : vendorDir
-      paths[src] = path
-    })
+    let lambda = lambdae[0]
+    let { config } = lambda
+    let nodeModules = join(src, 'node_modules', '@architect')
+    let vendorDir = join(src, 'vendor')
+    // Allow opting out of shared/views via config.arc @arc
+    let path = config.runtime.startsWith('nodejs') ? nodeModules : vendorDir
+    paths[src] = path
   })
 
   return paths
