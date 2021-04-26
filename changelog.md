@@ -2,6 +2,14 @@
 
 ---
 
+## [1.9.9] 2021-04-26
+
+### Fixed
+
+- Fixed `views` not hydrating in projects that don't use `shared`; fixes [#1133](https://github.com/architect/architect/issues/1133)
+
+---
+
 ## [1.9.8] 2021-04-21
 
 ### Fixed
