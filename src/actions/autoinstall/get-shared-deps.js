@@ -13,7 +13,7 @@ module.exports = function getSharedDeps ({ inventory, update }) {
   let sharedFiles = []
   if (shared) {
     projectDirs++
-    let result = getLambdaDeps({ dir: shared.src, update })
+    let result = getLambdaDeps({ dir: shared.src, update, inventory })
     projectFiles += result.files.length
     sharedDeps = result.deps
     let dir = stripCwd(shared.src)
@@ -24,7 +24,7 @@ module.exports = function getSharedDeps ({ inventory, update }) {
   let viewsFiles = []
   if (views) {
     projectDirs++
-    let result = getLambdaDeps({ dir: views.src, update })
+    let result = getLambdaDeps({ dir: views.src, update, inventory })
     projectFiles += result.files.length
     viewsDeps = result.deps
     let dir = stripCwd(views.src)

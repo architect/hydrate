@@ -39,7 +39,7 @@ module.exports = function autoinstaller (params) {
     // Autoinstall is currently Node.js only - exit early if it's another runtime
     if (!lambda.config.runtime.startsWith('nodejs')) return
     try {
-      let result = getLambdaDeps({ dir, update })
+      let result = getLambdaDeps({ dir, update, inventory })
       let { deps, files } = result
       projectFiles += files.length
       failures = failures.concat(result.failures)
