@@ -18,7 +18,8 @@ test(`Walk a folder's deps`, t => {
   process.stdout.write = write => {
     data += write
   }
-  let { deps, failures, files } = getLambdaDeps({ dir: mock, update })
+  let inventory = { inv: { _project: {} } }
+  let { deps, failures, files } = getLambdaDeps({ dir: mock, update, inventory })
   process.stdout.write = stdout
   let correct = [ '@a/package', '@b/package', 'c', 'd', 'e', 'f', 'g', 'h' ]
 

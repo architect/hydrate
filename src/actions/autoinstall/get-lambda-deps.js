@@ -4,9 +4,12 @@ let { sync: glob } = require('glob')
 let { ignoreDeps } = require('../../lib')
 let getRequires = require('./get-requires')
 
-module.exports = function getDirDeps ({ dir, update }) {
-  // Clean everything out bebefore we get going jic
-  rm(join(dir, 'node_modules'))
+module.exports = function getDirDeps ({ dir, update, inventory }) {
+  // Clean everything (except the root) out bebefore we get going jic
+  let isRoot = dir === inventory.inv._project.src
+  if (!isRoot) {
+    rm(join(dir, 'node_modules'))
+  }
 
   // Collection of all dependencies from all files in this directory
   let deps = []
