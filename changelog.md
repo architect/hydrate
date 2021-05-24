@@ -2,6 +2,15 @@
 
 ---
 
+## [1.9.11] 2021-05-24
+
+### Fixed
+
+- Hydration of plugin Lambdas now supports either plugin interface method
+    `functions` or `pluginFunctions`.
+
+---
+
 ## [1.9.10] 2021-05-17
 
 ### Fixed
