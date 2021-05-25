@@ -47,13 +47,12 @@ test('Basic stdout', t => {
     else {
       let term = stripAnsi(result.term.stdout)
       let raw = result.raw.stdout
-      console.log(term)
       t.equal(term, raw, 'Term + raw output contents match')
-      t.ok(term.includes(name), `Contents include: ${name}`)
-      t.ok(term.includes(startMsg), `Contents include: ${startMsg}`)
-      stdout.split('\n').forEach(o => t.ok(term.includes(o), `Contents include: ${o}`))
-      t.ok(term.includes(cmd), `Contents include: ${cmd}`)
-      t.ok(term.includes(done), `Contents include: ${done}`)
+      t.match(term, new RegExp(name), `Contents include: ${name}`)
+      t.match(term, new RegExp(startMsg), `Contents include: ${startMsg}`)
+      stdout.split('\n').forEach(o => t.match(term, new RegExp(o), `Contents include: ${o}`))
+      t.match(term, new RegExp(cmd), `Contents include: ${cmd}`)
+      t.match(term, new RegExp(done), `Contents include: ${done}`)
       t.end()
     }
   })
@@ -76,14 +75,13 @@ test('Basic stderr', t => {
       let rawStdout = result.raw.stdout
       let termStderr = stripAnsi(result.term.stderr)
       let rawStderr = result.raw.stderr
-      console.log(termStdout, termStderr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termStderr, rawStderr, 'Term + raw stderr contents match')
-      t.ok(termStdout.includes(name), `Contents include: ${name}`)
-      t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
-      stderr.split('\n').forEach(o => t.ok(termStderr.includes(o), `Contents include: ${o}`))
-      t.ok(termStderr.includes(cmd), `Contents include: ${cmd}`)
-      t.ok(termStdout.includes(done), `Contents include: ${done}`)
+      t.match(termStdout, new RegExp(name), `Contents include: ${name}`)
+      t.match(termStdout, new RegExp(startMsg), `Contents include: ${startMsg}`)
+      stderr.split('\n').forEach(o => t.match(termStderr, new RegExp(o), `Contents include: ${o}`))
+      t.match(termStderr, new RegExp(cmd), `Contents include: ${cmd}`)
+      t.match(termStdout, new RegExp(done), `Contents include: ${done}`)
       t.end()
     }
   })
@@ -107,16 +105,15 @@ test('Basic err', t => {
       let rawStdout = result.raw.stdout
       let termErr = stripAnsi(result.term.err)
       let rawErr = result.raw.err.message
-      console.log(termStdout, termErr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
       t.equal(result.raw.err.code, 1, 'Error code set to 1 (by default if not present)')
       t.notOk(result.raw.err.signal, 'No error signal present')
-      t.ok(termStdout.includes(name), `Contents include: ${name}`)
-      t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
-      errLine.split('\n').forEach(o => t.ok(termErr.includes(o), `Contents include: ${o}`))
-      t.notOk(termErr.includes(cmd), `Contents include: ${cmd}`)
-      t.notOk(termStdout.includes(done), `Contents do not include: ${done}`)
+      t.match(termStdout, new RegExp(name), `Contents include: ${name}`)
+      t.match(termStdout, new RegExp(startMsg), `Contents include: ${startMsg}`)
+      errLine.split('\n').forEach(o => t.match(termErr, new RegExp(o), `Contents include: ${o}`))
+      t.doesNotMatch(termErr, new RegExp(cmd), `Contents do not include: ${cmd}`)
+      t.doesNotMatch(termStdout, new RegExp(done), `Contents do not include: ${done}`)
       t.end()
     }
   })
@@ -142,16 +139,15 @@ test('Basic err with code', t => {
       let rawStdout = result.raw.stdout
       let termErr = stripAnsi(result.term.err)
       let rawErr = result.raw.err.message
-      console.log(termStdout, termErr)
       t.equal(termStdout, rawStdout, 'Term + raw stdout contents match')
       t.equal(termErr, rawErr, 'Term + raw err contents match')
       t.equal(result.raw.err.code, 2, 'Error code set to 2 (manually)')
       t.equal(result.raw.err.signal, 'SIGINT', 'Error signal present')
-      t.ok(termStdout.includes(name), `Contents include: ${name}`)
-      t.ok(termStdout.includes(startMsg), `Contents include: ${startMsg}`)
-      errLine.split('\n').forEach(o => t.ok(termErr.includes(o), `Contents include: ${o}`))
-      t.notOk(termErr.includes(cmd), `Contents include: ${cmd}`)
-      t.notOk(termStdout.includes(done), `Contents do not include: ${done}`)
+      t.match(termStdout, new RegExp(name), `Contents include: ${name}`)
+      t.match(termStdout, new RegExp(startMsg), `Contents include: ${startMsg}`)
+      errLine.split('\n').forEach(o => t.match(termErr, new RegExp(o), `Contents include: ${o}`))
+      t.doesNotMatch(termErr, new RegExp(cmd), `Contents do not include: ${cmd}`)
+      t.doesNotMatch(termStdout, new RegExp(done), `Contents do not include: ${done}`)
       t.end()
     }
   })
