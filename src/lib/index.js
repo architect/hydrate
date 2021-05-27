@@ -1,5 +1,5 @@
 let { pathToUnix } = require('@architect/utils')
-let isDep = file => file.includes('node_modules') || file.includes('vendor/bundle')
+let isDep = file => file.includes('node_modules') || file.includes('vendor/bundle') || file.includes('.deno_cache')
 let ignoreDeps = file => !isDep(pathToUnix(file))
 
 // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`

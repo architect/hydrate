@@ -1,6 +1,7 @@
 let { sync: glob } = require('glob')
 let series = require('run-series')
 let { dirname, join } = require('path')
+let { existsSync: exists } = require('fs')
 let stripAnsi = require('strip-ansi')
 let { pathToUnix, updater } = require('@architect/utils')
 let inventory = require('@architect/inventory')
@@ -69,6 +70,30 @@ function hydrator (inventory, installing, params, callback) {
     if (viewsDir && file.includes(viewsDir)) return false
     return true
   })
+
+  // Add deno cacheable files if they exist and we're hyrdrating a Deno runtime
+  let lambda = inv.lambdasBySrcDir[basepath]
+  if (lambda !== undefined && lambda.config !== undefined) {
+    let isDeno = lambda.config.runtime === 'deno'
+    if (isDeno) {
+      let denoCacheableFiles = [
+        'index.js',
+        'mod.js',
+        'index.ts',
+        'mod.ts',
+        'index.tsx',
+        'mod.tsx',
+        'deps.ts'
+      ]
+      denoCacheableFiles.map(denoFile => {
+        let file = join(basepath, denoFile)
+        if (exists(file)) {
+          files.push(file)
+        }
+      })
+    }
+  }
+
   // Get shared + views (or skip if hydrating a single isolated function, e.g. sandbox startup)
   if (hydrateShared) {
     let sharedManifest = (sharedDir && glob(pattern(sharedDir)).filter(ignoreDeps)) || []

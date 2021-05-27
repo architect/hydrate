@@ -1,4 +1,4 @@
-let { dirname, join, sep } = require('path')
+let { dirname, join, sep, basename } = require('path')
 let { existsSync } = require('fs')
 let child = require('child_process')
 let series = require('run-series')
@@ -34,6 +34,7 @@ module.exports = function hydrator (params, callback) {
   let isJs = file.endsWith('package.json')
   let isPy = file.endsWith('requirements.txt')
   let isRb = file.endsWith('Gemfile')
+  let isDeno = file.endsWith('deps.ts') || file.endsWith('index.js') || file.endsWith('index.ts') || file.endsWith('index.tsx') || file.endsWith('mod.js') || file.endsWith('mod.ts') || file.endsWith('mod.tsx')
 
   series([
     function clear (callback) {
@@ -43,7 +44,9 @@ module.exports = function hydrator (params, callback) {
         if (isJs) dir = join(cwd, 'node_modules')
         if (isPy) dir = join(cwd, 'vendor')
         if (isRb) dir = join(cwd, 'vendor', 'bundle')
-        rm(dir, callback)
+        if (isDeno) callback()
+        else
+          rm(dir, callback)
       }
       else callback()
     },
@@ -101,6 +104,12 @@ module.exports = function hydrator (params, callback) {
       // Update Ruby deps
       else if (isRb && !installing) {
         exec(`bundle update`, options, callback)
+      }
+
+      // cache deno deps.ts
+      else if (isDeno) {
+        // should --reload be added? That would force re-caching everytime, so maybe not?
+        exec(`DENO_DIR=./vendor/.deno_cache deno cache --unstable ./${basename(file)}`, options, callback)
       }
 
       else {
