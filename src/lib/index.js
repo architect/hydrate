@@ -5,8 +5,26 @@ let ignoreDeps = file => !isDep(pathToUnix(file))
 // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
 let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
 
+let denoCacheable = [
+  'index.js',
+  'mod.js',
+  'index.ts',
+  'mod.ts',
+  'index.tsx',
+  'mod.tsx',
+  'deps.ts'
+]
+
+let denoIgnore = [
+  'package.json',
+  'requirements.tex',
+  'Gemfile'
+]
+
 module.exports = {
   isDep,
   ignoreDeps,
   stripCwd,
+  denoCacheable,
+  denoIgnore
 }

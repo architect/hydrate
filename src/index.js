@@ -1,11 +1,10 @@
 let { sync: glob } = require('glob')
 let series = require('run-series')
-let { dirname, join } = require('path')
-let { existsSync: exists } = require('fs')
+let { dirname, join, basename, resolve } = require('path')
 let stripAnsi = require('strip-ansi')
 let { pathToUnix, updater } = require('@architect/utils')
 let inventory = require('@architect/inventory')
-let { isDep, ignoreDeps, stripCwd } = require('./lib')
+let { isDep, ignoreDeps, stripCwd, denoCacheable } = require('./lib')
 let shared = require('./shared')
 let actions = require('./actions')
 let cleanup = require('./_cleanup')
@@ -55,12 +54,12 @@ function hydrator (inventory, installing, params, callback) {
   // From here on out normalize all file comparisons to Unix paths
   let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src))
   let viewsDir = inv.views && inv.views.src && pathToUnix(stripCwd(inv.views.src))
-
+  // console.log(inv)
   /**
    * Find our dependency manifests
    */
   // eslint-disable-next-line
-  let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
+  let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile|${denoCacheable.join('|')})`
   let dir = basepath || '.'
   // Get everything except shared
   let files = glob(pattern(dir)).filter(file => {
@@ -68,31 +67,16 @@ function hydrator (inventory, installing, params, callback) {
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
     if (viewsDir && file.includes(viewsDir)) return false
+    if (denoCacheable.some(val => val === basename(file))) {
+      // basepath isn't always set (maybe just within the multi-auto install integration tests?)
+      let _basepath = basepath || resolve(file).replace(basename(file), '')
+      if (inv.lambdasBySrcDir[_basepath] === undefined) return false
+      if (inv.lambdasBySrcDir[_basepath].config.runtime !== 'deno') return false
+    }
     return true
   })
 
-  // Add deno cacheable files if they exist and we're hyrdrating a Deno runtime
-  let lambda = inv.lambdasBySrcDir[basepath]
-  if (lambda !== undefined && lambda.config !== undefined) {
-    let isDeno = lambda.config.runtime === 'deno'
-    if (isDeno) {
-      let denoCacheableFiles = [
-        'index.js',
-        'mod.js',
-        'index.ts',
-        'mod.ts',
-        'index.tsx',
-        'mod.tsx',
-        'deps.ts'
-      ]
-      denoCacheableFiles.map(denoFile => {
-        let file = join(basepath, denoFile)
-        if (exists(file)) {
-          files.push(file)
-        }
-      })
-    }
-  }
+
 
   // Get shared + views (or skip if hydrating a single isolated function, e.g. sandbox startup)
   if (hydrateShared) {
