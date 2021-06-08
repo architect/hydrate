@@ -2,6 +2,15 @@
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- Filter out arguments to `require()` that aren't valid package name strings.
+- Fixed a crash related to `esquery` finding a variable declarator without an `init` field.
+
+---
+
 ## [1.10.1 - 1.10.2] 2021-06-20
 
 ### Fixed
