@@ -14,3 +14,16 @@ let a = require('@a/package')
 let b = require('@b/package/method')
 let c = require('c/specific/method')
 let d = require('d')
+
+// Minifiers may redefine variables to save space
+let missingInit
+missingInit = 'ignoredmodule'
+require(missingInit)
+
+// When minifiers redefine variables, the original might be an invalid module string
+let requiredThing = 'invalid module string'
+requiredThing = 'validmodule'
+require(requiredThing)
+
+// There may be a function called require that's not the real thing
+require(1234)

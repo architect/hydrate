@@ -12,7 +12,7 @@ test('Set up env', t => {
 })
 
 test(`Walk a folder's deps`, t => {
-  t.plan(4)
+  t.plan(7)
   let stdout = process.stdout.write
   let data = ''
   process.stdout.write = write => {
@@ -30,4 +30,7 @@ test(`Walk a folder's deps`, t => {
   t.equal(files.length, 6, 'Walked 6 js files')
 
   t.match(data, /'something'/, 'Warned about dynamic require')
+  t.match(data, /'missingInit'/, 'Warned about reassigned require argument string')
+  t.match(data, /'invalid module string'/, 'Warned about invalid module string')
+  t.match(data, /'1234'/, 'Warned about non-string require argument')
 })
