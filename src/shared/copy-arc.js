@@ -41,7 +41,7 @@ module.exports = function copyArc (params, paths, callback) {
  * copy the current manifest into the destination dir
  */
 function copy (dest, params, callback) {
-  let cwd = process.cwd()
+  let { cwd } = params
   // path to destination
   let arcFileDest = join(dest, '.arc')
   // .arc in current working dir

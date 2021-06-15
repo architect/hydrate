@@ -18,19 +18,24 @@ using the following package managers:
 
 # API
 
-> Note: the process running `hydrate` must be the same as the root of the project it's hydrating. So if the project you're trying to `hydrate` is located locally at `/projects/myapp` and you're running `hydrate` from `/scripts/hydrate`, you'll need to ensure you `process.chdir('/projects/myapp')` prior to execution
-
-
 ## `hydrate(options)`
 
 `options` object can include the following properties:
 
-- `basepath`: filesystem path hydrate should consider as the root for searching for functions to hydrate Useful if you want to hydrate a subset of functions; defaults the current working directory
-- `autoinstall`: if truthy, enables automated Lambda dependency treeshaking via static code analysis; defaults to `false`
-- `install`: if truthy, will invoke [`hydrate.install()`][install]
-- `update`: if truthy, will invoke [`hydrate.update()`][update]
+- `autoinstall` - **Boolean** - if truthy, enables automated Lambda dependency treeshaking via static code analysis; defaults to `false`
+- `cwd` - **String** - root filesystem path of the project Hydrate is working in
+  - Defaults to current working directory
+  - May be the same or different from `basepath`; if using in conjunction with `basepath`, specify a subset of the project with `basepath`, for example:
+    - `{ cwd: '/your/project/', basepath: '/your/project/src/http/' }` runs Hydrate against `/your/project/` (without having to use `process.chdir`) and only hydrates functions within `/your/project/src/http/**`
+- `basepath` - **String** - filesystem path in which Hydrate should search for functions to hydrate
+  - Defaults the current working directory
+  - Useful if you want to hydrate one function or a subset of functions
+- `install` - **Boolean** - if truthy, will invoke [`hydrate.install()`][install]
+- `update` - **Boolean** - if truthy, will invoke [`hydrate.update()`][update]
 
 By default, invokes [`hydrate.shared()`][shared].
+
+> **Note on `cwd` vs `basepath`**: when in doubt, include neither parameter, Hydrate will default to process.cwd; if you know you need to aim Hydrate at a specific place but aren't sure which parameter to use, use `cwd`
 
 
 ## `hydrate.install(options, callback)`
