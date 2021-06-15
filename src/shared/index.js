@@ -9,7 +9,8 @@ let { updater } = require('@architect/utils')
 let _inventory = require('@architect/inventory')
 
 module.exports = function shared (params = {}, callback) {
-  let { quiet, update, inventory } = params
+  let { inventory, quiet, update } = params
+  params.cwd = params.cwd || process.cwd()
 
   let paths
   let start
@@ -21,7 +22,7 @@ module.exports = function shared (params = {}, callback) {
   series([
     function (callback) {
       if (!inventory) {
-        _inventory({}, function (err, result) {
+        _inventory({ cwd: params.cwd }, function (err, result) {
           if (err) callback(err)
           else {
             inventory = params.inventory = result

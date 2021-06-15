@@ -3,7 +3,7 @@ let { join } = require('path')
 let getLambdaDeps = require('./get-lambda-deps')
 let { stripCwd } = require('../../lib')
 
-module.exports = function getSharedDeps ({ inventory, update }) {
+module.exports = function getSharedDeps ({ cwd, inventory, update }) {
   let { shared, views } = inventory.inv
 
   let projectDirs = 0
@@ -16,7 +16,7 @@ module.exports = function getSharedDeps ({ inventory, update }) {
     let result = getLambdaDeps({ dir: shared.src, update, inventory })
     projectFiles += result.files.length
     sharedDeps = result.deps
-    let dir = stripCwd(shared.src)
+    let dir = stripCwd(shared.src, cwd)
     sharedFiles = result.files.map(f => join(dir, f))
   }
 
@@ -27,7 +27,7 @@ module.exports = function getSharedDeps ({ inventory, update }) {
     let result = getLambdaDeps({ dir: views.src, update, inventory })
     projectFiles += result.files.length
     viewsDeps = result.deps
-    let dir = stripCwd(views.src)
+    let dir = stripCwd(views.src, cwd)
     viewsFiles = result.files.map(f => join(dir, f))
   }
 

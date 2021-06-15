@@ -2,6 +2,15 @@
 
 ---
 
+## [1.9.12] 2021-06-15
+
+### Added
+
+- Added `cwd` API param, making it easier to run Hydrate in different project directories
+  - Since `cwd` and `basepath` have similar characteristics, please refer to the readme for usage!
+
+---
+
 ## [1.9.11] 2021-05-24
 
 ### Fixed

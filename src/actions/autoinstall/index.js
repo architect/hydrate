@@ -5,7 +5,7 @@ let getSharedDeps = require('./get-shared-deps')
 let getLambdaDeps = require('./get-lambda-deps')
 
 module.exports = function autoinstaller (params) {
-  let { dirs, inventory, update, verbose } = params
+  let { cwd, dirs, inventory, update, verbose } = params
   if (!dirs.length) return []
 
   update.start('Finding dependencies')
@@ -26,7 +26,7 @@ module.exports = function autoinstaller (params) {
   let totalDeps = 0
 
   // Aggregate shared + views deps
-  let shared = getSharedDeps({ inventory, update })
+  let shared = getSharedDeps({ cwd, inventory, update })
   let { sharedDeps, sharedFiles, viewsDeps, viewsFiles } = shared
   projectDirs += shared.projectDirs
   projectFiles += shared.projectFiles

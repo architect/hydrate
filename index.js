@@ -1,4 +1,4 @@
-let run = require('./src')
+let { install, update } = require('./src')
 let shared = require('./src/shared')
 
 /**
@@ -10,7 +10,10 @@ let shared = require('./src/shared')
  * @param {boolean} params.update - update dependencies; if also found with install, install takes priority
  * @param {boolean} params.symlink - use shared code symlinks
  */
-function hydrate (params = { install: true }, callback) {
+function hydrate (params, callback) {
+  params = params || { install: true }
+  params.cwd = params.cwd || process.cwd()
+
   // if a callback isn't supplied return a promise
   let promise
   if (!callback) {
@@ -21,12 +24,12 @@ function hydrate (params = { install: true }, callback) {
       }
     })
   }
-  let { autoinstall, verbose = false, basepath = '', symlink = false } = params
+  let { autoinstall, basepath = '', cwd, symlink = false, verbose = false } = params
   if (params.install) {
-    run.install({ autoinstall, verbose, basepath, symlink }, callback) // `install` includes `shared`
+    install({ autoinstall, basepath, cwd, symlink, verbose }, callback) // `install` includes `shared`
   }
   else if (params.update) {
-    run.update({ verbose, basepath, symlink }, callback) // `update` includes `shared`
+    update({ basepath, cwd, symlink, verbose }, callback) // `update` includes `shared`
   }
   else {
     shared({ symlink }, callback)
@@ -35,8 +38,8 @@ function hydrate (params = { install: true }, callback) {
   return promise
 }
 
-hydrate.install = run.install
-hydrate.update = run.update
+hydrate.install = install
+hydrate.update = update
 hydrate.shared = shared
 
 module.exports = hydrate

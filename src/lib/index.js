@@ -3,7 +3,7 @@ let isDep = file => file.includes('node_modules') || file.includes('vendor/bundl
 let ignoreDeps = file => !isDep(pathToUnix(file))
 
 // Relativize by stripping leading relative path + `.`, `/`, `./`, `\`, `.\`
-let stripCwd = f => f.replace(process.cwd(), '').replace(/^\.?\/?\\?/, '')
+let stripCwd = (f, cwd) => f.replace(cwd, '').replace(/^\.?\/?\\?/, '')
 
 module.exports = {
   isDep,

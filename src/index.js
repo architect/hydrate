@@ -17,13 +17,15 @@ let cleanup = require('./_cleanup')
  */
 module.exports = {
   install: function (params = {}, callback) {
-    inventory({}, function (err, result) {
+    params.cwd = params.cwd || process.cwd()
+    inventory({ cwd: params.cwd }, function (err, result) {
       if (err) callback(err)
       else hydrator(result, true, params, callback)
     })
   },
   update: function (params = {}, callback) {
-    inventory({}, function (err, result) {
+    params.cwd = params.cwd || process.cwd()
+    inventory({ cwd: params.cwd }, function (err, result) {
       if (err) callback(err)
       else hydrator(result, false, params, callback)
     })
@@ -37,6 +39,7 @@ function hydrator (inventory, installing, params, callback) {
     autoinstall = false,
     installRoot = false,
     basepath,
+    cwd,
     quiet,
     verbose,
     // Isolation / sandbox
@@ -52,8 +55,8 @@ function hydrator (inventory, installing, params, callback) {
   let hasLambdae = inv.lambdaSrcDirs && inv.lambdaSrcDirs.length
 
   // From here on out normalize all file comparisons to Unix paths
-  let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src))
-  let viewsDir = inv.views && inv.views.src && pathToUnix(stripCwd(inv.views.src))
+  let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src, cwd))
+  let viewsDir = inv.views && inv.views.src && pathToUnix(stripCwd(inv.views.src, cwd))
 
   /**
    * Find our dependency manifests
@@ -80,7 +83,7 @@ function hydrator (inventory, installing, params, callback) {
    * Relativize paths
    * Previous glob ops may be from absolute paths, producing absolute-pathed results
    */
-  files = files.map(file => stripCwd(file))
+  files = files.map(file => stripCwd(file, cwd))
 
   /**
    * Filter by active project paths (and root, if applicable)
@@ -88,8 +91,8 @@ function hydrator (inventory, installing, params, callback) {
   files = files.filter(file => {
     let dir = pathToUnix(dirname(file))
 
-    // Allow root project hydration of process.cwd() if passed as basepath
-    let hydrateBasepath = basepath === process.cwd()
+    // Allow root project hydration of cwd if passed as basepath
+    let hydrateBasepath = basepath === cwd
     if (hydrateBasepath && dir === '.') return true
     if (installRoot) return true
 
@@ -98,19 +101,19 @@ function hydrator (inventory, installing, params, callback) {
     if (viewsDir && file.includes(viewsDir)) return true
 
     // Hydrate functions, of course
-    return hasLambdae && inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p)) === dir)
+    return hasLambdae && inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p, cwd)) === dir)
   })
 
   // Run the autoinstaller first in case we need to add any new manifests to the ops
   if (autoinstall && installing && hasLambdae) {
     // Ignore directories already known to have a manifest
-    let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d))))
+    let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d, cwd))))
     // Allow scoping to a single directory
-    if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d)) === pathToUnix(stripCwd(basepath)))
+    if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d, cwd)) === pathToUnix(stripCwd(basepath, cwd)))
     let result = actions.autoinstall({ dirs, update, inventory, ...params })
     if (result.length) {
       autoinstalled = result
-      let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file)))
+      let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file), cwd))
       files = files.concat(install)
     }
   }
