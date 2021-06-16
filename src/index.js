@@ -18,17 +18,23 @@ let cleanup = require('./_cleanup')
 module.exports = {
   install: function (params = {}, callback) {
     params.cwd = params.cwd || process.cwd()
-    inventory({ cwd: params.cwd }, function (err, result) {
-      if (err) callback(err)
-      else hydrator(result, true, params, callback)
-    })
+    if (params.inventory) hydrator(params.inventory, true, params, callback)
+    else {
+      inventory({ cwd: params.cwd }, function (err, result) {
+        if (err) callback(err)
+        else hydrator(result, true, params, callback)
+      })
+    }
   },
   update: function (params = {}, callback) {
     params.cwd = params.cwd || process.cwd()
-    inventory({ cwd: params.cwd }, function (err, result) {
-      if (err) callback(err)
-      else hydrator(result, false, params, callback)
-    })
+    if (params.inventory) hydrator(params.inventory, true, params, callback)
+    else {
+      inventory({ cwd: params.cwd }, function (err, result) {
+        if (err) callback(err)
+        else hydrator(result, false, params, callback)
+      })
+    }
   },
 }
 

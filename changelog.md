@@ -8,6 +8,7 @@
 
 - Added `cwd` API param, making it easier to run Hydrate in different project directories
   - Since `cwd` and `basepath` have similar characteristics, please refer to the readme for usage!
+- Added ability to pass API an `inventory` object (to prevent extra Inventory runs and avoid potential state issues)
 
 ---
 

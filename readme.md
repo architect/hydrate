@@ -18,29 +18,24 @@ using the following package managers:
 
 # API
 
-## `hydrate(options)`
+All methods accept an `options` object can include the following properties:
 
-`options` object can include the following properties:
-
-- `autoinstall` - **Boolean** - if truthy, enables automated Lambda dependency treeshaking via static code analysis; defaults to `false`
+- `autoinstall` - **Boolean** - if truthy, enables automated Lambda dependency treeshaking via static code analysis; defaults to `false`, only used by `install`
 - `cwd` - **String** - root filesystem path of the project Hydrate is working in
   - Defaults to current working directory
   - May be the same or different from `basepath`; if using in conjunction with `basepath`, specify a subset of the project with `basepath`, for example:
     - `{ cwd: '/your/project/', basepath: '/your/project/src/http/' }` runs Hydrate against `/your/project/` (without having to use `process.chdir`) and only hydrates functions within `/your/project/src/http/**`
-- `basepath` - **String** - filesystem path in which Hydrate should search for functions to hydrate
+- `basepath` - **String** - filesystem path in which Hydrate should search for functions
   - Defaults the current working directory
   - Useful if you want to hydrate one function or a subset of functions
-- `install` - **Boolean** - if truthy, will invoke [`hydrate.install()`][install]
-- `update` - **Boolean** - if truthy, will invoke [`hydrate.update()`][update]
+- `inventory` - **Object** - Architect Inventory object; generally used internally
 
-By default, invokes [`hydrate.shared()`][shared].
-
-> **Note on `cwd` vs `basepath`**: when in doubt, include neither parameter, Hydrate will default to process.cwd; if you know you need to aim Hydrate at a specific place but aren't sure which parameter to use, use `cwd`
+> **Note on `cwd` vs `basepath`**: `cwd` is necessary for Hydrate to find your project's manifest and key files and folders, while `basepath` scopes hydration to a specific path. When in doubt, include neither parameter, Hydrate will default to process working directory; if you know you need to aim Hydrate at a specific place but aren't sure which parameter to use, use `cwd`.
 
 
 ## `hydrate.install(options, callback)`
 
-Installs dependencies for all Functions found in the specified `basepath`. Invokes [`hydrate.shared()`][shared].
+Installs function dependencies, invoking [`hydrate.shared()`][shared].
 
 Note that for the default value of `basepath='src'`, this means `install` will also hydrate shared folders like `src/shared` and `src/views`.
 
@@ -53,7 +48,7 @@ To ensure local development behavior is as close to `staging` and `production` a
 
 ## `hydrate.update(options, callback)`
 
-Updates dependencies in all Functions found in the specified `basepath`. Invokes [`hydrate.shared()`][shared]. Note that this will only functionally differ from [`hydrate.install()`][install] if you use a lockfile like `package-lock.json` or `Gemfile.lock`.
+Updates function dependencies, invoking [`hydrate.shared()`][shared]. Note that this will only functionally differ from [`hydrate.install()`][install] if you use a lockfile like `package-lock.json` or `Gemfile.lock`.
 
 Note that for the default value of `basepath='src'`, this means `update` will also update dependencies in shared folders like `src/shared` and `src/views`.
 
@@ -66,7 +61,15 @@ Note that for the default value of `basepath='src'`, this means `update` will al
 
 ## `hydrate.shared(options, callback)`
 
-Copies shared code (from `src/shared` and `src/views`) into all Functions.
+Copies shared code (from `src/shared` and `src/views`) into all functions.
+
+
+## `hydrate(options)`
+
+A terser method to invoke Hydrate. By default, invokes [`hydrate.shared()`][shared]; accepts the normal options, but can invoke `install` or `update` with either of the following options:
+
+- `install` - **Boolean** - if truthy, will invoke [`hydrate.install()`][install]
+- `update` - **Boolean** - if truthy, will invoke [`hydrate.update()`][update]
 
 
 [shared]: #hydratesharedoptions-callback
