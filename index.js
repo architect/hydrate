@@ -13,6 +13,7 @@ let shared = require('./src/shared')
 function hydrate (params, callback) {
   params = params || { install: true }
   params.cwd = params.cwd || process.cwd()
+  params.basepath = params.basepath || ''
 
   // if a callback isn't supplied return a promise
   let promise
@@ -24,16 +25,10 @@ function hydrate (params, callback) {
       }
     })
   }
-  let { autoinstall, basepath = '', cwd, symlink = false, verbose = false } = params
-  if (params.install) {
-    install({ autoinstall, basepath, cwd, symlink, verbose }, callback) // `install` includes `shared`
-  }
-  else if (params.update) {
-    update({ basepath, cwd, symlink, verbose }, callback) // `update` includes `shared`
-  }
-  else {
-    shared({ symlink }, callback)
-  }
+
+  if (params.install)     install(params, callback) // `install` includes `shared`
+  else if (params.update) update(params, callback) // `update` includes `shared`
+  else                    shared(params, callback)
 
   return promise
 }
