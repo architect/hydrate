@@ -10,6 +10,11 @@
   - Since `cwd` and `basepath` have similar characteristics, please refer to the readme for usage!
 - Added ability to pass API an `inventory` object (to prevent extra Inventory runs and avoid potential state issues)
 
+
+### Changed
+
+- Updated dependencies
+
 ---
 
 ## [1.9.11] 2021-05-24
