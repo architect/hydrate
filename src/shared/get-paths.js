@@ -32,7 +32,7 @@ module.exports = function getPaths (inventory) {
 
   if (shared && shared.shared) shared.shared.forEach(s => getPath(s, 'shared'))
   if (views && views.views) views.views.forEach(v => getPath(v, 'views'))
-  Object.keys(lambdasBySrcDir).forEach(l => getPath(l))
+  if (lambdasBySrcDir) Object.keys(lambdasBySrcDir).forEach(l => getPath(l))
 
   return paths
 }
