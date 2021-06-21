@@ -5,14 +5,18 @@ let { existsSync } = require('fs')
  * reads the Architect manifest and returns base paths to function runtime deps base
  */
 module.exports = function getPaths (inventory) {
-  let { inv } = inventory
-  let paths = {}
+  let { lambdasBySrcDir, shared, views } = inventory.inv
+  let paths = {
+    all: {},
+    shared: {},
+    views: {},
+  }
 
-  function getPath (src) {
+  function getPath (src, type) {
     // Don't create dirs for functions that don't already exist (or that we've already looked at)
-    if (!existsSync(src) || paths[src]) return
+    if (!existsSync(src) || (type && paths[type][src])) return
     // Ok, here we go
-    let lambdae = inv.lambdasBySrcDir[src]
+    let lambdae = lambdasBySrcDir[src]
     // lambdasBySrcDir may be an object or array, depending on how many project lambdas are "aliased" to the same source path
     // in either case, the underlying source dir will have a single config with a single runtime defined, so we only need to check the runtime once
     if (!Array.isArray(lambdae)) lambdae = [ lambdae ]
@@ -22,11 +26,13 @@ module.exports = function getPaths (inventory) {
     let vendorDir = join(src, 'vendor')
     // Allow opting out of shared/views via config.arc @arc
     let path = config.runtime.startsWith('nodejs') ? nodeModules : vendorDir
-    paths[src] = path
+    paths.all[src] = path
+    if (type) paths[type][src] = path
   }
 
-  if (inv.shared && inv.shared.shared) inv.shared.shared.forEach(getPath)
-  if (inv.views && inv.views.views) inv.views.views.forEach(getPath)
+  if (shared && shared.shared) shared.shared.forEach(s => getPath(s, 'shared'))
+  if (views && views.views) views.views.forEach(v => getPath(v, 'views'))
+  Object.keys(lambdasBySrcDir).forEach(l => getPath(l))
 
   return paths
 }
