@@ -27,8 +27,8 @@ module.exports = function copyViews (params, paths, callback) {
 
     series(views.map(view => {
       return function copier (callback) {
-        if (paths[view]) {
-          let finalDest = join(paths[view], 'views')
+        if (paths.views[view]) {
+          let finalDest = join(paths.views[view], 'views')
           cp(src, finalDest, params, callback)
         }
         else callback()

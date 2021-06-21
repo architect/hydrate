@@ -27,8 +27,8 @@ module.exports = function copyShared (params, paths, callback) {
 
     series(shared.map(share => {
       return function copier (callback) {
-        if (paths[share]) {
-          let finalDest = join(paths[share], 'shared')
+        if (paths.shared[share]) {
+          let finalDest = join(paths.shared[share], 'shared')
           cp(src, finalDest, params, callback)
         }
         else callback()

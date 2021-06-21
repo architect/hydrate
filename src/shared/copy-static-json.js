@@ -26,7 +26,7 @@ module.exports = function copyStatic (params, paths, callback) {
     let done = `Hydrated app with static.json`
     let start = update.start(`Hydrating app with static.json`)
 
-    let destinations = Object.entries(paths).map(p => p[1])
+    let destinations = Object.entries(paths.all).map(p => p[1])
     series(destinations.map(dest => {
       return function copier (callback) {
         cp(static, join(dest, 'shared', 'static.json'), params, callback)
