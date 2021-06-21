@@ -8,6 +8,11 @@
 
 - Fixed issue where `@architect/functions` `arc.static()` method may not work if using `@static fingerprint true`, but aren't using `src/shared` or `@static src some-dir`
 
+
+### Changed
+
+- Updated dependencies
+
 ---
 
 ## [1.10.0] 2021-06-15
