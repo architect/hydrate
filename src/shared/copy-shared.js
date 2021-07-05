@@ -14,7 +14,7 @@ let { stripCwd } = require('../lib')
  * else     | vendor/shared/
  */
 module.exports = function copyShared (params, paths, callback) {
-  let { update, only, inventory } = params
+  let { cwd, update, only, inventory } = params
   let { inv } = inventory
   let hasShared = inv.shared && inv.shared.shared.length
   let go = !only || only === 'shared'
@@ -22,13 +22,13 @@ module.exports = function copyShared (params, paths, callback) {
   if (hasShared && go) {
     let { src, shared } = inv.shared
     // Kick off logging
-    let done = `Hydrated app with shared: ${stripCwd(src)}`
-    let start = update.start(`Hydrating app with shared: ${stripCwd(src)}`)
+    let done = `Hydrated app with shared: ${stripCwd(src, cwd)}`
+    let start = update.start(`Hydrating app with shared: ${stripCwd(src, cwd)}`)
 
     series(shared.map(share => {
       return function copier (callback) {
-        if (paths[share]) {
-          let finalDest = join(paths[share], 'shared')
+        if (paths.shared[share]) {
+          let finalDest = join(paths.shared[share], 'shared')
           cp(src, finalDest, params, callback)
         }
         else callback()

@@ -2,6 +2,34 @@
 
 ---
 
+## [1.10.1 - 1.10.2] 2021-06-20
+
+### Fixed
+
+- Fixed issue where `@architect/functions` `arc.static()` method may not work if using `@static fingerprint true`, but aren't using `src/shared` or `@static src some-dir`
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
+## [1.10.0] 2021-06-15
+
+### Added
+
+- Added `cwd` API param, making it easier to run Hydrate in different project directories
+  - Since `cwd` and `basepath` have similar characteristics, please refer to the readme for usage!
+- Added ability to pass API an `inventory` object (to prevent extra Inventory runs and avoid potential state issues)
+
+
+### Changed
+
+- Updated dependencies
+
+---
+
 ## [1.9.11] 2021-05-24
 
 ### Fixed

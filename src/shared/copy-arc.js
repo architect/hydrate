@@ -23,7 +23,7 @@ module.exports = function copyArc (params, paths, callback) {
     let done = `Hydrated app with Architect manifest`
     let start = update.start(`Hydrating app with Architect manifest`)
 
-    let destinations = Object.entries(paths).map(p => p[1])
+    let destinations = Object.entries(paths.all).map(p => p[1])
     series(destinations.map(dest => {
       return function copier (callback) {
         copy(join(dest, 'shared'), params, callback)
@@ -41,7 +41,7 @@ module.exports = function copyArc (params, paths, callback) {
  * copy the current manifest into the destination dir
  */
 function copy (dest, params, callback) {
-  let cwd = process.cwd()
+  let { cwd } = params
   // path to destination
   let arcFileDest = join(dest, '.arc')
   // .arc in current working dir
