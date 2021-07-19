@@ -21,7 +21,7 @@ module.exports = function getRequires ({ dir, file, update }) {
   function getIdentifier (id) {
     let ids = esquery.query(ast, `[id.name='${id}']`) || []
     ids.forEach(r => {
-      if (r.init.value) called.push(r.init.value)
+      if (r.init && r.init.value) called.push(r.init.value)
       else update.warn(`Dynamic requires are not supported, dependency may not be installed: ${dir} requires '${id}'`)
     })
   }
@@ -32,23 +32,42 @@ module.exports = function getRequires ({ dir, file, update }) {
     if (arg.type === 'Literal') called.push(arg.value)
   })
 
-  // Filter invalid package calls, Architect shared + views, and Node.js builtins
-  let isPkg = /^(\w|@)/
-  let isArcShared = /^@architect(\/|\\)(shared|views)/
-  let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !builtins.includes(r))
+  function getPackageName (dep) {
+    function getDep (dep, sep) {
+      return dep.startsWith('@')
+        // Get '@foo/bar' from `@foo/bar' or '@foo/bar/baz/buz'
+        ? dep.split(sep).slice(0, 2).join(sep)
+        // Get 'foo' from `foo/bar' or 'foo/bar/baz'
+        : dep.split(sep)[0]
+    }
 
-  function getDep (dep, sep) {
-    return dep.startsWith('@')
-      // Get '@foo/bar' from `@foo/bar' or '@foo/bar/baz/buz'
-      ? dep.split(sep).slice(0, 2).join(sep)
-      // Get 'foo' from `foo/bar' or 'foo/bar/baz'
-      : dep.split(sep)[0]
-  }
-
-  deps = deps.map(dep => {
     if (dep.includes('/')) return getDep(dep, '/')
     if (dep.includes('\\')) return getDep(dep, '\\')
     return dep
+  }
+
+  let deps = []
+
+  // Filter invalid package calls, Architect shared + views, and Node.js builtins
+  let isArcShared = /^@architect(\/|\\)(shared|views)/
+  // https://www.npmjs.com/package/package-name-regex
+  let isPkg = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
+  called.forEach(r => {
+    if (typeof r === 'string') {
+      let pkg = getPackageName(r)
+
+      if (pkg && isPkg.test(pkg)) {
+        if (!isArcShared.test(pkg) && !builtins.includes(pkg)) {
+          deps.push(pkg)
+        }
+      }
+      else  {
+        update.warn(`Invalid module string '${pkg}' in require call found in ${dir}`)
+      }
+    }
+    else {
+      update.warn(`Non-string argument '${r}' passed to require() call`)
+    }
   })
 
   return deps
