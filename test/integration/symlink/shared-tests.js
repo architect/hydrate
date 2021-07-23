@@ -188,48 +188,6 @@ test(`[Shared file symlinking (custom paths)] shared() views to only @views (unl
   })
 })
 
-test(`[Shared file symlinking (default paths)] shared() copies app.arc file and static.json (Arc <5)`, t => {
-  t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
-  process.env.DEPRECATED = true
-  resetAndCopyShared(t, function () {
-    hydrate.shared({ symlink }, function (err) {
-      if (err) t.fail(err)
-      else {
-        delete process.env.DEPRECATED
-        // Check to see if files that are supposed to be there are actually there
-        arcFileArtifacts.forEach(path => {
-          t.ok(existsSync(path), `Found app.arc file in ${path}`)
-        })
-        staticArtifacts.forEach(path => {
-          t.ok(existsSync(path), `Found static.json file in ${path}`)
-        })
-        checkFolderCreation(t)
-      }
-    })
-  })
-})
-
-test(`[Shared file symlinking (custom paths)] shared() copies app.arc file and static.json (Arc <5)`, t => {
-  t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
-  process.env.DEPRECATED = true
-  resetAndCopySharedCustom(t, function () {
-    hydrate.shared({ symlink }, function (err) {
-      if (err) t.fail(err)
-      else {
-        delete process.env.DEPRECATED
-        // Check to see if files that are supposed to be there are actually there
-        arcFileArtifacts.forEach(path => {
-          t.ok(existsSync(path), `Found app.arc file in ${path}`)
-        })
-        staticArtifacts.forEach(path => {
-          t.ok(existsSync(path), `Found static.json file in ${path}`)
-        })
-        checkFolderCreation(t)
-      }
-    })
-  })
-})
-
 test(`[Shared file symlinking (default paths)] shared() copies static.json but not app.arc (Arc v6+)`, t => {
   t.plan(arcFileArtifacts.length + staticArtifacts.length + 1)
   resetAndCopyShared(t, function () {
