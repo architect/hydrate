@@ -2,6 +2,16 @@
 
 ---
 
+## [2.0.0] 2021-07-22
+
+### Changed
+
+- Breaking change: removed support for Node.js 10.x (now EOL, and no longer available to created in AWS Lambda)
+- Breaking change: removed support for Architect 5 (and lower)
+- Updated dependencies
+
+---
+
 ## [1.10.1 - 1.10.2] 2021-06-20
 
 ### Fixed
