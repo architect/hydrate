@@ -1,9 +1,10 @@
-let { dirname, join, sep } = require('path')
+let { dirname, join, sep, basename } = require('path')
 let { existsSync } = require('fs')
 let child = require('child_process')
 let series = require('run-series')
 let rm = require('rimraf')
 let print = require('../_printer')
+let { denoCacheable } = require('../lib')
 
 module.exports = function hydrator (params, callback) {
   let { file, action, update, env, shell, timeout, installing, verbose } = params
@@ -34,6 +35,7 @@ module.exports = function hydrator (params, callback) {
   let isJs = file.endsWith('package.json')
   let isPy = file.endsWith('requirements.txt')
   let isRb = file.endsWith('Gemfile')
+  let isDeno = denoCacheable.some(val => basename(file) === val)
 
   series([
     function clear (callback) {
@@ -43,6 +45,7 @@ module.exports = function hydrator (params, callback) {
         if (isJs) dir = join(cwd, 'node_modules')
         if (isPy) dir = join(cwd, 'vendor')
         if (isRb) dir = join(cwd, 'vendor', 'bundle')
+        // if (isDeno) dir = join(cwd, 'vendor', '.deno_cache')
         rm(dir, callback)
       }
       else callback()
@@ -101,6 +104,11 @@ module.exports = function hydrator (params, callback) {
       // Update Ruby deps
       else if (isRb && !installing) {
         exec(`bundle update`, options, callback)
+      }
+
+      // cache deno deps
+      else if (isDeno) {
+        exec(`DENO_DIR=./vendor/.deno_cache deno cache --unstable --reload ./${basename(file)}`, options, callback)
       }
 
       else {
