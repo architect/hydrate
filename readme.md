@@ -64,14 +64,6 @@ Note that for the default value of `basepath='src'`, this means `update` will al
 Copies shared code (from `src/shared` and `src/views`) into all functions.
 
 
-## `hydrate(options)`
-
-A terser method to invoke Hydrate. By default, invokes [`hydrate.shared()`][shared]; accepts the normal options, but can invoke `install` or `update` with either of the following options:
-
-- `install` - **Boolean** - if truthy, will invoke [`hydrate.install()`][install]
-- `update` - **Boolean** - if truthy, will invoke [`hydrate.update()`][update]
-
-
 [shared]: #hydratesharedoptions-callback
 [install]: #hydrateinstalloptions-callback
 [update]: #hydrateupdateoptions-callback

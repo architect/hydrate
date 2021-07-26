@@ -3,7 +3,7 @@ let series = require('run-series')
 let { dirname, join } = require('path')
 let stripAnsi = require('strip-ansi')
 let { pathToUnix, updater } = require('@architect/utils')
-let inventory = require('@architect/inventory')
+let _inventory = require('@architect/inventory')
 let { isDep, ignoreDeps, stripCwd } = require('./lib')
 let shared = require('./shared')
 let actions = require('./actions')
@@ -15,27 +15,32 @@ let cleanup = require('./_cleanup')
  * - shared
  * - views
  */
+function run (installing, params = {}, callback) {
+  params.cwd = params.cwd || process.cwd()
+  params.basepath = params.basepath || ''
+
+  // If a callback isn't supplied return a promise
+  let promise
+  if (!callback) {
+    promise = new Promise(function ugh (res, rej) {
+      callback = function errback (err, result) {
+        if (err) rej(err)
+        else res(result)
+      }
+    })
+  }
+  if (params.inventory) hydrator(params.inventory, true, params, callback)
+  else {
+    _inventory({ cwd: params.cwd }, function (err, inventory) {
+      if (err) callback(err)
+      else hydrator(inventory, installing, params, callback)
+    })
+  }
+  return promise
+}
 module.exports = {
-  install: function (params = {}, callback) {
-    params.cwd = params.cwd || process.cwd()
-    if (params.inventory) hydrator(params.inventory, true, params, callback)
-    else {
-      inventory({ cwd: params.cwd }, function (err, result) {
-        if (err) callback(err)
-        else hydrator(result, true, params, callback)
-      })
-    }
-  },
-  update: function (params = {}, callback) {
-    params.cwd = params.cwd || process.cwd()
-    if (params.inventory) hydrator(params.inventory, true, params, callback)
-    else {
-      inventory({ cwd: params.cwd }, function (err, result) {
-        if (err) callback(err)
-        else hydrator(result, false, params, callback)
-      })
-    }
-  },
+  install: run.bind({}, true),
+  update: run.bind({}, false),
 }
 
 function hydrator (inventory, installing, params, callback) {

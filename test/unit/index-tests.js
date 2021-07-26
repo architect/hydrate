@@ -20,42 +20,49 @@ function reset () {
   called = []
 }
 
-test('sanity check', t => {
+test('Set up env', t => {
   t.plan(1)
-  t.ok(hydrate, 'hydrate in scope')
+  t.ok(hydrate, 'Hydrate module is present')
 })
 
-test(`Hydrate invokes 'shared' by default`, t => {
+test('Main hydration methods are present', t => {
+  t.plan(3)
+  t.ok(hydrate.install, 'install method is present')
+  t.ok(hydrate.update, 'update method is present')
+  t.ok(hydrate.shared, 'shared method is present')
+})
+
+test(`hydrate.install invokes install`, t => {
   t.plan(2)
-  hydrate({}, function done (err) {
+  hydrate.install({}, function done (err) {
+    if (err) t.fail(err)
+    else {
+      t.equal(called.length, 1, 'Invoked one method')
+      t.equal(called[0], 'install', 'Invoked install')
+    }
+  })
+  reset()
+})
+
+test(`hydrate.update invokes update`, t => {
+  t.plan(2)
+  hydrate.update({}, function done (err) {
+    if (err) t.fail(err)
+    else {
+      t.equal(called.length, 1, 'Invoked one method')
+      t.equal(called[0], 'update', 'Invoked update')
+    }
+  })
+  reset()
+})
+
+test(`hydrate.shared invokes shared`, t => {
+  t.plan(2)
+  hydrate.shared({}, function done (err) {
     if (err) t.fail(err)
     else {
       t.equal(called.length, 1, 'Invoked one method')
       t.equal(called[0], 'shared', 'Invoked shared')
-    }
-  })
-  reset()
-})
-
-test(`Hydrate invokes 'install' if specified via params`, t => {
-  t.plan(2)
-  hydrate({ install: true }, function done (err) {
-    if (err) t.fail(err)
-    else {
-      t.equal(called.length, 1, 'Invoked one method')
-      t.equal(called[0], 'install', 'Invoked shared')
-    }
-  })
-  reset()
-})
-
-test(`Hydrate invokes 'update' if specified via params`, t => {
-  t.plan(2)
-  hydrate({ update: true }, function done (err) {
-    if (err) t.fail(err)
-    else {
-      t.equal(called.length, 1, 'Invoked one method')
-      t.equal(called[0], 'update', 'Invoked shared')
     }
   })
   reset()

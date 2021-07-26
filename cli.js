@@ -20,23 +20,20 @@ let isAutoinstall = opt => opt === 'autoinstall' || opt === '--autoinstall'
 
 // eslint-disable-next-line
 async function cmd (opts = []) {
-
   let args = {
     verbose: opts.some(isVerbose),
     autoinstall: opts.some(isAutoinstall),
   }
 
   if (opts.some(isShared)) {
-    return hydrate(args)
+    return hydrate.shared(args)
   }
 
   if (opts.some(isUpdate)) {
-    args.update = true
-    return hydrate(args)
+    return hydrate.update(args)
   }
 
-  args.install = true
-  return hydrate(args)
+  return hydrate.install(args)
 }
 
 module.exports = cmd

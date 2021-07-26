@@ -11,6 +11,17 @@ module.exports = function shared (params = {}, callback) {
   let { inventory, quiet, update } = params
   params.cwd = params.cwd || process.cwd()
 
+  // If a callback isn't supplied return a promise
+  let promise
+  if (!callback) {
+    promise = new Promise(function ugh (res, rej) {
+      callback = function errback (err, result) {
+        if (err) rej(err)
+        else res(result)
+      }
+    })
+  }
+
   let paths
   let start
   if (!update) {
@@ -65,4 +76,6 @@ module.exports = function shared (params = {}, callback) {
       callback(null, result)
     }
   })
+
+  return promise
 }
