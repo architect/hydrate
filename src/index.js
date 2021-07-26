@@ -1,7 +1,6 @@
 let { sync: glob } = require('glob')
 let series = require('run-series')
 let { dirname, join } = require('path')
-let stripAnsi = require('strip-ansi')
 let { pathToUnix, updater } = require('@architect/utils')
 let _inventory = require('@architect/inventory')
 let { isDep, ignoreDeps, stripCwd } = require('./lib')
@@ -132,23 +131,15 @@ function hydrator (inventory, installing, params, callback) {
   /**
    * Build out job queue
    */
+  let ops = []
   let deps = files.length
-  let init = ''
   if (deps && deps > 0) {
     let msg = `${action}ing dependencies in ${deps} path${deps > 1 ? 's' : ''}`
-    init += update.status(msg)
+    update.status(msg)
   }
   if (!deps && verbose) {
-    init += update.status(`No Lambda dependencies found`)
+    update.status(`No Lambda dependencies found`)
   }
-  if (init) {
-    init = {
-      raw: { stdout: stripAnsi(init) },
-      term: { stdout: init }
-    }
-  }
-  // The job queue
-  let ops = []
 
   // Install + update
   files.sort().forEach(file => {
@@ -166,29 +157,18 @@ function hydrator (inventory, installing, params, callback) {
     ops.push(callback => shared({ update, inventory, ...params }, callback))
   }
 
-  series(ops, function done (err, result) {
+  series(ops, function done (err) {
     // Tidy up before exiting
     cleanup(autoinstalled)
-
-    result = [].concat.apply([], result) // Flatten the nested shared array
-    if (init) result.unshift(init) // Bump init logging to the top
-    if (err) callback(err, result)
+    if (err) callback(err)
     else {
       if (deps && deps > 0) {
-        let done = update.done(`Successfully ${action.toLowerCase()}ed dependencies`)
-        result.push({
-          raw: { stdout: stripAnsi(done) },
-          term: { stdout: done }
-        })
+        update.done(`Successfully ${action.toLowerCase()}ed dependencies`)
       }
       if (!deps && !quiet) {
-        let done = update.done(`Finished checks, nothing to ${action.toLowerCase()}e`)
-        result.push({
-          raw: { stdout: stripAnsi(done) },
-          term: { stdout: done }
-        })
+        update.done(`Finished checks, nothing to ${action.toLowerCase()}e`)
       }
-      callback(null, result)
+      callback()
     }
   })
 }

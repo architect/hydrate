@@ -8,8 +8,16 @@
 
 - Breaking change: removed support for Node.js 10.x (now EOL, and no longer available to created in AWS Lambda)
 - Breaking change: removed legacy `hydrate()` interface, usage should now always be `hydrate.install(opts)`, `hydrate.update(opts)`, or `hydrate.shared(opts)`; fixes #1168
+- Breaking change: removed returning terminal output object
+  - Hydration logging / output should now be retrieved via `utils.updater().get()`
 - Breaking change: removed support for Architect 5 (and lower)
 - Updated dependencies
+
+
+### Fixed
+
+- Fixed issue with `async/await` interface of Hydrate methods
+- Improved output of terminal information being returned, especially in error scenarios
 
 ---
 

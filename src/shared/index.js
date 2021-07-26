@@ -1,5 +1,4 @@
 let series = require('run-series')
-let stripAnsi = require('strip-ansi')
 let getPaths = require('./get-paths')
 let copyShared = require('./copy-shared')
 let copyViews = require('./copy-views')
@@ -23,7 +22,6 @@ module.exports = function shared (params = {}, callback) {
   }
 
   let paths
-  let start
   if (!update) {
     let updaterParams = { quiet }
     update = updater('Hydrate', updaterParams)
@@ -46,7 +44,7 @@ module.exports = function shared (params = {}, callback) {
       let { inv } = inventory
       let { shared, views } = inv
       if (shared || views) {
-        start = update.status('Hydrating app with shared files')
+        update.status('Hydrating app with shared files')
       }
       paths = getPaths(inventory)
       callback()
@@ -60,21 +58,9 @@ module.exports = function shared (params = {}, callback) {
     function (callback) {
       copyStaticJSON(params, paths, callback)
     },
-  ], function done (err, result) {
+  ], function done (err) {
     if (err) callback(err)
-    else {
-      // Remove empty positions from series functions that skipped
-      result = result.filter(r => r)
-      if (start) {
-        result.unshift({
-          raw: stripAnsi(start),
-          term: {
-            stdout: start
-          }
-        })
-      }
-      callback(null, result)
-    }
+    else callback()
   })
 
   return promise
