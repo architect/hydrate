@@ -2,11 +2,12 @@
 
 ---
 
-## [2.0.0] 2021-07-22
+## [2.0.0 - 2.0.1] 2021-07-22
 
 ### Changed
 
 - Breaking change: removed support for Node.js 10.x (now EOL, and no longer available to created in AWS Lambda)
+- Breaking change: removed legacy `hydrate()` interface, usage should now always be `hydrate.install(opts)`, `hydrate.update(opts)`, or `hydrate.shared(opts)`; fixes #1168
 - Breaking change: removed support for Architect 5 (and lower)
 - Updated dependencies
 
