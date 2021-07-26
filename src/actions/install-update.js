@@ -19,16 +19,15 @@ module.exports = function hydrator (params, callback) {
     let done = `${action}ed ${relativePath}${sep}`
     start = update.start(`${action}ing ${relativePath}${sep}`)
 
-    child.exec(cmd, opts,
-      function (err, stdout, stderr) {
-        // If zero output, acknowledge *something* happened
-        if (!err && !stdout && !stderr) {
-          update.cancel()
-          stdout = `Done in ${(Date.now() - now) / 1000}s`
-        }
-        let params = { err, stdout, stderr, cmd, done, start, update, verbose }
-        print(params, callback)
-      })
+    child.exec(cmd, opts, function (err, stdout, stderr) {
+      // If zero output, acknowledge *something* happened
+      if (!err && !stdout && !stderr) {
+        update.cancel()
+        stdout = `Done in ${(Date.now() - now) / 1000}s`
+      }
+      let params = { err, stdout, stderr, cmd, done, start, update, verbose }
+      print(params, callback)
+    })
   }
 
   let isJs = file.endsWith('package.json')
