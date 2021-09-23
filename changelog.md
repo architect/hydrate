@@ -2,6 +2,14 @@
 
 ---
 
+## [2.0.3] 2021-09-23
+
+### Fixed
+
+- Fixed faulty error code path during shared file copying
+
+---
+
 ## [2.0.0 - 2.0.2] 2021-07-22
 
 ### Changed

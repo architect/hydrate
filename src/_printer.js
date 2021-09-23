@@ -15,7 +15,7 @@ module.exports = function print (params, callback) {
   else if (!update) {
     callback(ReferenceError('Must pass an updater'))
   }
-  else if (!done || (!err && !done)) {
+  else if (!done || (err && !done)) {
     callback(ReferenceError('Must pass err or done'))
   }
   else {
