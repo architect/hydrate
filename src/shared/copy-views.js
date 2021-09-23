@@ -35,7 +35,7 @@ module.exports = function copyViews (params, paths, callback) {
       }
     }), function _done (err) {
       let cmd = 'copy'
-      if (err) print({ cmd, err, start, update }, callback)
+      if (err) print({ cmd, done, err, start, update }, callback)
       else print({ cmd, start, done, update }, callback)
     })
   }
