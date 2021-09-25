@@ -11,6 +11,7 @@ using the following package managers:
 - **node.js** via `npm` using `package.json` and `package-lock.json` files
 - **python (3.7+)** via `pip3` using a `requirements.txt` file
 - **ruby** via `bundle` using `Gemfile` and `Gemfile.lock` files
+- **php** via `composer` using `composer.json` and `composer.lock` files
 
 # Installation
 
@@ -44,7 +45,7 @@ To ensure local development behavior is as close to `staging` and `production` a
 - **node.js**: `npm ci` if `package-lock.json` is present and `npm i` if not
 - **python**: `pip3 install`
 - **ruby**: `bundle install`
-
+- **php**: `composer install`
 
 ## `hydrate.update(options, callback)`
 
@@ -57,7 +58,7 @@ Note that for the default value of `basepath='src'`, this means `update` will al
 - **node.js**: `npm update`
 - **python**: `pip3 install -U --upgrade-strategy eager`
 - **ruby**: `bundle update`
-
+- **php**: `composer update`
 
 ## `hydrate.shared(options, callback)`
 
