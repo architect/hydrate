@@ -7,6 +7,7 @@ module.exports = function initPhpComposer(params) {
 
   //skip if we're in shared or views dir
   if(cwd.indexOf(viewsDir) === -1 && cwd.indexOf(sharedDir) === -1) {
+    
     let composerConfig = JSON.parse(readFileSync(join(cwd, 'composer.json')));
 
     if(composerConfig.autoload == null) {
@@ -15,15 +16,15 @@ module.exports = function initPhpComposer(params) {
       }
     }
 
-    if(composerConfig.autoload['psr-4'] === null || !composerConfig.autoload['psr-4'].hasOwnProperty(String.raw`Architect\\Shared\\`)) {
+    if(composerConfig.autoload['psr-4'] === null || !composerConfig.autoload['psr-4'].hasOwnProperty(`Architect\\Shared\\`)) {
       composerConfig['autoload']['psr-4'] = {...composerConfig['autoload']['psr-4'], ...{
-        [String.raw`Architect\\Shared\\`]: "./vendor/shared"
+        [`Architect\\Shared\\`]: "./vendor/shared"
       }}
     }
 
-    if(composerConfig.autoload['psr-4'] === null || !composerConfig.autoload['psr-4'].hasOwnProperty(String.raw`Architect\\Views\\`)) {
+    if(composerConfig.autoload['psr-4'] === null || !composerConfig.autoload['psr-4'].hasOwnProperty(`Architect\\Views\\`)) {
       composerConfig['autoload']['psr-4'] = {...composerConfig['autoload']['psr-4'], ...{
-        [String.raw`Architect\\Views\\`]: "./vendor/views"
+        [`Architect\\Views\\`]: "./vendor/views"
       }}
     }
 
