@@ -1,9 +1,10 @@
 let { dirname, join, sep } = require('path')
-let { existsSync } = require('fs')
+let { existsSync, readFileSync, writeFileSync } = require('fs')
 let child = require('child_process')
 let series = require('run-series')
 let rm = require('rimraf')
 let print = require('../_printer')
+let phpInitComposer = require('../_php')
 
 module.exports = function hydrator (params, callback) {
   let { file, action, update, env, shell, timeout, installing, verbose } = params
@@ -33,7 +34,8 @@ module.exports = function hydrator (params, callback) {
   let isJs = file.endsWith('package.json')
   let isPy = file.endsWith('requirements.txt')
   let isRb = file.endsWith('Gemfile')
-
+  let isPhp = file.endsWith('composer.json') 
+ 
   series([
     function clear (callback) {
       if (installing) {
@@ -42,6 +44,7 @@ module.exports = function hydrator (params, callback) {
         if (isJs) dir = join(cwd, 'node_modules')
         if (isPy) dir = join(cwd, 'vendor')
         if (isRb) dir = join(cwd, 'vendor', 'bundle')
+        if (isPhp) dir = join(cwd, 'vendor')
         rm(dir, callback)
       }
       else callback()
@@ -100,6 +103,24 @@ module.exports = function hydrator (params, callback) {
       // Update Ruby deps
       else if (isRb && !installing) {
         exec(`bundle update`, options, callback)
+      }
+
+      // Install PHP deps
+      else if (isPhp && installing) {
+        //dont run composer install within composer's vendor dir
+        if (cwd.indexOf('shared/vendor') === -1 && cwd.indexOf('views/vendor/') === -1) {
+          phpInitComposer({cwd})
+          exec(`composer dumpautoload -o && composer install --no-dev`, options, callback)
+        }
+      }
+
+      // Update PHP deps
+      else if (isPhp && !installing) {
+        //dont run composer install within composer's vendor dir
+        if (cwd.indexOf('shared/vendor') === -1 && cwd.indexOf('views/vendor/') === -1) {
+          phpInitComposer({cwd})
+          exec(`composer dumpautoload -o && composer update --no-dev`, options, callback)
+        }
       }
 
       else {
