@@ -1,11 +1,12 @@
+let { join } = require('path')
 let { readFileSync, writeFileSync } = require('fs')
 
 module.exports = function initPhpComposer(params) {
 
-  let {cwd} = params
+  let {cwd, sharedDir, viewsDir} = params
 
   //skip if we're in shared or views dir
-  if(cwd.indexOf('views') !== -1 && cwd.indexOf('shared') !== -1) {
+  if(cwd.indexOf(viewsDir) === -1 && cwd.indexOf(sharedDir) === -1) {
     let composerConfig = JSON.parse(readFileSync(join(cwd, 'composer.json')));
 
     if(composerConfig.autoload == null) {

@@ -7,7 +7,7 @@ let print = require('../_printer')
 let phpInitComposer = require('../_php')
 
 module.exports = function hydrator (params, callback) {
-  let { file, action, update, env, shell, timeout, installing, verbose } = params
+  let { file, action, update, env, shell, timeout, installing, verbose, viewsDir, sharedDir } = params
   let cwd = dirname(file)
   let options = { cwd, env, shell, timeout }
   let start
@@ -107,20 +107,14 @@ module.exports = function hydrator (params, callback) {
 
       // Install PHP deps
       else if (isPhp && installing) {
-        //dont run composer install within composer's vendor dir
-        if (cwd.indexOf('shared/vendor') === -1 && cwd.indexOf('views/vendor/') === -1) {
-          phpInitComposer({cwd})
-          exec(`composer dumpautoload -o && composer install --no-dev`, options, callback)
-        }
+        phpInitComposer({cwd, sharedDir, viewsDir})
+        exec(`composer dumpautoload -o && composer install --no-dev`, options, callback)
       }
 
       // Update PHP deps
       else if (isPhp && !installing) {
-        //dont run composer install within composer's vendor dir
-        if (cwd.indexOf('shared/vendor') === -1 && cwd.indexOf('views/vendor/') === -1) {
-          phpInitComposer({cwd})
-          exec(`composer dumpautoload -o && composer update --no-dev`, options, callback)
-        }
+        phpInitComposer({cwd, sharedDir, viewsDir})
+        exec(`composer dumpautoload -o && composer update --no-dev`, options, callback)
       }
 
       else {

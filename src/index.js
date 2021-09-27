@@ -143,11 +143,14 @@ function hydrator (inventory, installing, params, callback) {
 
   // Install + update
   files.sort().forEach(file => {
+
     ops.push(callback => actions.hydrate({
       action,
       file,
       installing,
       update,
+      sharedDir,
+      viewsDir,
       ...params
     }, callback))
   })
