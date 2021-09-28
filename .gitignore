@@ -5,3 +5,4 @@ package-lock.json
 test/integration/tmp
 test/tmp
 vendor/
+.DS_Store
