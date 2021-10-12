@@ -37,7 +37,7 @@ test('Corrupt package-lock.json may or amy not fail hydrate.update (depending on
     let basepath = nodeFunctions[0]
     hydrate.update({ basepath }, function done (err) {
       console.log(`noop log to help reset tap-spec lol`)
-      if (npmVer.startsWith('7')) {
+      if (Number(npmVer[0]) >= 7) {
         if (err) t.fail(err)
         else t.pass('Hydration did not fail in npm 7.x')
       }
