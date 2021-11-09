@@ -1,67 +1,88 @@
 # `@architect/hydrate` [![GitHub CI status](https://github.com/architect/hydrate/workflows/Node%20CI/badge.svg)](https://github.com/architect/hydrate/actions?query=workflow%3A%22Node+CI%22)
-<!-- [![codecov](https://codecov.io/gh/architect/hydrate/branch/master/graph/badge.svg)](https://codecov.io/gh/architect/hydrate) -->
 
-[@architect/hydrate][npm] ensures that all functions managed by architect have
-their dependencies installed. Functions containing all its required dependencies
-are considered to be 'hydrated' - thus the name!
+[@architect/hydrate][npm] ensures that all functions managed by Architect have their dependencies installed. Functions containing all required dependencies are considered to be 'hydrated' - thus the name!
 
-[@architect/hydrate][npm] supports dependencies managed in the following languages
-using the following package managers:
+[@architect/hydrate][npm] supports dependencies managed in the following languages using the following package managers:
 
-- **node.js** via `npm` using `package.json` and `package-lock.json` files
-- **python (3.7+)** via `pip3` using a `requirements.txt` file
-- **ruby** via `bundle` using `Gemfile` and `Gemfile.lock` files
+- **Node.js** via `npm` using `package.json` (and optionally `package-lock.json`), or via `yarn` using `package.json` and `yarn.lock`
+- **Python** via `pip3` using a `requirements.txt` file
+- **Ruby** via `bundle` using `Gemfile` and `Gemfile.lock` files
+
 
 # Installation
 
     npm install @architect/hydrate
 
+
 # API
 
 All methods accept an `options` object can include the following properties:
 
-- `autoinstall` - **Boolean** - if truthy, enables automated Lambda dependency treeshaking via static code analysis; defaults to `false`, only used by `install`
-- `cwd` - **String** - root filesystem path of the project Hydrate is working in
+- `autoinstall` - **Boolean** - Enables or disables automated Lambda dependency treeshaking via static code analysis
+  - Defaults to `false`
+  - Used by `install`
+- `basepath` - **String** - Filesystem path in which Hydrate should search for functions
+  - Defaults the current working directory
+  - Useful if you want to hydrate one function or a subset of functions
+  - Used by `install` + `update`
+- `copyShared` - **Boolean** - Enables or disables copying of shared code folders (e.g. `src/shared`) into Lambdas
+  - Useful to disable if you want to just hydrate external dependencies
+  - Defaults to `true`
+  - Used by `install` + `update`
+- `cwd` - **String** - Root filesystem path of the project Hydrate is working in
   - Defaults to current working directory
   - May be the same or different from `basepath`; if using in conjunction with `basepath`, specify a subset of the project with `basepath`, for example:
     - `{ cwd: '/your/project/', basepath: '/your/project/src/http/' }` runs Hydrate against `/your/project/` (without having to use `process.chdir`) and only hydrates functions within `/your/project/src/http/**`
-- `basepath` - **String** - filesystem path in which Hydrate should search for functions
-  - Defaults the current working directory
-  - Useful if you want to hydrate one function or a subset of functions
+  - Used by `install` + `update` + `shared`
+- `hydrateShared` - **Boolean** - Enables or disables dependency hydration in shared code folders (e.g. `src/shared`)
+  - Useful to disable if you want to just hydrate external dependencies
+  - Defaults to `true`
+  - Used by `install` + `update`
 - `inventory` - **Object** - Architect Inventory object; generally used internally
+- `only` - **String** - Specify a subset of possible shared files for `shared` to copy into Lambdas
+  - Falsy by default
+  - Accepts: `shared`, `views`, or `staticJson`
+  - Used by `shared`
+- `quiet` - **Boolean** - Disables (most) logging
+- `symlink` - **Boolean** - Enables or disables symlinking instead of full directory copying, useful for local development
+  - Defaults to `false`
+  - Used by `install` + `update` + `shared`
+- `timeout` - **Number** - Amount of time in milliseconds to give each package manager process to execute
+  - Used by `install` + `update`
+- `verbose` - **Boolean** - Enables verbose logging
 
 > **Note on `cwd` vs `basepath`**: `cwd` is necessary for Hydrate to find your project's manifest and key files and folders, while `basepath` scopes hydration to a specific path. When in doubt, include neither parameter, Hydrate will default to process working directory; if you know you need to aim Hydrate at a specific place but aren't sure which parameter to use, use `cwd`.
 
 
-## `hydrate.install(options, callback)`
+## `hydrate.install(options[, callback]) → [Promise]`
 
-Installs function dependencies, invoking [`hydrate.shared()`][shared].
-
-Note that for the default value of `basepath='src'`, this means `install` will also hydrate shared folders like `src/shared` and `src/views`.
+Installs function dependencies, then invokes [`hydrate.shared()`][shared].
 
 To ensure local development behavior is as close to `staging` and `production` as possible, `hydrate.install()` (and other hydrate functions) uses:
 
-- **node.js**: `npm ci` if `package-lock.json` is present and `npm i` if not
-- **python**: `pip3 install`
-- **ruby**: `bundle install`
+- **Node.js**: `npm ci` if `package-lock.json` is present and `npm i` if not; or `yarn`
+- **Python**: `pip3 install`
+- **Ruby**: `bundle install`
+
+Note: by default `update` also installs dependencies in shared folders like `src/shared` and `src/views`.
 
 
-## `hydrate.update(options, callback)`
+## `hydrate.update(options[, callback]) → [Promise]`
 
-Updates function dependencies, invoking [`hydrate.shared()`][shared]. Note that this will only functionally differ from [`hydrate.install()`][install] if you use a lockfile like `package-lock.json` or `Gemfile.lock`.
-
-Note that for the default value of `basepath='src'`, this means `update` will also update dependencies in shared folders like `src/shared` and `src/views`.
+Updates function dependencies, then invokes [`hydrate.shared()`][shared].
 
 `update` is functionally almost identical to [`install`][install], except it will update dependencies to newer versions _if they exist_. This is done via:
 
-- **node.js**: `npm update`
-- **python**: `pip3 install -U --upgrade-strategy eager`
-- **ruby**: `bundle update`
+- **Node.js**: `npm update` or `yarn upgrade`
+- **Python**: `pip3 install -U --upgrade-strategy eager`
+- **Ruby**: `bundle update`
+
+Note: by default `update` also updates dependencies in shared folders like `src/shared` and `src/views`.
 
 
-## `hydrate.shared(options, callback)`
+## `hydrate.shared(options[, callback]) → [Promise]`
 
-Copies shared code (from `src/shared` and `src/views`) into all functions.
+Copies shared code (from `src/shared` and `src/views`, or your custom `@shared` + `@views` paths, if any) into all functions.
 
 
 [shared]: #hydratesharedoptions-callback
