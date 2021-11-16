@@ -44,7 +44,7 @@ trails
 rivers
   river *String
 
-@streams
+@tables-streams
 rivers
 
 @shared
