@@ -5,7 +5,7 @@ let { join } = require('path')
 module.exports = function cleanup (installed) {
   if (installed) {
     installed.forEach(i => {
-      let { dir, file, remove } = i
+      let { dir, file, swap, remove } = i
       try {
         if (file === 'package.json') {
           let dest = join(dir, 'node_modules', '_arc-autoinstall')
@@ -15,6 +15,9 @@ module.exports = function cleanup (installed) {
             let after = join(dest, f)
             if (existsSync(before)) renameSync(before, after)
           })
+          if (swap) {
+            renameSync(join(dir, swap), join(dir, file))
+          }
         }
       }
       catch (err) { null } // Swallow errors, we may have to bubble something else
