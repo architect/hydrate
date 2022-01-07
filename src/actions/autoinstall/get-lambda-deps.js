@@ -2,7 +2,7 @@ let { join } = require('path')
 let { sync: rm } = require('rimraf')
 let { sync: glob } = require('glob')
 let { ignoreDeps } = require('../../lib')
-let getRequires = require('./get-requires')
+let getRequires = require('./find-lambda-deps')
 
 module.exports = function getDirDeps ({ dir, update, inventory }) {
   // Clean everything (except the root) out bebefore we get going jic
