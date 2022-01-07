@@ -1,6 +1,7 @@
 let { sync: glob } = require('glob')
 let series = require('run-series')
-let { dirname, join } = require('path')
+let { dirname, join, sep } = require('path')
+let { readFileSync } = require('fs')
 let { pathToUnix, updater } = require('@architect/utils')
 let _inventory = require('@architect/inventory')
 let { isDep, ignoreDeps, stripCwd } = require('./lib')
@@ -62,7 +63,7 @@ function hydrator (inventory, installing, params, callback) {
   let action = installing ? 'Hydrat' : 'Updat' // Used in logging below
 
   // Does this project have any Lambdae?
-  let hasLambdae = inv.lambdaSrcDirs && inv.lambdaSrcDirs.length
+  let hasLambdae = inv.lambdaSrcDirs?.length
 
   // From here on out normalize all file comparisons to Unix paths
   let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src, cwd))
@@ -117,9 +118,26 @@ function hydrator (inventory, installing, params, callback) {
   // Run the autoinstaller first in case we need to add any new manifests to the ops
   if (autoinstall && installing && hasLambdae) {
     // Ignore directories already known to have a manifest
-    let dirs = inv.lambdaSrcDirs.filter(d => !files.some(file => dirname(file) === pathToUnix(stripCwd(d, cwd))))
+    let dirs = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
+      let rel = pathToUnix(stripCwd(src, cwd))
+      let lambdaHasManifest = files.some(file => dirname(file) === rel)
+      // TODO this should be enumerated in inventory
+      if (lambdaHasManifest && lambda.config.runtime.startsWith('nodejs')) {
+        try {
+          let pkg = JSON.parse(readFileSync(join(src, 'package.json')))
+          if (!pkg.dependencies && !pkg.peerDependencies && !pkg.devDependencies) return src
+        }
+        catch (err) {
+          update.error(`Invalid or unable to read ${src}${sep}package.json`)
+        }
+      }
+      else if (!lambdaHasManifest) return src
+    }).filter(Boolean)
+
     // Allow scoping to a single directory
-    if (basepath) dirs = dirs.filter(d => pathToUnix(stripCwd(d, cwd)) === pathToUnix(stripCwd(basepath, cwd)))
+    if (basepath) {
+      dirs = dirs.filter(d => pathToUnix(stripCwd(d, cwd)) === pathToUnix(stripCwd(basepath, cwd)))
+    }
     let result = actions.autoinstall({ dirs, update, inventory, ...params })
     if (result.length) {
       autoinstalled = result
