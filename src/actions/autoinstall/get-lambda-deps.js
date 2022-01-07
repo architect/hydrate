@@ -18,7 +18,7 @@ module.exports = function getDirDeps ({ dir, update, inventory }) {
   let failures = []
 
   // Gather ye business logic while ye may
-  let files = glob('**/*.js', { cwd: dir }).filter(ignoreDeps)
+  let files = glob('**/*.+(js|cjs|mjs)', { cwd: dir }).filter(ignoreDeps)
   files.forEach(f => {
     try {
       let requires = getRequires({ dir, file: join(dir, f), update })
