@@ -2,6 +2,14 @@
 
 ---
 
+## [2.2.0] 2022-01-07
+
+### Added
+
+- Added support for Node.js 14 ESM Lambda treeshaking!
+
+---
+
 ## [2.1.0] 2021-11-16
 
 ### Added
