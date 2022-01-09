@@ -5,6 +5,7 @@ let getLambdaDeps = require(sut)
 let mock = join(process.cwd(), 'test', 'mocks')
 let { updater } = require('@architect/utils')
 let update = updater('Hydrate')
+let jsFiles = 8
 
 test('Set up env', t => {
   t.plan(1)
@@ -25,7 +26,7 @@ test(`Walk CommonJS deps`, t => {
 
   t.deepEqual(deps.sort(), correct, `Got correct deps`)
   t.notOk(failures.length, 'Got no failures')
-  t.equal(files.length, 7, 'Walked 7 js files')
+  t.equal(files.length, jsFiles, `Walked ${jsFiles} js files`)
   t.match(data, /'something'/, 'Warned about dynamic require')
 })
 
@@ -43,7 +44,7 @@ test(`Walk ESM deps`, t => {
 
   t.deepEqual(deps.sort(), correct, `Got correct deps`)
   t.notOk(failures.length, 'Got no failures')
-  t.equal(files.length, 7, 'Walked 7 js files')
+  t.equal(files.length, jsFiles, `Walked ${jsFiles} js files`)
   t.match(data, /'something'/, 'Warned about dynamic require')
 })
 

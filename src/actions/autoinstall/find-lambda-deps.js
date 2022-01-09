@@ -9,8 +9,8 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
   let opts = { ecmaVersion: 'latest', onToken: tokens }
   // Loose is a little gentler on userland code; we aren't here to judge code quality!
   let ast = loose.parse(contents, opts)
-  let hasImport = tokens.some(({ value }) => value === 'import')
-  let hasRequire = tokens.some(({ value }) => value === 'require')
+  let hasImport = tokens.some(({ value, type }) => value === 'import' && type?.label !== 'string')
+  let hasRequire = tokens.some(({ value, type }) => value === 'require' && type?.label !== 'string')
 
   // Exit early if module doesn't require any dependencies
   if (!hasRequire && !hasImport) return
