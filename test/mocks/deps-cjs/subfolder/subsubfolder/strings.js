@@ -1,0 +1,4 @@
+let strings = [
+  'require',
+  'import',
+]
