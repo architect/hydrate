@@ -2,6 +2,14 @@
 
 ---
 
+## [2.2.1] 2022-01-09
+
+### Fixed
+
+- Fixed treeshaking detection of CJS/ESM when strings `import` and `require` are present in the AST
+
+---
+
 ## [2.2.0] 2022-01-07
 
 ### Added
