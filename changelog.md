@@ -2,6 +2,14 @@
 
 ---
 
+## [2.2.2] 2022-01-10
+
+### Fixed
+
+- Fix false positive treeshaking of `import`s from http(s)
+
+---
+
 ## [2.2.1] 2022-01-09
 
 ### Fixed
