@@ -5,7 +5,7 @@ let getLambdaDeps = require(sut)
 let mock = join(process.cwd(), 'test', 'mocks')
 let { updater } = require('@architect/utils')
 let update = updater('Hydrate')
-let jsFiles = 8
+let jsFiles = 9
 
 test('Set up env', t => {
   t.plan(1)
