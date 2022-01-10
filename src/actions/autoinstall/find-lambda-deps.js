@@ -49,11 +49,12 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
     if (arg?.type === 'Literal') called.push(arg.value)
   })
 
-  // Filter invalid package calls, Architect shared + views, and Node.js builtins
+  // Filter invalid package calls, Architect shared + views, Node.js builtins, file:// + http[s]://
   let isPkg = /^(\w|@)/
   let isArcShared = /^@architect(\/|\\)(shared|views)/
   let isFile = /^file:\/\//
-  let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !isFile.test(r) && !builtins.includes(r))
+  let isWeb = /^https?:\/\//
+  let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !isFile.test(r) && !isWeb.test(r) && !builtins.includes(r))
 
   function getDep (dep, sep) {
     return dep.startsWith('@')
