@@ -5,7 +5,7 @@ let { ignoreDeps } = require('../../lib')
 let getRequires = require('./find-lambda-deps')
 
 module.exports = function getDirDeps ({ dir, update, inventory }) {
-  // Clean everything (except the root) out bebefore we get going jic
+  // Clean everything (except the root) out before we get going jic
   let isRoot = dir === inventory.inv._project.src
   if (!isRoot) {
     rm(join(dir, 'node_modules'))
