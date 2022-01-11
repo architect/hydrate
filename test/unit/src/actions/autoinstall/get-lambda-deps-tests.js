@@ -6,6 +6,7 @@ let mock = join(process.cwd(), 'test', 'mocks')
 let { updater } = require('@architect/utils')
 let update = updater('Hydrate')
 let jsFiles = 9
+let correct = [ '@a/package', '@b/package', 'c', 'd', 'e', 'f', 'g', 'h' ]
 
 test('Set up env', t => {
   t.plan(1)
@@ -22,7 +23,6 @@ test(`Walk CommonJS deps`, t => {
   let inventory = { inv: { _project: {} } }
   let { deps, failures, files } = getLambdaDeps({ dir: join(mock, 'deps-cjs'), update, inventory })
   process.stdout.write = stdout
-  let correct = [ '@a/package', '@b/package', 'c', 'd', 'e', 'f', 'g', 'h' ]
 
   t.deepEqual(deps.sort(), correct, `Got correct deps`)
   t.notOk(failures.length, 'Got no failures')
@@ -40,7 +40,6 @@ test(`Walk ESM deps`, t => {
   let inventory = { inv: { _project: {} } }
   let { deps, failures, files } = getLambdaDeps({ dir: join(mock, 'deps-esm'), update, inventory })
   process.stdout.write = stdout
-  let correct = [ '@a/package', '@b/package', 'c', 'd', 'e', 'f', 'g', 'h' ]
 
   t.deepEqual(deps.sort(), correct, `Got correct deps`)
   t.notOk(failures.length, 'Got no failures')
@@ -48,15 +47,13 @@ test(`Walk ESM deps`, t => {
   t.match(data, /'something'/, 'Warned about dynamic require')
 })
 
-test(`Module systems can't mix`, t => {
-  t.plan(5)
+test(`Module systems can kind of mix (sometimes) but not really`, t => {
+  t.plan(2)
   let inventory = { inv: { _project: {} } }
   let dir = join(mock, 'deps-mixed')
-  let { deps, failures, files } = getLambdaDeps({ dir, update, inventory })
+  let { deps, files } = getLambdaDeps({ dir, update, inventory })
 
-  t.notOk(deps.length, 'Got no deps')
-  t.equal(failures.length, 1, 'Got a failure')
-  t.equal(failures[0].file, join(dir, 'no-bueno.js'), `Error found in correct file`)
-  t.match(failures[0].error.message, /\'import\' and \'require\'/, `Got correct error`)
-  t.equal(files.length, 2, 'Walked 2 js files')
+  // TODO such mixed ensure checks are only happening in ESM, not CJS; use Arc 10's `lambda.handlerModuleSystem`
+  t.deepEqual(deps.sort(), [ 'a', 'b' ], `Got correct deps`)
+  t.equal(files.length, 1, 'Walked 1 js file')
 })

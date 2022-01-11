@@ -2,11 +2,19 @@
 
 ---
 
+## [2.2.3] 2022-01-11
+
+### Fixed
+
+- Fix potential false tree shaking errors in ESM files that make use of `require()` (e.g. via `import { createRequire } from 'module'`)
+
+---
+
 ## [2.2.2] 2022-01-10
 
 ### Fixed
 
-- Fix false positive treeshaking of `import`s from http(s)
+- Fix false positive tree shaking of `import`s from http(s)
 
 ---
 
@@ -14,7 +22,7 @@
 
 ### Fixed
 
-- Fixed treeshaking detection of CJS/ESM when strings `import` and `require` are present in the AST
+- Fixed tree shaking detection of CJS/ESM when strings `import` and `require` are present in the AST
 
 ---
 
@@ -22,7 +30,7 @@
 
 ### Added
 
-- Added support for Node.js 14 ESM Lambda treeshaking!
+- Added support for Node.js 14 ESM Lambda tree shaking!
 
 ---
 

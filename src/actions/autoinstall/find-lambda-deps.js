@@ -15,15 +15,12 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
   // Exit early if module doesn't require any dependencies
   if (!hasRequire && !hasImport) return
 
-  // Can't use both module systems in the same file
-  if (hasRequire && hasImport) throw Error(`Found both 'import' and 'require' statements in ${file}`)
-
   let isESM = !!(hasImport)
 
   let called = []
-  let query = isESM
-    ? `ImportExpression, ImportDeclaration, ExpressionStatement[expression.type='ImportExpression'], Property[key.name='import']`
-    : `[callee.name='require']`
+  let esmQuery = `ImportExpression, ImportDeclaration, ExpressionStatement[expression.type='ImportExpression'], Property[key.name='import']`
+  let query = `[callee.name='require']`
+  if (isESM) query = query += ', ' + esmQuery
   let imports = esquery.query(ast, query)
 
   // Traverse into import() + require() args to get their (hopefully) static values
@@ -38,9 +35,10 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
   imports.forEach(r => {
     let arg
     if (isESM) {
-      if (r.expression)  arg = r.expression?.source
-      else if (r.source) arg = r.source
-      else if (r.value)  arg = r.value?.params?.[0]
+      if (r.expression)     arg = r.expression?.source
+      else if (r.source)    arg = r.source
+      else if (r.value)     arg = r.value?.params?.[0]
+      else if (r.arguments) arg = r?.arguments?.[0]
     }
     else {
       arg = r?.arguments?.[0]
