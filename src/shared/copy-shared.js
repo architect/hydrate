@@ -16,7 +16,7 @@ let { stripCwd } = require('../lib')
 module.exports = function copyShared (params, paths, callback) {
   let { cwd, update, only, inventory } = params
   let { inv } = inventory
-  let hasShared = inv.shared && inv.shared.shared.length
+  let hasShared = inv.shared?.shared?.length
   let go = !only || only === 'shared'
 
   if (hasShared && go) {

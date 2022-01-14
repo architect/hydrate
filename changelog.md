@@ -2,11 +2,29 @@
 
 ---
 
+## [3.0.0] 2022-01-13
+
+### Added
+
+- Added support for Arc 10 plugin API
+
+
+### Changed
+
+- Breaking change: legacy `@tables-streams` folders (`src/tables/...` and `src/streams/...`) are now deprecated
+
+
+### Fixed
+
+- Fixed issue where Lambdas configured with `@arc shared false` would still get shared code
+
+---
+
 ## [2.2.3] 2022-01-11
 
 ### Fixed
 
-- Fix potential false tree shaking errors in ESM files that make use of `require()` (e.g. via `import { createRequire } from 'module'`)
+- Fixed potential false tree shaking errors in ESM files that make use of `require()` (e.g. via `import { createRequire } from 'module'`)
 
 ---
 
@@ -14,7 +32,7 @@
 
 ### Fixed
 
-- Fix false positive tree shaking of `import`s from http(s)
+- Fixed false positive tree shaking of `import`s from http(s)
 
 ---
 

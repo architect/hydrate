@@ -33,9 +33,6 @@ let arcQueues = [ 'parks-to-visit' ]
 let arcScheduled = [ 'hikes-with-friends' ]
   .map(route => join('src', 'scheduled', route))
 
-let arcTables = [ 'trails' ]
-  .map(route => join('src', 'tables', route))
-
 let arcTablesStreams = [ 'rivers' ]
   .map(route => join('src', 'tables-streams', route))
 
@@ -51,7 +48,7 @@ let arcPluginLambda = [ 'newlambda' ]
  */
 let pythonFunctions = [ join('src', 'http', 'get-memories') ]
 let rubyFunctions = [ join('src', 'http', 'delete-badness_in_life') ]
-let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTables, arcTablesStreams, arcCustomPath, arcPluginLambda)
+let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTablesStreams, arcCustomPath, arcPluginLambda)
   .filter(p => !pythonFunctions.includes(p) && !rubyFunctions.includes(p))
 
 /**
@@ -190,7 +187,6 @@ module.exports = {
   arcEvents,
   arcQueues,
   arcScheduled,
-  arcTables,
   arcTablesStreams,
 
   arcAutoinstall,
