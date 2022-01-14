@@ -57,6 +57,3 @@ post /up/tents
 
 @plugins
 myplugin
-
-@myplugin
-newlambda

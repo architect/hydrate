@@ -47,6 +47,3 @@ rivers
 
 @plugins
 myplugin
-
-@myplugin
-newlambda

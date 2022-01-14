@@ -16,7 +16,7 @@ let { stripCwd } = require('../lib')
 module.exports = function copyViews (params, paths, callback) {
   let { cwd, update, only, inventory } = params
   let { inv } = inventory
-  let hasViews = inv.views && inv.views.views.length
+  let hasViews = inv.views?.views?.length
   let go = !only || only === 'views'
 
   if (hasViews && go) {

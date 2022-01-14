@@ -55,6 +55,3 @@ src custom-views-folder
 
 @plugins
 myplugin
-
-@myplugin
-newlambda

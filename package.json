@@ -30,10 +30,10 @@
   },
   "homepage": "https://github.com/architect/hydrate#readme",
   "dependencies": {
-    "@architect/inventory": "~2.2.0",
+    "@architect/inventory": "~3.0.0-RC.1",
     "@architect/utils": "~3.0.4",
     "acorn-loose": "~8.3.0",
-    "chalk": "~4.1.2",
+    "chalk": "4.1.2",
     "cpr": "~3.0.1",
     "esquery": "~1.4.0",
     "glob": "~7.2.0",
