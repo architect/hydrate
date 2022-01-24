@@ -12,6 +12,7 @@
 ### Changed
 
 - Breaking change: legacy `@tables-streams` folders (`src/tables/...` and `src/streams/...`) are now deprecated
+- Stop publishing to the GitHub Package registry
 
 
 ### Fixed
