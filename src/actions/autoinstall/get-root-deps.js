@@ -3,7 +3,7 @@ let { join } = require('path')
 
 // Get package[-lock].json contents and map out root dependency versions
 module.exports = function getDeps ({ inv }) {
-  let root = inv._project.src
+  let root = inv._project.cwd
   let packageJson = join(root, 'package.json')
   let packageLock = join(root, 'package-lock.json')
 

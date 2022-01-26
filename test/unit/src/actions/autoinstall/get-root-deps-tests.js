@@ -11,7 +11,7 @@ function pkgify (deps, devDeps, lock) {
   if (lock) tmpl.lockfileVersion = lock
   return JSON.stringify(tmpl, null, 2)
 }
-let inventory = { inv: { _project: { src: process.cwd() } } }
+let inventory = { inv: { _project: { cwd: process.cwd() } } }
 let run = fs => {
   mockFs(fs)
   let result = getRootDeps(inventory)
