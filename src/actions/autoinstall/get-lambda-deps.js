@@ -1,5 +1,5 @@
 let { join } = require('path')
-let { sync: rm } = require('rimraf')
+let { rmSync } = require('fs')
 let { sync: glob } = require('glob')
 let { ignoreDeps } = require('../../lib')
 let getRequires = require('./find-lambda-deps')
@@ -8,7 +8,7 @@ module.exports = function getDirDeps ({ dir, update, inventory }) {
   // Clean everything (except the root) out before we get going jic
   let isRoot = dir === inventory.inv._project.src
   if (!isRoot) {
-    rm(join(dir, 'node_modules'))
+    rmSync(join(dir, 'node_modules'), { recursive: true, force: true })
   }
 
   // Collection of all dependencies from all files in this directory
