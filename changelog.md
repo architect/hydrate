@@ -11,7 +11,9 @@
 
 ### Changed
 
+- Lambda treeshaking (currently for Node.js) is now the default when being run from CLI
 - Breaking change: legacy `@tables-streams` folders (`src/tables/...` and `src/streams/...`) are now deprecated
+- Breaking change: bare CLI arguments (e.g. `hydrate update`) as aliases to flags are no longer used, please use CLI flags (e.g. `hydrate --update` or `hydrate -u`)
 - Stop publishing to the GitHub Package registry
 - Updated dependencies
 
