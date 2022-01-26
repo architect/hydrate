@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 let minimist = require('minimist')
+let _inventory = require('@architect/inventory')
+let { banner } = require('@architect/utils')
+let { version } = require('./package.json')
 let hydrate = require('.')
 
 /**
@@ -13,8 +16,8 @@ let hydrate = require('.')
  * -u|--update .... updates each function's dependencies
  * -v|--verbose ... prints additional output to console
  */
-async function main (options = {}) {
-  let { inventory } = options
+async function main (opts = {}) {
+  let { inventory } = opts
 
   let alias = {
     update:   [ 'u', 'upgrade' ],
@@ -34,13 +37,13 @@ async function main (options = {}) {
   }
 
   if (args.shared) {
-    hydrate.shared(params)
+    return hydrate.shared(params)
   }
   else if (args.update) {
-    hydrate.update(params)
+    return hydrate.update(params)
   }
   else {
-    hydrate.install(params)
+    return hydrate.install(params)
   }
 }
 
@@ -50,7 +53,9 @@ module.exports = main
 if (require.main === module) {
   (async function () {
     try {
-      await main()
+      let inventory = await _inventory({})
+      banner({ inventory, version: `Hydrate ${version}` })
+      await main({ inventory })
     }
     catch (err) {
       console.log(err)
