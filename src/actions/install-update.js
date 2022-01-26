@@ -1,8 +1,7 @@
 let { dirname, join, sep } = require('path')
-let { existsSync } = require('fs')
+let { existsSync, rmSync } = require('fs')
 let child = require('child_process')
 let series = require('run-series')
-let rm = require('rimraf')
 let print = require('../_printer')
 
 module.exports = function hydrator (params, callback) {
@@ -42,7 +41,8 @@ module.exports = function hydrator (params, callback) {
         if (isJs) dir = join(cwd, 'node_modules')
         if (isPy) dir = join(cwd, 'vendor')
         if (isRb) dir = join(cwd, 'vendor', 'bundle')
-        rm(dir, callback)
+        rmSync(dir, { recursive: true, force: true })
+        callback()
       }
       else callback()
     },

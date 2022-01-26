@@ -1,6 +1,5 @@
 let { dirname, join } = require('path')
-let { existsSync } = require('fs')
-let rm = require('rimraf')
+let { existsSync, rmSync } = require('fs')
 let cp = require('cpr')
 let glob = require('glob')
 
@@ -134,16 +133,12 @@ let viewsArtifactsDisabled = [
 // Test resetters
 function reset (t, callback) {
   process.chdir(join(__dirname, '..'))
-  rm(mockTmp, { glob: false, maxBusyTries: 30 }, function (err) {
+  rmSync(mockTmp, { recursive: true, force: true })
+  cp(mockSource, mockTmp, { overwrite: true }, function (err) {
     if (err) t.fail(err)
     else {
-      cp(mockSource, mockTmp, { overwrite: true }, function (err) {
-        if (err) t.fail(err)
-        else {
-          process.chdir(mockTmp)
-          callback()
-        }
-      })
+      process.chdir(mockTmp)
+      callback()
     }
   })
 }
