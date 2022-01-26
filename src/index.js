@@ -29,7 +29,9 @@ function run (installing, params = {}, callback) {
       }
     })
   }
-  if (params.inventory) hydrator(params.inventory, true, params, callback)
+  if (params.inventory) {
+    hydrator(params.inventory, true, params, callback)
+  }
   else {
     _inventory({ cwd: params.cwd }, function (err, inventory) {
       if (err) callback(err)
@@ -38,6 +40,7 @@ function run (installing, params = {}, callback) {
   }
   return promise
 }
+
 module.exports = {
   install: run.bind({}, true),
   update: run.bind({}, false),
@@ -47,7 +50,7 @@ function hydrator (inventory, installing, params, callback) {
   let { inv } = inventory
   let {
     // Main params
-    autoinstall = false,
+    autoinstall = true,
     installRoot = false,
     basepath,
     cwd,
@@ -138,7 +141,7 @@ function hydrator (inventory, installing, params, callback) {
     if (basepath) {
       dirs = dirs.filter(d => pathToUnix(stripCwd(d, cwd)) === pathToUnix(stripCwd(basepath, cwd)))
     }
-    let result = actions.autoinstall({ dirs, update, inventory, ...params })
+    let result = actions.autoinstall({ dirs, update, ...params, inventory })
     if (result.length) {
       autoinstalled = result
       let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file), cwd))
