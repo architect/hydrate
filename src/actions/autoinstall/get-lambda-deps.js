@@ -6,7 +6,7 @@ let getRequires = require('./find-lambda-deps')
 
 module.exports = function getDirDeps ({ dir, update, inventory }) {
   // Clean everything (except the root) out before we get going jic
-  let isRoot = dir === inventory.inv._project.src
+  let isRoot = dir === inventory.inv._project.cwd
   if (!isRoot) {
     rmSync(join(dir, 'node_modules'), { recursive: true, force: true })
   }
