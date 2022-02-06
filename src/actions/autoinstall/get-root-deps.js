@@ -11,16 +11,17 @@ module.exports = function getDeps ({ inv }) {
   let deps = Object.assign(package.devDependencies || {}, package.dependencies || {})
 
   let lock = existsSync(packageLock) && JSON.parse(readFileSync(packageLock))
-  if (lock && lock.lockfileVersion === 1 && lock.dependencies) {
+  // Top level lockfile deps only; we aren't going to walk the tree
+  // Per npm: lockfileVersion 2 is backwards compatible with v1; however v3 will be a fully breaking change
+  if (lock && [ 1, 2 ].includes(lock.lockfileVersion) && lock.dependencies) {
     let lockDeps = {}
-    // Top level lockfile deps only; we aren't going to walk this tree
     Object.entries(lock.dependencies).forEach(([ dep, data ]) => {
+      if (!dep || !data.version) return
       lockDeps[dep] = data.version
     })
     // Locked deps win
     deps = Object.assign(deps, lockDeps)
   }
-  // TODO add npm 7 support (`lock.lockfileVersion === 2`)
 
   return deps
 }
