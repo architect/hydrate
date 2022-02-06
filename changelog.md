@@ -7,6 +7,7 @@
 ### Added
 
 - Added support for Arc 10 plugin API
+- Added support for package-lock.json `lockfileVersion` 2; fixes #1306, thanks @gopeter!
 
 
 ### Changed
