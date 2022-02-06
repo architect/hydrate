@@ -54,12 +54,13 @@ test('package.json', t => {
 })
 
 test('package.json + package-lock.json', t => {
-  t.plan(2)
+  t.plan(4)
   let deps
   let lockDeps
   let correct
   let result
 
+  // v1
   deps = {
     foo: '^1.0.0',
     bar: '^2.0.0',
@@ -72,13 +73,24 @@ test('package.json + package-lock.json', t => {
     'package.json': pkgify(deps),
     'package-lock.json': pkgify(lockDeps, null, 1),
   })
-  correct = deps = {
+  correct = {
     foo: '1.2.3',
     bar: '2.3.4',
   }
-  t.deepEqual(result, correct, 'Got back specific dep versions from lockfile')
+  t.deepEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 1)')
   console.log(result)
+  mockFs.restore()
 
+  // v2
+  result = run({
+    'package.json': pkgify(deps),
+    'package-lock.json': pkgify(lockDeps, null, 2),
+  })
+  t.deepEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 2)')
+  console.log(result)
+  mockFs.restore()
+
+  // v1
   deps = {
     foo: '^1.0.0',
     bar: '^2.0.0',
@@ -91,12 +103,21 @@ test('package.json + package-lock.json', t => {
     'package.json': pkgify(deps),
     'package-lock.json': pkgify(lockDeps, null, 1),
   })
-  correct = deps = {
+  correct = {
     foo: '^1.0.0',
     bar: '2.3.4',
     baz: '3.4.5',
   }
-  t.deepEqual(result, correct, 'Merged dep versions from package + lockfile')
+  t.deepEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 1)')
+  console.log(result)
+  mockFs.restore()
+
+  // v2
+  result = run({
+    'package.json': pkgify(deps),
+    'package-lock.json': pkgify(lockDeps, null, 2),
+  })
+  t.deepEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 2)')
   console.log(result)
 
   mockFs.restore()
