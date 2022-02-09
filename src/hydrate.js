@@ -15,7 +15,7 @@ let cleanup = require('./_cleanup')
  * - shared
  * - views
  */
-function run (installing, params = {}, callback) {
+module.exports = function run (installing, params = {}, callback) {
   params.cwd = params.cwd || process.cwd()
   params.basepath = params.basepath || ''
 
@@ -39,11 +39,6 @@ function run (installing, params = {}, callback) {
     })
   }
   return promise
-}
-
-module.exports = {
-  install: run.bind({}, true),
-  update: run.bind({}, false),
 }
 
 function hydrator (inventory, installing, params, callback) {
