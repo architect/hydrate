@@ -2,7 +2,7 @@
 let minimist = require('minimist')
 let _inventory = require('@architect/inventory')
 let { banner } = require('@architect/utils')
-let { version } = require('./package.json')
+let { version } = require('../package.json')
 let hydrate = require('.')
 
 /**
