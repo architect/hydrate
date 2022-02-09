@@ -2,9 +2,9 @@
   "name": "@architect/hydrate",
   "version": "3.0.0-RC.5",
   "description": "Architect dependency hydrator and shared file manager",
-  "main": "index.js",
+  "main": "src/index.js",
   "bin": {
-    "arc-hydrate": "./cli.js"
+    "arc-hydrate": "src/cli.js"
   },
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
@@ -29,6 +29,9 @@
     "url": "https://github.com/architect/hydrate/issues"
   },
   "homepage": "https://github.com/architect/hydrate#readme",
+  "files": [
+    "src/*"
+  ],
   "dependencies": {
     "@architect/inventory": "~3.0.0-RC.8",
     "@architect/utils": "~3.0.4",
