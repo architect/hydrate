@@ -5,14 +5,14 @@ function caller (type, callback) {
   called.push(type)
   callback()
 }
-let run = {
-  install: (p, callback) => caller('install', callback),
-  update: (p, callback) => caller('update', callback),
+let run = (installing, params, callback) => {
+  if (installing) caller('install', callback)
+  else caller('update', callback)
 }
 let shared = (p, callback) => caller('shared', callback)
 let hydrate = proxyquire('../../', {
-  './src': run,
-  './src/shared': shared,
+  './hydrate': run,
+  './shared': shared,
 })
 process.env.CI = true // Suppresses tape issues with progress indicator
 
