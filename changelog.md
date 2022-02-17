@@ -2,7 +2,7 @@
 
 ---
 
-## [3.0.0] 2022-01-13
+## [3.0.0 - 3.0.1] 2022-01-13
 
 ### Added
 
@@ -16,6 +16,7 @@
 - Breaking change: legacy `@tables-streams` folders (`src/tables/...` and `src/streams/...`) are now deprecated
 - Breaking change: bare CLI arguments (e.g. `hydrate update`) as aliases to flags are no longer used, please use CLI flags (e.g. `hydrate --update` or `hydrate -u`)
 - Stop publishing to the GitHub Package registry
+- Traverse folders that start with `.` looking for Lambda package files to hydrate
 - Updated dependencies
 
 

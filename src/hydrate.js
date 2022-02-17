@@ -74,7 +74,7 @@ function hydrator (inventory, installing, params, callback) {
   let pattern = p => `${p}/**/@(package\.json|requirements\.txt|Gemfile)`
   let dir = basepath || '.'
   // Get everything except shared
-  let files = glob(pattern(dir)).filter(file => {
+  let files = glob(pattern(dir), { dot: true }).filter(file => {
     file = pathToUnix(file)
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
