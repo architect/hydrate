@@ -1,5 +1,6 @@
 // Built-ins should be ignored
 import path from 'path'
+import fs from 'node:fs'
 
 // AWS-SDK should also be ignored
 import aws from 'aws-sdk'
