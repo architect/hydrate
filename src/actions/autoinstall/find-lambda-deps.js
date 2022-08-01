@@ -51,8 +51,9 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
   let isPkg = /^(\w|@)/
   let isArcShared = /^@architect(\/|\\)(shared|views)/
   let isFile = /^file:\/\//
+  let isBuiltin = /^node:/
   let isWeb = /^https?:\/\//
-  let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !isFile.test(r) && !isWeb.test(r) && !builtins.includes(r))
+  let deps = called.filter(r => isPkg.test(r) && !isArcShared.test(r) && !isFile.test(r) && !isBuiltin.test(r) && !isWeb.test(r) && !builtins.includes(r))
 
   function getDep (dep, sep) {
     return dep.startsWith('@')

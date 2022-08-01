@@ -4,6 +4,11 @@
 
 ## [3.0.4] 2022-07-26
 
+### Added
+
+- Added support for Node.js 16's `node:` builtin module syntax; fixes #1358
+
+
 ### Changed
 
 - Updated dependencies

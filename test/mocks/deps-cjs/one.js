@@ -1,5 +1,6 @@
 // Built-ins should be ignored
 let path = require('path')
+let fs = require('node:fs')
 
 // AWS-SDK should also be ignored
 let aws = require('aws-sdk')
