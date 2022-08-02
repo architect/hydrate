@@ -2,6 +2,7 @@ let { dirname, join } = require('path')
 let { existsSync, rmSync } = require('fs')
 let cp = require('cpr')
 let glob = require('glob')
+let { pathToUnix } = require('@architect/utils')
 
 let mockSource    = join(__dirname, '..', 'mocks', 'normal')
 let mockTmp       = join(__dirname, '..', 'tmp')
@@ -57,7 +58,7 @@ let pythonDependencies = pythonFunctions
   .map(p => join(p, 'vendor', 'minimal-0.1.0.dist-info'))
 
 let rubyDependencies = () => rubyFunctions
-  .map(p => glob.sync(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`)[0])
+  .map(p => glob.sync(pathToUnix(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`))[0])
 
 let nodeDependencies = nodeFunctions
   .map(p => join(p, 'node_modules', 'tiny-json-http'))
