@@ -1,8 +1,9 @@
 let { dirname, join } = require('path')
-let { existsSync, rmSync } = require('fs')
+let { existsSync } = require('fs')
 let cp = require('cpr')
 let glob = require('glob')
 let { pathToUnix } = require('@architect/utils')
+let { destroyPath } = require('../../src/lib')
 
 let mockSource    = join(__dirname, '..', 'mocks', 'normal')
 let mockTmp       = join(__dirname, '..', 'tmp')
@@ -134,7 +135,7 @@ let viewsArtifactsDisabled = [
 // Test resetters
 function reset (t, callback) {
   process.chdir(join(__dirname, '..'))
-  rmSync(mockTmp, { recursive: true, force: true })
+  destroyPath(mockTmp)
   cp(mockSource, mockTmp, { overwrite: true }, function (err) {
     if (err) t.fail(err)
     else {
