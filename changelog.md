@@ -2,6 +2,14 @@
 
 ---
 
+## [3.0.5] 2022-08-11
+
+### Fixed
+
+- Handle obscure case where lingering broken symlinks would not be properly removed by the shared file copier
+
+---
+
 ## [3.0.4] 2022-07-26
 
 ### Added
