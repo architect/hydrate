@@ -102,7 +102,7 @@ let staticArtifacts = arcFileArtifacts
   .map(p => join(dirname(p), 'static.json'))
 
 let sharedArtifacts = []
-  .concat(pythonFunctions.map(p => join(p, rubyShared, 'shared.md')))
+  .concat(pythonFunctions.map(p => join(p, pythonShared, 'shared.md')))
   .concat(rubyFunctions.map(p => join(p, rubyShared, 'shared.md')))
   .concat(nodeFunctions.map(p => join(p, nodeShared, 'shared.md')))
   .concat(arcCustomPath.map(p => join(p, nodeShared, 'shared.md')))
