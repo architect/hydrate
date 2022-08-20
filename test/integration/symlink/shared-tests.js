@@ -12,6 +12,7 @@ let test = require('tape')
 let {
   resetAndCopyShared,
   resetAndCopySharedCustom,
+  resetAndCopySharedPlugins,
   checkFolderCreation,
   arcFileArtifacts,
   staticArtifacts,
@@ -20,6 +21,7 @@ let {
   getViewsArtifacts,
   viewsArtifacts,
   viewsArtifactsDisabled,
+  pluginArtifacts,
 } = require('../_shared')
 let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
@@ -92,6 +94,51 @@ test(`[Shared file symlinking (default paths)] shared() copies shared and views 
         checkFolderCreation(t)
       }
     })
+  })
+})
+
+test(`[Shared file symlinking with plugins (default paths)] shared() copies shared and views, as well as files via plugin`, t => {
+  t.plan(
+    sharedArtifacts.length +
+    getViewsArtifacts.length +
+    sharedArtifactsDisabled.length +
+    viewsArtifactsDisabled.length +
+    pluginArtifacts.length + 1
+  )
+  resetAndCopySharedPlugins(t, function () {
+    cp(join('src', 'app.plugins'), join('.', 'app.arc'), { overwrite: true },
+      function (err) {
+        if (err) t.fail(err)
+        else {
+          hydrate.shared({}, function (err) {
+            if (err) t.fail(err)
+            else {
+            // Check to see if files that are supposed to be there are actually there
+              sharedArtifacts.forEach(path => {
+                t.ok(existsSync(path), `Found shared file in ${path}`)
+              })
+              sharedArtifactsDisabled.forEach(path => {
+                t.notOk(existsSync(path), `Did not find shared file in function with @arc shared false ${path}`)
+              })
+              getViewsArtifacts.forEach(path => {
+                if (path.includes('get-')) {
+                  t.ok(existsSync(path), `Found views file in GET function ${path}`)
+                }
+                else {
+                  t.notOk(existsSync(path), `Did not find views file in non-GET function ${path}`)
+                }
+              })
+              viewsArtifactsDisabled.forEach(path => {
+                t.notOk(existsSync(path), `Did not find views file in function with @arc views false ${path}`)
+              })
+              pluginArtifacts.forEach(path => {
+                t.ok(existsSync(path), `Found plugin file in ${path}`)
+              })
+              checkFolderCreation(t)
+            }
+          })
+        }
+      })
   })
 })
 
