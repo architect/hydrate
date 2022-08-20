@@ -2,6 +2,14 @@
 
 ---
 
+## [3.1.0] 2022-08-20
+
+### Added
+
+- Added `hydrate.copy` API for copying in files and folders to Lambda dependency directories (`./path/to/lambda/node_modules/` or `./path/to/lambda/vendor`)
+
+---
+
 ## [3.0.6] 2022-08-20
 
 ### Fixed
