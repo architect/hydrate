@@ -108,6 +108,20 @@ let sharedArtifacts = []
   .concat(arcCustomPath.map(p => join(p, nodeShared, 'shared.md')))
   .concat(arcAutoinstall.map(p => join(p, nodeShared, 'shared.md')))
 
+let threePluginFiles = (path, vendor) => [
+  join(path, vendor, '1.md'),
+  join(path, vendor, 'plugin-file-2.md'),
+  join(path, vendor, 'plugin-folder-1', 'plugin-file-3.md'),
+  join(path, vendor, 'plugin-folder-2', 'subfolder', 'plugin-file-4.md'),
+]
+let pluginArtifacts = []
+  .concat(pythonFunctions.map(p => threePluginFiles(p, 'vendor')))
+  .concat(rubyFunctions.map(p => threePluginFiles(p, 'vendor')))
+  .concat(nodeFunctions.map(p => threePluginFiles(p, 'node_modules')))
+  .concat(arcCustomPath.map(p => threePluginFiles(p, 'node_modules')))
+  .concat(arcAutoinstall.map(p => threePluginFiles(p, 'node_modules')))
+  .flat()
+
 let sharedArtifactsDisabled = [
   join('src', 'http', 'any-time_is_good-catchall', nodeShared, 'shared.md')
 ]
@@ -168,6 +182,14 @@ function resetAndCopySharedCustom (t, callback) {
     })
   })
 }
+function resetAndCopySharedPlugins (t, callback) {
+  reset(t, function () {
+    cp('_shared-plugins', 'src', { overwrite: true }, function done (err) {
+      if (err) t.fail(err)
+      else callback()
+    })
+  })
+}
 
 // Ensure we don't create empty folders with copied files
 let checkFolderCreation = t => t.notOk(existsSync(join('src', 'events', 'silence')), `Did not copy and create function folder that should not exist`)
@@ -178,6 +200,7 @@ module.exports = {
   resetAndCopyShared,
   resetAndCopySharedAutoinstall,
   resetAndCopySharedCustom,
+  resetAndCopySharedPlugins,
   checkFolderCreation,
 
   arcHttp,
@@ -210,6 +233,7 @@ module.exports = {
   getViewsArtifacts,
   viewsArtifacts,
   viewsArtifactsDisabled,
+  pluginArtifacts,
 
   mockTmp,
 }

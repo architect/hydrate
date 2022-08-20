@@ -4,6 +4,7 @@ let resetShared = require('./reset')
 let copyShared = require('./copy-shared')
 let copyViews = require('./copy-views')
 let copyStaticJSON = require('./copy-static-json')
+let copyPlugins = require('./copy-plugins')
 let { updater } = require('@architect/utils')
 let _inventory = require('@architect/inventory')
 
@@ -61,6 +62,9 @@ module.exports = function shared (params = {}, callback) {
     },
     function (callback) {
       copyStaticJSON(params, paths, callback)
+    },
+    function (callback) {
+      copyPlugins(params, paths, callback)
     },
   ], function done (err) {
     if (err) callback(err)
