@@ -2,6 +2,14 @@
 
 ---
 
+## [3.0.6] 2022-08-20
+
+### Fixed
+
+- Fix obscure case where copying `static.json` may fail when a shared folder is removed from the project; fixes #1367
+
+---
+
 ## [3.0.5] 2022-08-11
 
 ### Fixed

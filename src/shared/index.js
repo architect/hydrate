@@ -1,5 +1,6 @@
 let series = require('run-series')
 let getPaths = require('./get-paths')
+let resetShared = require('./reset')
 let copyShared = require('./copy-shared')
 let copyViews = require('./copy-views')
 let copyStaticJSON = require('./copy-static-json')
@@ -48,6 +49,9 @@ module.exports = function shared (params = {}, callback) {
       }
       paths = getPaths(inventory)
       callback()
+    },
+    function (callback) {
+      resetShared(paths, callback)
     },
     function (callback) {
       copyShared(params, paths, callback)
