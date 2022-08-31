@@ -27,7 +27,8 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
   function getIdentifier (id) {
     let ids = esquery.query(ast, `[id.name='${id}']`) || []
     ids.forEach(r => {
-      if (r.init.value) called.push(r.init.value)
+      // Note: r.init may be null in certain cases (such as variable declarations in for/of statements)
+      if (r.init?.value) called.push(r.init.value)
       else update.warn(`Dynamic ${isESM ? 'imports' : 'requires'} are not supported, dependency may not be installed: ${dir} imports '${id}'`)
     })
   }
