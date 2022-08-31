@@ -1,3 +1,4 @@
+let { join } = require('path')
 let { destroyPath } = require('../lib')
 
 /**
@@ -7,7 +8,9 @@ module.exports = function resetShared (paths, callback) {
   let destroy = Object.values(paths.all).filter(p => p.includes('@architect'))
   if (destroy.length) {
     for (let path of destroy) {
-      destroyPath(path)
+      // Specifically destroy just @architect/shared + views
+      destroyPath(join(path, 'shared'))
+      destroyPath(join(path, 'views'))
     }
   }
   callback()

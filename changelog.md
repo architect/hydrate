@@ -2,11 +2,16 @@
 
 ---
 
-## [3.1.0] 2022-08-20
+## [3.1.0 - 3.1.1] 2022-08-20
 
 ### Added
 
 - Added `hydrate.copy` API for copying in files and folders to Lambda dependency directories (`./path/to/lambda/node_modules/` or `./path/to/lambda/vendor`)
+
+
+### Fixed
+
+- Fixed issue where `hydrate.shared()` erroneously destroys the `@architect/functions` module; thanks @idy!
 
 ---
 
