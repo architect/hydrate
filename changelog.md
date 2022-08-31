@@ -2,7 +2,7 @@
 
 ---
 
-## [3.1.0 - 3.1.1] 2022-08-20
+## [3.1.0 - 3.1.2] 2022-08-20
 
 ### Added
 
@@ -12,6 +12,7 @@
 ### Fixed
 
 - Fixed issue where `hydrate.shared()` erroneously destroys the `@architect/functions` module; thanks @idy!
+- Fixed issue where autoinstall would fail to parse `require` or `import` within for/of statements; fixes #1370
 
 ---
 
