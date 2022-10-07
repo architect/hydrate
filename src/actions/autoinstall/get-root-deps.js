@@ -16,7 +16,7 @@ module.exports = function getDeps ({ inv }) {
   if (lock && [ 1, 2 ].includes(lock.lockfileVersion) && lock.dependencies) {
     let lockDeps = {}
     Object.entries(lock.dependencies).forEach(([ dep, data ]) => {
-      if (!dep || !data.version) return
+      if (!dep || !data.version || data.dev) return
       lockDeps[dep] = data.version
     })
     // Locked deps win

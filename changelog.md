@@ -2,6 +2,16 @@
 
 ---
 
+## [3.1.4] 2022-10-07
+
+### Fixed
+
+- Fixed corner case where Lambda treeshaking could install a potentially out of date dependency if found in the project's developer dependencies tree, even if as a transient dependency of another package in `package-lock.json`
+  - Per npm semantics, Architect assumes business logic that needs a specific version will use `dependencies`
+  - If for whatever reason your Architect app's business logic depends on a specific dependency version, and that version is only found in `devDependencies`, you must specify that version in `dependencies`
+
+---
+
 ## [3.1.3] 2022-09-07
 
 ### Changed
