@@ -2,6 +2,19 @@
 
 ---
 
+## [3.1.5] 2022-11-15
+
+### Changed
+
+- Changed `hydrate.copy` API to copy files into all Lambdas, not just those with shared code enabled
+
+
+### Fixed
+
+- Fixed issue where `hydrate.copy` plugins breaking on projects that disabled or aren't using shared code; thanks @tbeseda!
+
+---
+
 ## [3.1.4] 2022-10-07
 
 ### Fixed
