@@ -118,6 +118,8 @@ let pluginArtifacts = []
   .concat(pythonFunctions.map(p => threePluginFiles(p, 'vendor')))
   .concat(rubyFunctions.map(p => threePluginFiles(p, 'vendor')))
   .concat(nodeFunctions.map(p => threePluginFiles(p, 'node_modules')))
+  // hydrate.copy copies to all functions, even with shared disabled
+  .concat([ join('src', 'events', 'silence') ].map(p => threePluginFiles(p, 'node_modules')))
   .concat(arcCustomPath.map(p => threePluginFiles(p, 'node_modules')))
   .concat(arcAutoinstall.map(p => threePluginFiles(p, 'node_modules')))
   .flat()

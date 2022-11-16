@@ -7,11 +7,10 @@ let series = require('run-series')
 module.exports = function runCopyPlugins (params, paths, callback) {
   let { inventory } = params
   let { inv } = inventory
-  let { lambdasBySrcDir } = inv
+  let { lambdasBySrcDir, lambdaSrcDirs } = inv
   let { cwd } = inv._project
   let copyPlugins = inv.plugins?._methods?.hydrate?.copy
-  let shared = inv.shared?.shared
-  if (copyPlugins && shared.length) {
+  if (copyPlugins && lambdaSrcDirs?.length) {
     let frozen = deepFrozenCopy(inventory)
     let { arc } = frozen.inv._project
 
@@ -37,17 +36,15 @@ module.exports = function runCopyPlugins (params, paths, callback) {
               if (target && isAbsolute(target)) return rej(ReferenceError(`'target' path '${target}' cannot be absolute`))
 
               // Sure what's one more nested sequence of ops?
-              series(shared.map(share => {
+              series(lambdaSrcDirs.map(lambda => {
                 return function copier (callback) {
-                  if (paths.shared[share]) {
-                    let isNode = lambdasBySrcDir[share].config.runtime.startsWith('nodejs')
-                    let filename = target || basename(source)
-                    let nodeModules = join(share, 'node_modules', filename)
-                    let vendorDir = join(share, 'vendor', filename)
-                    let dest = isNode ? nodeModules : vendorDir
-                    cp(src, dest, params, callback)
-                  }
-                  else callback()
+                  let { config, src } = lambdasBySrcDir[lambda]
+                  let isNode = config.runtime.startsWith('nodejs')
+                  let filename = target || basename(source)
+                  let nodeModules = join(src, 'node_modules', filename)
+                  let vendorDir = join(src, 'vendor', filename)
+                  let dest = isNode ? nodeModules : vendorDir
+                  cp(src, dest, params, callback)
                 }
               }), function _done (err) {
                 if (err) rej(err)

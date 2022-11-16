@@ -134,7 +134,8 @@ test(`[Shared file symlinking with plugins (default paths)] shared() copies shar
               pluginArtifacts.forEach(path => {
                 t.ok(existsSync(path), `Found plugin file in ${path}`)
               })
-              checkFolderCreation(t)
+              let normallyShouldNotBePresent = join('src', 'events', 'silence', 'node_modules')
+              t.ok(existsSync(normallyShouldNotBePresent), 'Silence event folder created just this once!')
             }
           })
         }

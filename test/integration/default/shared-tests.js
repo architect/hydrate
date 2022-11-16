@@ -130,7 +130,8 @@ test(`[Shared file copying with plugins (default paths)] shared() copies shared 
               pluginArtifacts.forEach(path => {
                 t.ok(existsSync(path), `Found plugin file in ${path}`)
               })
-              checkFolderCreation(t)
+              let normallyShouldNotBePresent = join('src', 'events', 'silence', 'node_modules')
+              t.ok(existsSync(normallyShouldNotBePresent), 'Silence event folder created just this once!')
             }
           })
         }
