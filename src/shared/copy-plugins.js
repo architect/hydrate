@@ -36,13 +36,13 @@ module.exports = function runCopyPlugins (params, paths, callback) {
               if (target && isAbsolute(target)) return rej(ReferenceError(`'target' path '${target}' cannot be absolute`))
 
               // Sure what's one more nested sequence of ops?
-              series(lambdaSrcDirs.map(lambda => {
+              series(lambdaSrcDirs.map(dir => {
                 return function copier (callback) {
-                  let { config, src } = lambdasBySrcDir[lambda]
-                  let isNode = config.runtime.startsWith('nodejs')
+                  let lambda = lambdasBySrcDir[dir]
+                  let isNode = lambda.config.runtime.startsWith('nodejs')
                   let filename = target || basename(source)
-                  let nodeModules = join(src, 'node_modules', filename)
-                  let vendorDir = join(src, 'vendor', filename)
+                  let nodeModules = join(lambda.src, 'node_modules', filename)
+                  let vendorDir = join(lambda.src, 'vendor', filename)
                   let dest = isNode ? nodeModules : vendorDir
                   cp(src, dest, params, callback)
                 }
