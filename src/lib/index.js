@@ -4,7 +4,7 @@ let isDep = file => file.includes('node_modules') || file.includes('vendor/bundl
 let ignoreDeps = file => !isDep(pathToUnix(file))
 
 function destroyPath (path) {
-  rmSync(path, { recursive: true, force: true })
+  rmSync(path, { recursive: true, force: true, maxRetries: 10 })
   // If there are stale symlinks lying about, rmSync will have missed them
   // So let's attempt an unlink jic, and all should be well
   try { unlinkSync(path) }
