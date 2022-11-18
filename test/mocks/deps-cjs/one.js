@@ -4,6 +4,7 @@ let fs = require('node:fs')
 
 // AWS-SDK should also be ignored
 let aws = require('aws-sdk')
+let aws = require('@aws-sdk/client-whatev')
 
 // Arc shared and views should be ignored
 let shared = require('@architect/shared/something')
