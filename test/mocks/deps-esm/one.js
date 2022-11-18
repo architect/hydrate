@@ -4,6 +4,7 @@ import fs from 'node:fs'
 
 // AWS-SDK should also be ignored
 import aws from 'aws-sdk'
+import whatev from '@aws-sdk/client-whatev'
 
 // Arc shared and views should be ignored
 import shared from '@architect/shared/something.js'
