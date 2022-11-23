@@ -27,28 +27,46 @@ module.exports = function autoinstaller (params) {
 
   // Aggregate shared + views deps
   let shared = getSharedDeps({ cwd, inventory, update })
-  let { sharedDeps, sharedFiles, viewsDeps, viewsFiles } = shared
+  let {
+    sharedDeps, sharedFiles, /* sharedAwsSdkV2, sharedAwsSdkV3, */
+    viewsDeps, viewsFiles, /* viewsAwsSdkV2, viewsAwsSdkV3, */
+  } = shared
   projectDirs += shared.projectDirs
   projectFiles += shared.projectFiles
+
+  // TODO warn for shared/views
+
+  let v2Warnings = []
+  let v3Warnings = []
 
   dirs.forEach(dir => {
     projectDirs++
     let lambda = inventory.inv.lambdasBySrcDir[dir]
     if (Array.isArray(lambda)) lambda = lambda[0] // Handle multitenant Lambdae
+    let { config, name, pragma } = lambda
+    let { runtime } = config
 
     // Autoinstall is currently Node.js only - exit early if it's another runtime
-    if (!lambda.config.runtime.startsWith('nodejs')) return
+    if (!runtime.startsWith('nodejs')) return
     try {
       let result = getLambdaDeps({ dir, update, inventory })
-      let { deps, files } = result
+      let { deps, files, awsSdkV2, awsSdkV3 } = result
       projectFiles += files.length
       failures = failures.concat(result.failures)
 
-      if (lambda.config.shared) {
+      let hasSdkV3 = runtime >= 'nodejs18.x'
+      if (hasSdkV3 && awsSdkV2) {
+        v2Warnings.push(`- '@${pragma} ${name}' (runtime: '${runtime}')`)
+      }
+      if (!hasSdkV3 && awsSdkV3) {
+        v3Warnings.push(`- '@${pragma} ${name}' (runtime: '${runtime}')`)
+      }
+
+      if (config.shared) {
         deps = deps.concat(sharedDeps)
         files = files.concat(sharedFiles)
       }
-      if (lambda.config.views) {
+      if (config.views) {
         deps = deps.concat(viewsDeps)
         files = files.concat(viewsFiles)
       }
@@ -87,6 +105,27 @@ module.exports = function autoinstaller (params) {
       throw err
     }
   })
+
+  let plural = arr => arr.length > 1
+  let msg = (plural, dep) => `The following function${plural ? 's' : ''} requires or imports ${dep}, which is not built into your Lambda${plural ? `s'` : `'s`} runtime:`
+  let depWarnings = []
+  if (v2Warnings.length) {
+    depWarnings.push(
+      msg(plural(v2Warnings), `'aws-sdk'`),
+      ...v2Warnings,
+    )
+  }
+  if (v3Warnings.length) {
+    depWarnings.push(
+      msg(plural(v3Warnings), `one or more '@aws-sdk/*' (V3) modules`),
+      ...v3Warnings,
+    )
+  }
+  if (depWarnings) {
+    depWarnings.unshift('Found following possible AWS SDK version mismatches!')
+    depWarnings.push('Architect does not manage AWS SDK, thus this code may be broken when deployed. See more at: https://arc.codes/aws-sdk-versions')
+    update.warn(depWarnings.join('\n'))
+  }
 
   // Halt hydration (and deployment) if there are dependency determination issues
   if (failures.length) {

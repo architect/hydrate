@@ -31,9 +31,11 @@ module.exports = function getDirDeps ({ dir, update, inventory }) {
   // Tidy up the dependencies
   deps = [ ...new Set(deps.sort()) ] // Dedupe
 
-  // AWS SDK is presumed to already be present at runtime
-  // Due to differences older vs. newer Node.js Lambda containers, that may not actually necessarily be the case
+  // Some version of AWS SDK is presumed to already be present at runtime
+  // However, due to SDK version differences between older vs. newer Node.js Lambda containers, that may not actually necessarily be the case, so flag them
+  let awsSdkV2 = deps.some(d => d === 'aws-sdk')
+  let awsSdkV3 = deps.some(d => d.startsWith('@aws-sdk'))
   deps = deps.filter(d => d !== 'aws-sdk' && !d.startsWith('@aws-sdk'))
 
-  return { deps, failures, files }
+  return { deps, failures, files, awsSdkV2, awsSdkV3 }
 }
