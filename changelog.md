@@ -4,9 +4,16 @@
 
 ## [3.1.6] 2022-11-18
 
+### Added
+
+- Added support for Lambda `nodejs18.x` runtime
+- Added Node.js 18.x to test matrix
+
+
 ### Changed
 
 - Ignore AWS SDK v3 (`@aws-sdk/*`) references during Lambda treeshaking
+- Updated dependencies
 
 ---
 
