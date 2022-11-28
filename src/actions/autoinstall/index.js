@@ -3,6 +3,10 @@ let { join } = require('path')
 let getRootDeps = require('./get-root-deps')
 let getSharedDeps = require('./get-shared-deps')
 let getLambdaDeps = require('./get-lambda-deps')
+let sdkInfo = 'Architect does not manage AWS SDK, thus this code may be broken when deployed. See more at: https://arc.codes/aws-sdk-versions'
+let sdkV2 = `'aws-sdk' (v2)`
+let sdkV3short = `'@aws-sdk/*' (v3)`
+let sdkV3long = `one or more ${sdkV3short} modules`
 
 module.exports = function autoinstaller (params) {
   let { cwd, dirs, inventory, update, verbose } = params
@@ -28,17 +32,38 @@ module.exports = function autoinstaller (params) {
   // Aggregate shared + views deps
   let shared = getSharedDeps({ cwd, inventory, update })
   let {
-    sharedDeps, sharedFiles, /* sharedAwsSdkV2, sharedAwsSdkV3, */
-    viewsDeps, viewsFiles, /* viewsAwsSdkV2, viewsAwsSdkV3, */
+    sharedDeps, sharedFiles, sharedAwsSdkV2, sharedAwsSdkV3,
+    viewsDeps, viewsFiles, viewsAwsSdkV2, viewsAwsSdkV3,
   } = shared
   projectDirs += shared.projectDirs
   projectFiles += shared.projectFiles
 
-  // TODO warn for shared/views
+  // Complain about possible shared code / AWS SDK issues
+  let foundSharedIssueWithAwsSdkV2 = 0, foundSharedIssueWithAwsSdkV3 = 0, foundViewsIssueWithAwsSdkV2 = 0, foundViewsIssueWithAwsSdkV3 = 0
+  Object.values(inventory.inv.lambdasBySrcDir).forEach(({ config }) => {
+    let { runtime, shared, views } = config
+    if (!runtime.startsWith('nodejs')) return
+    let hasSdkV3 = runtime >= 'nodejs18.x'
+    let hasSdkV2 = runtime < 'nodejs18.x'
+    if (!foundSharedIssueWithAwsSdkV2 && shared && sharedAwsSdkV2 && hasSdkV3) foundSharedIssueWithAwsSdkV2++
+    if (!foundSharedIssueWithAwsSdkV3 && shared && sharedAwsSdkV3 && hasSdkV2) foundSharedIssueWithAwsSdkV3++
+    if (!foundViewsIssueWithAwsSdkV2 && views && viewsAwsSdkV2 && hasSdkV3) foundViewsIssueWithAwsSdkV2++
+    if (!foundViewsIssueWithAwsSdkV3 && views && viewsAwsSdkV3 && hasSdkV2) foundViewsIssueWithAwsSdkV3++
+  })
+
+  let sharedWarnings = []
+  if (foundSharedIssueWithAwsSdkV2) sharedWarnings.push(`- Found shared code that imports or requires ${sdkV2}; ${foundSharedIssueWithAwsSdkV2} Lambda(s) only have ${sdkV3short} built in`)
+  if (foundSharedIssueWithAwsSdkV3) sharedWarnings.push(`- Found shared code that imports or requires ${sdkV3long}; ${foundSharedIssueWithAwsSdkV3} Lambda(s) only have ${sdkV2} built in`)
+  if (foundViewsIssueWithAwsSdkV2) sharedWarnings.push(`- Found views code that imports or requires ${sdkV2}; ${foundViewsIssueWithAwsSdkV2} Lambda(s) only have ${sdkV3short} built in`)
+  if (foundViewsIssueWithAwsSdkV3) sharedWarnings.push(`- Found views code that imports or requires ${sdkV3long}; ${foundViewsIssueWithAwsSdkV3} Lambda(s) only have ${sdkV2} built in`)
+  if (sharedWarnings.length) {
+    sharedWarnings.unshift('Found possible AWS SDK version mismatches in Architect shared code')
+    sharedWarnings.push(sdkInfo)
+    update.warn(sharedWarnings.join('\n'))
+  }
 
   let v2Warnings = []
   let v3Warnings = []
-
   dirs.forEach(dir => {
     projectDirs++
     let lambda = inventory.inv.lambdasBySrcDir[dir]
@@ -111,19 +136,19 @@ module.exports = function autoinstaller (params) {
   let depWarnings = []
   if (v2Warnings.length) {
     depWarnings.push(
-      msg(plural(v2Warnings), `'aws-sdk'`),
+      msg(plural(v2Warnings), sdkV2),
       ...v2Warnings,
     )
   }
   if (v3Warnings.length) {
     depWarnings.push(
-      msg(plural(v3Warnings), `one or more '@aws-sdk/*' (V3) modules`),
+      msg(plural(v3Warnings), sdkV3long),
       ...v3Warnings,
     )
   }
-  if (depWarnings) {
-    depWarnings.unshift('Found following possible AWS SDK version mismatches!')
-    depWarnings.push('Architect does not manage AWS SDK, thus this code may be broken when deployed. See more at: https://arc.codes/aws-sdk-versions')
+  if (depWarnings.length) {
+    depWarnings.unshift('Found possible AWS SDK version mismatches in Lambda handler code')
+    depWarnings.push(sdkInfo)
     update.warn(depWarnings.join('\n'))
   }
 

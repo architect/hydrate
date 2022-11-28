@@ -16,6 +16,7 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
   if (!hasRequire && !hasImport) return
 
   let isESM = !!(hasImport)
+  let statement = isESM ? 'imports' : 'requires'
 
   let called = []
   let esmQuery = `ImportExpression, ImportDeclaration, ExpressionStatement[expression.type='ImportExpression'], Property[key.name='import']`
@@ -29,7 +30,7 @@ module.exports = function findLambdaDeps ({ dir, file, update }) {
     ids.forEach(r => {
       // Note: r.init may be null in certain cases (such as variable declarations in for/of statements)
       if (r.init?.value) called.push(r.init.value)
-      else update.warn(`Dynamic ${isESM ? 'imports' : 'requires'} are not supported, dependency may not be installed: ${dir} imports '${id}'`)
+      else update.warn(`Lambda treeshaking does not support dynamic ${statement}, dependency may not be installed: ${dir} ${statement} '${id}'`)
     })
   }
 
