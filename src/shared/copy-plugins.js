@@ -41,8 +41,9 @@ module.exports = function runCopyPlugins (params, paths, callback) {
                   let lambda = lambdasBySrcDir[dir]
                   let isNode = lambda.config.runtime.startsWith('nodejs')
                   let filename = target || basename(source)
-                  let nodeModules = join(lambda.src, 'node_modules', filename)
-                  let vendorDir = join(lambda.src, 'vendor', filename)
+                  let base = lambda.build || lambda.src
+                  let nodeModules = join(base, 'node_modules', filename)
+                  let vendorDir = join(base, 'vendor', filename)
                   let dest = isNode ? nodeModules : vendorDir
                   cp(src, dest, params, callback)
                 }
