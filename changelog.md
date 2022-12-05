@@ -2,6 +2,14 @@
 
 ---
 
+## [3.1.7] 2022-12-05
+
+### Fixed
+
+- Fixed `hydrate.copy` API bug where Lambda build dir is not used
+
+---
+
 ## [3.1.6] 2022-11-18
 
 ### Added
