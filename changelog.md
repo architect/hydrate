@@ -2,6 +2,14 @@
 
 ---
 
+## [3.1.8] 2022-12-06
+
+### Fixed
+
+- Fixed `hydrate.copy` API bug where files are copied to `vendor`, not `node_modules`, for `typescript` Lambdas
+
+---
+
 ## [3.1.7] 2022-12-05
 
 ### Fixed
