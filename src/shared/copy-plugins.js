@@ -39,7 +39,8 @@ module.exports = function runCopyPlugins (params, paths, callback) {
               series(lambdaSrcDirs.map(dir => {
                 return function copier (callback) {
                   let lambda = lambdasBySrcDir[dir]
-                  let isNode = lambda.config.runtime.startsWith('nodejs')
+                  let isNode = lambda.config?.runtimeConfig?.baseRuntime?.startsWith('nodejs') ||
+                               lambda.config.runtime.startsWith('nodejs')
                   let filename = target || basename(source)
                   let base = lambda.build || lambda.src
                   let nodeModules = join(base, 'node_modules', filename)
