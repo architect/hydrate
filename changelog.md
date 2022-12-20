@@ -2,6 +2,14 @@
 
 ---
 
+## [3.1.9] 2022-12-20
+
+### Fixed
+
+- Fixed `hydrate.copy` crashing when copying to multi-tenant Lambdae
+
+---
+
 ## [3.1.8] 2022-12-06
 
 ### Fixed
