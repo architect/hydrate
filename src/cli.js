@@ -34,6 +34,7 @@ async function main (opts = {}) {
     inventory,
     autoinstall:  args.autoinstall,
     verbose:      args.verbose,
+    pkgManager:   args.pkgManager?.trim()
   }
 
   if (args.shared) {

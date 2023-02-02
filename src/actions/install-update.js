@@ -6,7 +6,7 @@ let print = require('../_printer')
 let { destroyPath } = require('../lib')
 
 module.exports = function hydrator (params, callback) {
-  let { file, action, update, env, shell, timeout, installing, verbose } = params
+  let { file, action, update, env, shell, timeout, installing, verbose, pkgManager } = params
   let cwd = dirname(file)
   let options = { cwd, env, shell, timeout }
   let start
@@ -30,9 +30,17 @@ module.exports = function hydrator (params, callback) {
     })
   }
 
+  let exists = file => existsSync(join(cwd, file))
   let isJs = file.endsWith('package.json')
   let isPy = file.endsWith('requirements.txt')
   let isRb = file.endsWith('Gemfile')
+
+  let isNpm, isPnpm, isYarn
+  if (isJs) {
+    isNpm = pkgManager ? pkgManager === 'npm' : exists('package-lock.json')
+    isPnpm = pkgManager ? pkgManager === 'pnpm' : exists('pnpm-lock.yaml')
+    isYarn = pkgManager ? pkgManager === 'yarn' : exists('yarn.lock')
+  }
 
   series([
     function clear (callback) {
@@ -51,15 +59,20 @@ module.exports = function hydrator (params, callback) {
       // TODO: I think we should consider what minimum version of node/npm this
       // module needs to use as the npm commands below have different behaviour
       // depending on npm version - and enshrine those in the package.json
-      let exists = file => existsSync(join(cwd, file))
 
       // Install JS deps
       if (isJs && installing) {
         let prodFlag = isRoot ? '' : '--production'
-        if (exists('package-lock.json')) {
+        if (isNpm) {
           exec(`npm ci ${prodFlag}`, options, callback)
         }
-        else if (exists('yarn.lock')) {
+        else if (isPnpm) {
+          prodFlag = isRoot ? '' : '--prod'
+          let local = join(cwd, 'node_modules', 'pnpm')
+          let cmd = local ? `npx pnpm i ${prodFlag}` : `pnpm i ${prodFlag}`
+          exec(cmd, options, callback)
+        }
+        else if (isYarn) {
           let local = join(cwd, 'node_modules', 'yarn')
           let cmd = local ? `npx yarn ${prodFlag}` : `yarn ${prodFlag}`
           exec(cmd, options, callback)
@@ -71,9 +84,14 @@ module.exports = function hydrator (params, callback) {
 
       // Update JS deps
       else if (isJs && !installing) {
-        if (exists('yarn.lock')) {
+        if (isYarn) {
           let local = join(cwd, 'node_modules', 'yarn')
           let cmd = local ? 'npx yarn upgrade' : 'yarn upgrade'
+          exec(cmd, options, callback)
+        }
+        else if (isPnpm) {
+          let local = join(cwd, 'node_modules', 'pnpm')
+          let cmd = local ? 'npx pnpm update' : 'pnpm update'
           exec(cmd, options, callback)
         }
         else {
