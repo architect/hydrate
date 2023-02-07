@@ -99,8 +99,12 @@ module.exports = function autoinstaller (params) {
       }
       deps = [ ...new Set(deps.sort()) ] // Dedupe
 
-      // Exit now if there are no deps to write
+      // Exit now if there are no deps to write or the Lambda is in the project root
       if (!deps.length) return
+      if (dir === cwd && deps.length) {
+        update.warn(`@${pragma} ${name} handler in project root skipped during Lambda treeshaking`)
+        return
+      }
       totalDeps += deps.length
 
       // Build the manifest
