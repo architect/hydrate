@@ -2,6 +2,14 @@
 
 ---
 
+## [3.1.11] 2023-02-06
+
+### Fixed
+
+- Made hydrating Lambda handlers in the project root slightly less wonky (even possibly destructive); partially improves #1405
+
+---
+
 ## [3.1.10] 2023-01-18
 
 ### Changed
