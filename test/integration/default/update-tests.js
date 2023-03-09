@@ -21,6 +21,8 @@ test(`[Default (file copying)] update() bumps installed dependencies to newer ve
       else {
         // eslint-disable-next-line
         let pkgLock = JSON.parse(readFileSync(join(mockTmp, nodeFunctions[0], 'package-lock.json')))
+        // TODO ↓ remove me! ↓
+        console.log(`pkgLock:`, JSON.stringify(pkgLock, null, 2))
         let newVersion = pkgLock.lockfileVersion === 2
           ? pkgLock.packages['node_modules/tiny-json-http'].version
           : pkgLock.dependencies['tiny-json-http'].version
