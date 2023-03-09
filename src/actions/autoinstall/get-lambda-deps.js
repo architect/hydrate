@@ -18,9 +18,13 @@ module.exports = function getDirDeps ({ dir, update, inventory }) {
 
   // Gather ye business logic while ye may
   let files = globSync('**/*.+(js|cjs|mjs)', { cwd: dir }).filter(ignoreDeps)
+  // TODO ↓ remove me! ↓
+  console.log(`files:`, files)
   files.forEach(f => {
     try {
       let requires = getRequires({ dir, file: join(dir, f), update })
+      // TODO ↓ remove me! ↓
+      console.log(`requires:`, requires)
       if (requires) deps = deps.concat(requires)
     }
     catch (error) {
@@ -36,6 +40,9 @@ module.exports = function getDirDeps ({ dir, update, inventory }) {
   let awsSdkV2 = deps.some(d => d === 'aws-sdk')
   let awsSdkV3 = deps.some(d => d.startsWith('@aws-sdk'))
   deps = deps.filter(d => d !== 'aws-sdk' && !d.startsWith('@aws-sdk'))
+
+  // TODO ↓ remove me! ↓
+  console.log({ deps, failures, files, awsSdkV2, awsSdkV3 })
 
   return { deps, failures, files, awsSdkV2, awsSdkV3 }
 }
