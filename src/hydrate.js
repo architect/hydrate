@@ -71,7 +71,7 @@ function hydrator (inventory, installing, params, callback) {
    * Find our dependency manifests
    */
   // eslint-disable-next-line
-  let pattern = p => pathToUnix(`${p}/**/@(package\.json|requirements\.txt|Gemfile)`)
+  let pattern = p => pathToUnix(`${p}/**/@(package.json|requirements.txt|Gemfile)`)
   let dir = basepath || '.'
   // Get everything except shared
   let files = globSync(pattern(dir), { dot: true }).filter(file => {
