@@ -12,6 +12,9 @@ module.exports = function autoinstaller (params) {
   let { cwd, dirs, inventory, update, verbose } = params
   if (!dirs.length) return []
 
+  // TODO ↓ remove me! ↓
+  console.log(`autoinstaller dirs:`, JSON.stringify(dirs, null, 2))
+
   update.start('Finding dependencies')
 
   // Generated manifests to be hydrated later (if there are no parsing failures)

@@ -17,6 +17,8 @@ module.exports = function getDirDeps ({ dir, update, inventory }) {
   let failures = []
 
   // Gather ye business logic while ye may
+  // TODO ↓ remove me! ↓
+  console.log(`looking in dir:`, dir)
   let files = globSync('**/*.+(js|cjs|mjs)', { cwd: dir }).filter(ignoreDeps)
   // TODO ↓ remove me! ↓
   console.log(`files:`, files)
