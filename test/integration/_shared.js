@@ -1,7 +1,7 @@
 let { dirname, join } = require('path')
 let { existsSync } = require('fs')
 let cp = require('cpr')
-let glob = require('glob')
+let { globSync } = require('glob')
 let { pathToUnix } = require('@architect/utils')
 let { destroyPath } = require('../../src/lib')
 
@@ -59,7 +59,7 @@ let pythonDependencies = pythonFunctions
   .map(p => join(p, 'vendor', 'minimal-0.1.0.dist-info'))
 
 let rubyDependencies = () => rubyFunctions
-  .map(p => glob.sync(pathToUnix(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`))[0])
+  .map(p => globSync(pathToUnix(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`))[0])
 
 let nodeDependencies = nodeFunctions
   .map(p => join(p, 'node_modules', 'tiny-json-http'))

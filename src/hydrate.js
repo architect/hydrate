@@ -1,4 +1,4 @@
-let { sync: glob } = require('glob')
+let { globSync } = require('glob')
 let series = require('run-series')
 let { dirname, join, sep } = require('path')
 let { readFileSync } = require('fs')
@@ -64,18 +64,17 @@ function hydrator (inventory, installing, params, callback) {
   let hasLambdae = inv.lambdaSrcDirs?.length
 
   // From here on out normalize all file comparisons to Unix paths
-  let sharedDir = inv.shared && inv.shared.src && pathToUnix(stripCwd(inv.shared.src, cwd))
-  let viewsDir = inv.views && inv.views.src && pathToUnix(stripCwd(inv.views.src, cwd))
+  let sharedDir = inv.shared && inv.shared.src && stripCwd(inv.shared.src, cwd)
+  let viewsDir = inv.views && inv.views.src && stripCwd(inv.views.src, cwd)
 
   /**
    * Find our dependency manifests
    */
   // eslint-disable-next-line
-  let pattern = p => pathToUnix(`${p}/**/@(package\.json|requirements\.txt|Gemfile)`)
+  let pattern = p => pathToUnix(`${p}/**/@(package.json|requirements.txt|Gemfile)`)
   let dir = basepath || '.'
   // Get everything except shared
-  let files = glob(pattern(dir), { dot: true }).filter(file => {
-    file = pathToUnix(file)
+  let files = globSync(pattern(dir), { dot: true }).filter(file => {
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
     if (viewsDir && file.includes(viewsDir)) return false
@@ -83,8 +82,8 @@ function hydrator (inventory, installing, params, callback) {
   })
   // Get shared + views (or skip if hydrating a single isolated function, e.g. sandbox startup)
   if (hydrateShared) {
-    let sharedManifest = (sharedDir && glob(pattern(sharedDir)).filter(ignoreDeps)) || []
-    let viewsManifest = (viewsDir && glob(pattern(viewsDir)).filter(ignoreDeps)) || []
+    let sharedManifest = (sharedDir && globSync(pattern(sharedDir)).filter(ignoreDeps)) || []
+    let viewsManifest = (viewsDir && globSync(pattern(viewsDir)).filter(ignoreDeps)) || []
     files = files.concat(sharedManifest, viewsManifest)
   }
 
@@ -98,7 +97,7 @@ function hydrator (inventory, installing, params, callback) {
    * Filter by active project paths (and root, if applicable)
    */
   files = files.filter(file => {
-    let dir = pathToUnix(dirname(file))
+    let dir = dirname(file)
 
     // Allow root project hydration of cwd if passed as basepath
     let hydrateBasepath = basepath === cwd
@@ -110,14 +109,14 @@ function hydrator (inventory, installing, params, callback) {
     if (viewsDir && file.includes(viewsDir)) return true
 
     // Hydrate functions, of course
-    return hasLambdae && inv.lambdaSrcDirs.some(p => pathToUnix(stripCwd(p, cwd)) === dir)
+    return hasLambdae && inv.lambdaSrcDirs.some(p => stripCwd(p, cwd) === dir)
   })
 
   // Run the autoinstaller first in case we need to add any new manifests to the ops
   if (autoinstall && installing && hasLambdae) {
     // Ignore directories already known to have a manifest
     let dirs = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
-      let rel = pathToUnix(stripCwd(src, cwd))
+      let rel = stripCwd(src, cwd)
       let lambdaHasManifest = files.some(file => dirname(file) === rel)
       // TODO this should be enumerated in inventory
       if (lambdaHasManifest && lambda.config.runtime.startsWith('nodejs')) {
@@ -134,7 +133,7 @@ function hydrator (inventory, installing, params, callback) {
 
     // Allow scoping to a single directory
     if (basepath) {
-      dirs = dirs.filter(d => pathToUnix(stripCwd(d, cwd)) === pathToUnix(stripCwd(basepath, cwd)))
+      dirs = dirs.filter(d => stripCwd(d, cwd) === stripCwd(basepath, cwd))
     }
     let result = actions.autoinstall({ dirs, update, ...params, inventory })
     if (result.length) {

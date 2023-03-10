@@ -20,8 +20,8 @@ test(`[Default (file copying)] update() bumps installed dependencies to newer ve
       if (err) t.fail(err)
       else {
         // eslint-disable-next-line
-        let pkgLock = require(join(mockTmp, nodeFunctions[0], 'package-lock.json'))
-        let newVersion = pkgLock.lockfileVersion === 2
+        let pkgLock = JSON.parse(readFileSync(join(mockTmp, nodeFunctions[0], 'package-lock.json')))
+        let newVersion = [ 2, 3 ].includes(pkgLock.lockfileVersion)
           ? pkgLock.packages['node_modules/tiny-json-http'].version
           : pkgLock.dependencies['tiny-json-http'].version
         t.notEqual(newVersion, '7.0.2', `get-index tiny-json-http bumped to ${newVersion} from 7.0.2`)
