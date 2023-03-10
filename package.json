@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "@architect/inventory": "~3.4.2",
-    "@architect/utils": "~3.1.4",
+    "@architect/utils": "~3.1.5",
     "acorn-loose": "~8.3.0",
     "chalk": "4.1.2",
     "cpr": "~3.0.1",

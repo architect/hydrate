@@ -2,6 +2,15 @@
 
 ---
 
+## [3.1.12] 2023-03-09
+
+### Changed
+
+- Updated dependencies
+- Internal changes: refactored globbing and filtering logic for Glob v9; partial refactor for npm 9's lockfileVersion 3
+
+---
+
 ## [3.1.11] 2023-02-06
 
 ### Fixed
