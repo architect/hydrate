@@ -6,7 +6,7 @@ let print = require('../_printer')
 let { destroyPath } = require('../lib')
 
 module.exports = function hydrator (params, callback) {
-  let { file, action, update, env, shell, timeout, installing, verbose, pkgManager } = params
+  let { file, action, update, env, shell, timeout, installing, verbose } = params
   let cwd = dirname(file)
   let options = { cwd, env, shell, timeout }
   let start
@@ -37,9 +37,9 @@ module.exports = function hydrator (params, callback) {
 
   let isNpm, isPnpm, isYarn
   if (isJs) {
-    isNpm = pkgManager ? pkgManager === 'npm' : exists('package-lock.json')
-    isPnpm = pkgManager ? pkgManager === 'pnpm' : exists('pnpm-lock.yaml')
-    isYarn = pkgManager ? pkgManager === 'yarn' : exists('yarn.lock')
+    isNpm = exists('package-lock.json')
+    isPnpm = params.pnpm || exists('pnpm-lock.yaml')
+    isYarn = params.yarn || exists('yarn.lock')
   }
 
   series([

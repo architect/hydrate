@@ -41,7 +41,7 @@ test(`[Default (file copying)] install() hydrates all Functions', shared and vie
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length + 4
+    nodeViewsDependencies.length + 6
   t.plan(count)
   resetAndCopyShared(t, function () {
     hydrate.install({ autoinstall: true }, function (err) {
@@ -82,6 +82,12 @@ test(`[Default (file copying)] install() hydrates all Functions', shared and vie
         let yarnIntFile = join(yarnFunction, 'node_modules', '.yarn-integrity')
         let pkgLockFile = join(yarnFunction, 'package-lock.json')
         t.ok(existsSync(yarnIntFile), 'Found yarn integrity file')
+        t.notOk(existsSync(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
+        // pnpm-specific tests
+        let pnpmFunction = join(mockTmp, 'src', 'http', 'options-are_plentiful')
+        let pnpmIntFile = join(pnpmFunction, 'node_modules', '.modules.yaml')
+        pkgLockFile = join(pnpmFunction, 'package-lock.json')
+        t.ok(existsSync(pnpmIntFile), 'Found pnpm integrity file')
         t.notOk(existsSync(pkgLockFile), `Did not find package-lock.json (i.e. npm didn't run)`)
         checkFolderCreation(t)
       }
