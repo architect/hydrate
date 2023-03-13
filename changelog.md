@@ -2,6 +2,15 @@
 
 ---
 
+## [3.2.0] 2023-03-12
+
+### Added
+
+- Added `pnpm` support; Hydrate will use pnpm if a `pnpm-lock.yaml` file is present, or if the `--pnpm` CLI flag is present; thanks @nicksrandall!
+- Oh, also: added `--pnpm` + `--yarn` flags
+
+---
+
 ## [3.1.12] 2023-03-09
 
 ### Changed
