@@ -7,6 +7,7 @@ get     /memories
 post    /up/tents
 put     /on_your_boots
 delete  /badness-in-life
+options /are-plentiful
 /in-the-clouds
   method head
   src src/head/in-the-clouds

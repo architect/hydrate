@@ -20,7 +20,7 @@ let arcHttp = [
   'get-memories',
   'post-up-tents', // autoinstall target
   'put-on_your_boots',
-  'delete-badness_in_life'
+  'options-are_plentiful',
 ].map(route => join('src', 'http', route))
 
 let arcAutoinstall = [ arcHttp[2] ]
