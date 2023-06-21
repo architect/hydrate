@@ -16,9 +16,8 @@ module.exports = function getPaths (inventory) {
     // Don't create dirs for functions that don't already exist (or that we've already looked at)
     if (!existsSync(src) || (type && paths[type][src])) return
 
-    // Account for multi-tenant Lambdas
-    let item = lambdasBySrcDir[src]
-    let lambda = Array.isArray(item) ? item[0] : item
+    let lambda = lambdasBySrcDir[src]
+    if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { config } = lambda
     let nodeModules = join(src, 'node_modules', '@architect')
     let vendorDir = join(src, 'vendor')

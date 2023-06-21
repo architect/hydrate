@@ -116,6 +116,7 @@ function hydrator (inventory, installing, params, callback) {
   if (autoinstall && installing && hasLambdae) {
     // Ignore directories already known to have a manifest
     let dirs = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
+      if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
       let rel = stripCwd(src, cwd)
       let lambdaHasManifest = files.some(file => dirname(file) === rel)
       // TODO this should be enumerated in inventory

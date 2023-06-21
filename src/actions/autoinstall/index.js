@@ -41,8 +41,8 @@ module.exports = function autoinstaller (params) {
   // Complain about possible shared code / AWS SDK issues
   let foundSharedIssueWithAwsSdkV2 = 0, foundSharedIssueWithAwsSdkV3 = 0, foundViewsIssueWithAwsSdkV2 = 0, foundViewsIssueWithAwsSdkV3 = 0
   Object.values(inventory.inv.lambdasBySrcDir).forEach(lambda => {
-    // Multi-tenant Lambda check
-    if (Array.isArray(lambda)) lambda = lambda[0]
+    if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
+
     let { runtime, shared, views } = lambda.config
     if (!runtime.startsWith('nodejs')) return
     let hasSdkV3 = runtime >= 'nodejs18.x'
@@ -69,7 +69,7 @@ module.exports = function autoinstaller (params) {
   dirs.forEach(dir => {
     projectDirs++
     let lambda = inventory.inv.lambdasBySrcDir[dir]
-    if (Array.isArray(lambda)) lambda = lambda[0] // Handle multitenant Lambdae
+    if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { config, name, pragma } = lambda
     let { runtime } = config
 
