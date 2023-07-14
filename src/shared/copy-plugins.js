@@ -30,7 +30,7 @@ module.exports = function runCopyPlugins (params, paths, callback) {
               if (!source) return rej(ReferenceError(`must return 'source' path`))
 
               // Make sure we normalize source paths to absolute
-              let src = isAbsolute(source) ? isAbsolute : join(cwd, source)
+              let src = isAbsolute(source) ? source : join(cwd, source)
               if (!existsSync(src)) return rej(ReferenceError(`'source' path '${source}' not found in project`))
 
               if (target && isAbsolute(target)) return rej(ReferenceError(`'target' path '${target}' cannot be absolute`))
