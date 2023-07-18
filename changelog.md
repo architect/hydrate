@@ -2,6 +2,14 @@
 
 ---
 
+## [3.2.3] 2023-07-17
+
+### Fixed
+
+- Fixed issue using absolute paths in `hydrate.copy` plugins
+
+---
+
 ## [3.2.2] 2023-06-21
 
 ### Fixed
