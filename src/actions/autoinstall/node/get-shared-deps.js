@@ -1,7 +1,7 @@
 let { join } = require('path')
 // Ok, not technically Lambdas here but whatev
 let getLambdaDeps = require('./get-lambda-deps')
-let { stripCwd } = require('../../lib')
+let { stripCwd } = require('../../../lib')
 
 module.exports = function getSharedDeps ({ cwd, inventory, update }) {
   let { shared, views } = inventory.inv

@@ -1,6 +1,6 @@
 let { join } = require('path')
 let test = require('tape')
-let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'get-lambda-deps')
+let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'node', 'get-lambda-deps')
 let getLambdaDeps = require(sut)
 let mock = join(process.cwd(), 'test', 'mocks')
 let { updater } = require('@architect/utils')

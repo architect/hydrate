@@ -1,6 +1,6 @@
 let { join } = require('path')
 let { globSync } = require('glob')
-let { destroyPath, ignoreDeps } = require('../../lib')
+let { destroyPath, ignoreDeps } = require('../../../lib')
 let getRequires = require('./find-lambda-deps')
 
 module.exports = function getDirDeps ({ dir, update, inventory }) {
