@@ -9,8 +9,8 @@ let sdkV2 = `'aws-sdk' (v2)`
 let sdkV3short = `'@aws-sdk/*' (v3)`
 let sdkV3long = `one or more ${sdkV3short} modules`
 
-module.exports = function treeshakeNode (params) {
-  let { cwd, dirs, inventory, update } = params
+module.exports = function treeshakeNode (nodeDirs, params) {
+  let { cwd, inventory, update } = params
 
   // Generated manifests to be hydrated later (if there are no parsing failures)
   let installing = []
@@ -64,15 +64,13 @@ module.exports = function treeshakeNode (params) {
   let v2Warnings = []
   let v3Warnings = []
 
-  dirs.forEach(dir => {
+  nodeDirs.forEach(dir => {
     projectDirs++
     let lambda = inventory.inv.lambdasBySrcDir[dir]
     if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { config, name, pragma } = lambda
     let { runtime } = config
 
-    // Autoinstall is currently Node.js only - exit early if it's another runtime
-    if (!runtime.startsWith('nodejs')) return
     try {
       let result = getLambdaDeps({ dir, update, inventory })
       let { deps, files, awsSdkV2, awsSdkV3 } = result

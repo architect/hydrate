@@ -1,10 +1,10 @@
 let { renameSync, writeFileSync } = require('fs')
 let { join } = require('path')
 let treeshakeNode = require('./node')
-let treeshakePython = require('./node')
+let treeshakePython = require('./python')
 
 module.exports = function autoinstaller (params) {
-  let { dirs, update, verbose } = params
+  let { dirs, inventory, update, verbose } = params
   if (!dirs.length) return []
 
   update.start('Finding dependencies')
@@ -20,19 +20,25 @@ module.exports = function autoinstaller (params) {
   let pyDeps = 0
   let totalDeps = 0
 
-  let nodeResults = treeshakeNode(params)
-  installing.push(...nodeResults.installing)
-  projectDirs += nodeResults.projectDirs
-  projectFiles += nodeResults.projectFiles
-  nodeDeps += nodeResults.nodeDeps
-  totalDeps += nodeResults.nodeDeps
+  let nodeDirs = getRuntimeDirs(dirs, inventory, 'nodejs')
+  if (nodeDirs.length) {
+    let nodeResults = treeshakeNode(nodeDirs, params)
+    installing.push(...nodeResults.installing)
+    projectDirs += nodeDirs.length
+    projectFiles += nodeResults.projectFiles
+    nodeDeps += nodeResults.nodeDeps
+    totalDeps += nodeResults.nodeDeps
+  }
 
-  let pyResults = treeshakePython(params)
-  installing.push(...pyResults.installing)
-  projectDirs += pyResults.projectDirs
-  projectFiles += pyResults.projectFiles
-  pyDeps += pyResults.pyDeps
-  totalDeps += pyResults.pyDeps
+  let pyDirs = getRuntimeDirs(dirs, inventory, 'python')
+  if (pyDirs.length) {
+    let pyResults = treeshakePython(pyDirs, params)
+    installing.push(...pyResults.installing)
+    projectDirs += pyDirs.length
+    projectFiles += pyResults.projectFiles
+    pyDeps += pyResults.pyDeps
+    totalDeps += pyResults.pyDeps
+  }
 
   // Write everything at the end in case there were any parsing errors
   installing.forEach(({ dir, file, swap, data }) => {
@@ -57,4 +63,14 @@ module.exports = function autoinstaller (params) {
   else update.cancel()
 
   return installing
+}
+
+function getRuntimeDirs (dirs, inventory, runtimeName) {
+  let runtimeDirs = dirs.filter(dir => {
+    let lambda = inventory.inv.lambdasBySrcDir[dir]
+    if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
+    let { runtime } = lambda.config
+    if (runtime.startsWith(runtimeName)) return true
+  })
+  return runtimeDirs
 }

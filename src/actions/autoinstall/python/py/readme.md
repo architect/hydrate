@@ -1,4 +1,17 @@
-# Python stdlib lists by Lambda runtime version
+# Why we did stuff this way
+
+## Getting package subdependencies
+
+Later versions of Python have some (seemingly complex) affordances for getting package metadata, but our approach is to support earlier versions where possible.
+
+So, on that note, we tried the popular `pipreqs` tool and found it to be unreliable in determining package names. Aditionally we also tried `pipgrip`, `freeze`-ing reqs, `pip show` (which does not print the subdependency tree), `johnnydep`, and some other techniques.
+
+None worked as well, or reliably, as `pipdeptree`, so for now that is now a pre-installed requirement for Python Lambda treeshaking.
+
+Aside: I would have vendored `pipdeptree` alongside `importlib_metadata`, but it really does not want to be called that way, so we'll just have to continue using it as a CLI util for now.
+
+
+## Python stdlib lists (by Lambda runtime version)
 
 Unfortunately, Python did not add `sys.stdlib_module_names` until Python v3.10, which means folks on earlier versions cannot reliably pull a current list of stdlib modules.
 
@@ -35,3 +48,8 @@ for row in soup.find_all("tr")[1:]:  # Skip the header row
 modules = list(dict.fromkeys(modules))
 print(json.dumps(modules))
 ```
+
+
+## `importlib_metadata`
+
+`importlib_metadata` vendored with gratitude from https://github.com/python/importlib_metadata and used under the Apache license

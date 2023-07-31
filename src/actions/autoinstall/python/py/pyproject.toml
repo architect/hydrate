@@ -1,0 +1,5 @@
+# `vendoring` tool required here: `pip install vendoring`
+[tool.vendoring]
+destination = "vendor/"
+requirements = "vendor.txt"
+namespace = ""

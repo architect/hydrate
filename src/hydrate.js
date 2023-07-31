@@ -74,7 +74,7 @@ function hydrator (inventory, installing, params, callback) {
   let pattern = p => pathToUnix(`${p}/**/@(package.json|requirements.txt|Gemfile)`)
   let dir = basepath || '.'
   // Get everything except shared
-  let files = globSync(pattern(dir), { dot: true }).filter(file => {
+  let manifests = globSync(pattern(dir), { dot: true }).filter(file => {
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
     if (viewsDir && file.includes(viewsDir)) return false
@@ -84,19 +84,19 @@ function hydrator (inventory, installing, params, callback) {
   if (hydrateShared) {
     let sharedManifest = (sharedDir && globSync(pattern(sharedDir)).filter(ignoreDeps)) || []
     let viewsManifest = (viewsDir && globSync(pattern(viewsDir)).filter(ignoreDeps)) || []
-    files = files.concat(sharedManifest, viewsManifest)
+    manifests = manifests.concat(sharedManifest, viewsManifest)
   }
 
   /**
    * Relativize paths
    * Previous glob ops may be from absolute paths, producing absolute-pathed results
    */
-  files = files.map(file => stripCwd(file, cwd))
+  manifests = manifests.map(file => stripCwd(file, cwd))
 
   /**
    * Filter by active project paths (and root, if applicable)
    */
-  files = files.filter(file => {
+  manifests = manifests.filter(file => {
     let dir = dirname(file)
 
     // Allow root project hydration of cwd if passed as basepath
@@ -115,10 +115,10 @@ function hydrator (inventory, installing, params, callback) {
   // Run the autoinstaller first in case we need to add any new manifests to the ops
   if (autoinstall && installing && hasLambdae) {
     // Ignore directories already known to have a manifest
-    let dirs = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
+    let srcDirsWithoutManifests = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
       if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
       let rel = stripCwd(src, cwd)
-      let lambdaHasManifest = files.some(file => dirname(file) === rel)
+      let lambdaHasManifest = manifests.some(file => dirname(file) === rel)
       // TODO this should be enumerated in inventory
       if (lambdaHasManifest && lambda.config.runtime.startsWith('nodejs')) {
         try {
@@ -134,13 +134,13 @@ function hydrator (inventory, installing, params, callback) {
 
     // Allow scoping to a single directory
     if (basepath) {
-      dirs = dirs.filter(d => stripCwd(d, cwd) === stripCwd(basepath, cwd))
+      srcDirsWithoutManifests = srcDirsWithoutManifests.filter(d => stripCwd(d, cwd) === stripCwd(basepath, cwd))
     }
-    let result = actions.autoinstall({ dirs, update, ...params, inventory })
+    let result = actions.autoinstall({ dirs: srcDirsWithoutManifests, update, ...params, inventory })
     if (result.length) {
       autoinstalled = result
       let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file), cwd))
-      files = files.concat(install)
+      manifests = manifests.concat(install)
     }
   }
 
@@ -148,7 +148,7 @@ function hydrator (inventory, installing, params, callback) {
    * Build out job queue
    */
   let ops = []
-  let deps = files.length
+  let deps = manifests.length
   if (deps && deps > 0) {
     let msg = `${action}ing dependencies in ${deps} path${deps > 1 ? 's' : ''}`
     update.status(msg)
@@ -158,7 +158,7 @@ function hydrator (inventory, installing, params, callback) {
   }
 
   // Install + update
-  files.sort().forEach(file => {
+  manifests.sort().forEach(file => {
     ops.push(callback => actions.hydrate({
       action,
       file,

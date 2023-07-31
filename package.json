@@ -13,7 +13,8 @@
     "test:integration:fast": "cross-env tape 'test/integration/symlink/**/*-tests.js' 'test/integration/*-tests.js' | tap-spec",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
     "lint": "eslint . --fix",
-    "rc": "npm version prerelease --preid RC"
+    "rc": "npm version prerelease --preid RC",
+    "vendor": "cd src/actions/autoinstall/python/py/ && vendoring sync && zip -r9 vendor.zip ./vendor"
   },
   "engines": {
     "node": ">=14"

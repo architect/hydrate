@@ -4,7 +4,17 @@ import json
 import os
 import pathlib
 import sys
-import importlib_metadata
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+vendor_path = os.path.join(dir_path, "vendor")
+if not os.path.exists(vendor_path):
+    import zipfile
+
+    vendor_zip = os.path.join(dir_path, "vendor.zip")
+    with zipfile.ZipFile(vendor_zip, "r") as zipped:
+        zipped.extractall(dir_path)
+
+from vendor import importlib_metadata
 
 # This script expects to be run like so: `get_python_deps.py $lambda_runtime $arc_src_dir`
 # The Lambda runtime (e.g. `python3.10`) is used to fetch the stdlib json file
@@ -20,14 +30,16 @@ files = list(filter(lambda file: f"{src}/vendor" not in file, paths))
 # Load the stdlib list for the Python version in question
 filename = f"{sys.argv[1]}.json"
 folder = pathlib.Path(__file__).parent.resolve()
-stdlib_file = os.path.join(folder, "py_stdlib", filename)
+stdlib_file = os.path.join(folder, "stdlib", filename)
 with open(stdlib_file, encoding="utf-8") as file:
     stdlib = json.loads(file.read())
 
 
 def clean_deps(deps_list):
     deduped_deps = list(dict.fromkeys(deps_list))
-    filtered_deps = list(filter(lambda d: d not in stdlib, deduped_deps))
+    filtered_deps = list(
+        filter(lambda d: d not in stdlib and d != "boto3", deduped_deps)
+    )
     return filtered_deps
 
 
@@ -64,4 +76,4 @@ for file in files:
         failed = ",".join(unresolved_deps)
         failures.append({"file": file, "error": f"Cannot resolve module(s): {failed}"})
 
-print({"deps": clean_deps(deps), "failures": failures, "files": files})
+print(json.dumps({"deps": clean_deps(deps), "failures": failures, "files": files}))
