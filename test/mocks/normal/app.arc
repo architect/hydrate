@@ -5,6 +5,7 @@ hydrate
 get     /
 get     /memories
 post    /up/tents
+put     /aside-hangups
 put     /on_your_boots
 delete  /badness-in-life
 options /are-plentiful

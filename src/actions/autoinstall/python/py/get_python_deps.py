@@ -7,6 +7,7 @@ import sys
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 vendor_path = os.path.join(dir_path, "vendor")
+sys.path.append(vendor_path)
 if not os.path.exists(vendor_path):
     import zipfile
 
@@ -14,7 +15,7 @@ if not os.path.exists(vendor_path):
     with zipfile.ZipFile(vendor_zip, "r") as zipped:
         zipped.extractall(dir_path)
 
-from vendor import importlib_metadata
+import importlib_metadata
 
 # This script expects to be run like so: `get_python_deps.py $lambda_runtime $arc_src_dir`
 # The Lambda runtime (e.g. `python3.10`) is used to fetch the stdlib json file

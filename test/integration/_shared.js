@@ -18,12 +18,13 @@ let nodeViews     = join('node_modules', '@architect', 'views')
 let arcHttp = [
   'get-index',
   'get-memories',
-  'post-up-tents', // autoinstall target
+  'post-up-tents',      // autoinstall target
+  'put-aside_hangups',  // autoinstall target
   'put-on_your_boots',
   'options-are_plentiful',
 ].map(route => join('src', 'http', route))
 
-let arcAutoinstall = [ arcHttp[2] ]
+let arcAutoinstall = [ arcHttp[2], arcHttp[3] ]
 
 let arcEvents = [ 'just-being-in-nature' ]
   .map(route => join('src', 'events', route))
@@ -47,7 +48,7 @@ let arcPluginLambda = [ 'newlambda' ]
 /**
  * Functions by runtime
  */
-let pythonFunctions = [ join('src', 'http', 'get-memories') ]
+let pythonFunctions = [ join('src', 'http', 'get-memories'), join('src', 'http', 'put-aside_hangups') ]
 let rubyFunctions = [ join('src', 'http', 'delete-badness_in_life') ]
 let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTablesStreams, arcCustomPath, arcPluginLambda)
   .filter(p => !pythonFunctions.includes(p) && !rubyFunctions.includes(p))
@@ -56,7 +57,7 @@ let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTables
  * Runtime dependencies
  */
 let pythonDependencies = pythonFunctions
-  .map(p => join(p, 'vendor', 'minimal-0.1.0.dist-info'))
+  .map(p => join(p, 'vendor', 'pipdeptree'))
 
 let rubyDependencies = () => rubyFunctions
   .map(p => globSync(pathToUnix(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`))[0])
@@ -96,7 +97,7 @@ let arcFileArtifacts = []
   .concat(rubyFunctions.map(p => join(p, rubyShared, '.arc')))
   .concat(nodeFunctions.map(p => join(p, nodeShared, '.arc')))
   .concat(arcCustomPath.map(p => join(p, nodeShared, '.arc')))
-  .concat(arcAutoinstall.map(p => join(p, nodeShared, '.arc')))
+  .concat(arcAutoinstall.map((p, i) => join(p, i ? pythonShared : nodeShared, '.arc')))
 
 let staticArtifacts = arcFileArtifacts
   .map(p => join(dirname(p), 'static.json'))
@@ -106,7 +107,7 @@ let sharedArtifacts = []
   .concat(rubyFunctions.map(p => join(p, rubyShared, 'shared.md')))
   .concat(nodeFunctions.map(p => join(p, nodeShared, 'shared.md')))
   .concat(arcCustomPath.map(p => join(p, nodeShared, 'shared.md')))
-  .concat(arcAutoinstall.map(p => join(p, nodeShared, 'shared.md')))
+  .concat(arcAutoinstall.map((p, i) => join(p, i ? pythonShared : nodeShared, 'shared.md')))
 
 let threePluginFiles = (path, vendor) => [
   join(path, vendor, '1.md'),
@@ -121,7 +122,7 @@ let pluginArtifacts = []
   // hydrate.copy copies to all functions, even with shared disabled
   .concat([ join('src', 'events', 'silence') ].map(p => threePluginFiles(p, 'node_modules')))
   .concat(arcCustomPath.map(p => threePluginFiles(p, 'node_modules')))
-  .concat(arcAutoinstall.map(p => threePluginFiles(p, 'node_modules')))
+  .concat(arcAutoinstall.map((p, i) => threePluginFiles(p, i ? 'vendor' : 'node_modules')))
   .flat()
 
 let sharedArtifactsDisabled = [

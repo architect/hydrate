@@ -63,7 +63,9 @@ jobs:
         VER=`bundle --version`; echo "Bundle ver: $VER"
 
     - name: Install
-      run: npm install
+      run: |
+        npm install
+        pip3 install -r requirements.txt
 
     - name: Test
       run: npm test

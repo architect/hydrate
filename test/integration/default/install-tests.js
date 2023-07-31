@@ -14,6 +14,7 @@ let {
   arcHttp,
   arcAutoinstall,
   nodeFunctions,
+  pythonFunctions,
   pythonDependencies,
   rubyDependencies,
   nodeDependencies,
@@ -41,7 +42,7 @@ test(`[Default (file copying)] install() hydrates all Functions', shared and vie
     rubySharedDependencies.length +
     rubyViewsDependencies.length +
     nodeSharedDependencies.length +
-    nodeViewsDependencies.length + 6
+    nodeViewsDependencies.length + 7
   t.plan(count)
   resetAndCopyShared(t, function () {
     hydrate.install({ autoinstall: true }, function (err) {
@@ -77,6 +78,8 @@ test(`[Default (file copying)] install() hydrates all Functions', shared and vie
         // Autoinstall-specific tests
         let package = join(arcAutoinstall[0], 'node_modules', '_arc-autoinstall', 'package.json')
         t.ok(existsSync(package), 'Found autoinstall package.json')
+        let requirements = join(arcAutoinstall[1], 'vendor', '_arc_autoinstall', 'requirements.txt')
+        t.ok(existsSync(requirements), 'Found autoinstall requirements.txt')
         // Yarn-specific tests
         let yarnFunction = join(mockTmp, 'src', 'http', 'put-on_your_boots')
         let yarnIntFile = join(yarnFunction, 'node_modules', '.yarn-integrity')
@@ -154,7 +157,7 @@ test(`[Default (file copying)] install (specific path / single path) hydrates on
   })
 })
 
-test(`[Default (file copying)] install (specific path / single path) in a manifest-free function adds missing deps with autoinstall enabled`, t => {
+test(`[Default (file copying)] install (specific path / single path) in a manifest-free Node.js function adds missing deps with autoinstall enabled`, t => {
   t.plan(7)
   resetAndCopyShared(t, function () {
     let basepath = nodeFunctions[1]
@@ -177,7 +180,30 @@ test(`[Default (file copying)] install (specific path / single path) in a manife
   })
 })
 
-test(`[Default (file copying)] install (specific path / single path) in a manifest-free function does not add missing deps with autoinstall disabled`, t => {
+test(`[Default (file copying)] install (specific path / single path) in a manifest-free Python function adds missing deps with autoinstall enabled`, t => {
+  t.plan(7)
+  resetAndCopyShared(t, function () {
+    let basepath = pythonFunctions[1]
+    hydrate.install({ basepath, autoinstall: true }, function (err) {
+      if (err) t.fail(err)
+      else {
+        // Check to see if files that are supposed to be there are actually there
+        t.ok(existsSync(pythonDependencies[1]), `scoped install for ${pythonFunctions[1]} installed dependencies in ${pythonDependencies[1]}`)
+        t.notOk(existsSync(nodeDependencies[0]), `scoped install did not install dependencies for unspecified function at ${nodeDependencies[0]}`)
+        let arcFileArtifact = arcFileArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let sharedArtifact = sharedArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let viewsArtifact = viewsArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        t.ok(existsSync(pythonSharedDependencies[1]), `python shared dependency exists at ${pythonSharedDependencies[1]}`)
+        t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
+        t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
+        t.notOk(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+        checkFolderCreation(t)
+      }
+    })
+  })
+})
+
+test(`[Default (file copying)] install (specific path / single path) in a manifest-free Node.js function does not add missing deps with autoinstall disabled`, t => {
   t.plan(7)
   resetAndCopyShared(t, function () {
     let basepath = nodeFunctions[1]
@@ -191,6 +217,29 @@ test(`[Default (file copying)] install (specific path / single path) in a manife
         let sharedArtifact = sharedArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
         let viewsArtifact = viewsArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
         t.ok(existsSync(nodeSharedDependencies[1]), `node shared dependency exists at ${nodeSharedDependencies[1]}`)
+        t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
+        t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
+        t.notOk(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
+        checkFolderCreation(t)
+      }
+    })
+  })
+})
+
+test(`[Default (file copying)] install (specific path / single path) in a manifest-free Python function does not add missing deps with autoinstall disabled`, t => {
+  t.plan(7)
+  resetAndCopyShared(t, function () {
+    let basepath = pythonFunctions[1]
+    hydrate.install({ basepath, autoinstall: false }, function (err) {
+      if (err) t.fail(err)
+      else {
+        // Check to see if files that are supposed to be there are actually there
+        t.notOk(existsSync(pythonDependencies[1]), `scoped install for ${pythonFunctions[1]} installed dependencies in ${pythonDependencies[1]}`)
+        t.notOk(existsSync(nodeDependencies[0]), `scoped install did not install dependencies for unspecified function at ${nodeDependencies[0]}`)
+        let arcFileArtifact = arcFileArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let sharedArtifact = sharedArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        let viewsArtifact = viewsArtifacts.find(p => p.startsWith(arcAutoinstall[0]))
+        t.ok(existsSync(pythonSharedDependencies[1]), `python shared dependency exists at ${pythonSharedDependencies[1]}`)
         t.notOk(existsSync(arcFileArtifact), `arc file does not exist at ${arcFileArtifact}`)
         t.ok(existsSync(sharedArtifact), `shared file artifact exists at ${sharedArtifact}`)
         t.notOk(existsSync(viewsArtifact), `shared file artifact exists at ${viewsArtifact}`)
