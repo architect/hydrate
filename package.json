@@ -34,7 +34,7 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/inventory": "~3.5.7",
+    "@architect/inventory": "~3.6.0",
     "@architect/utils": "~3.1.9",
     "acorn-loose": "~8.3.0",
     "chalk": "4.1.2",
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@architect/eslint-config": "~2.1.1",
     "cross-env": "~7.0.3",
-    "eslint": "~8.46.0",
+    "eslint": "~8.47.0",
     "mock-fs": "~5.2.0",
     "nyc": "^15.1.0",
     "pnpm": "~7.32.2",
