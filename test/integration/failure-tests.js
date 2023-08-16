@@ -85,7 +85,7 @@ test('Corrupt requirements.txt fails hydrate.install', t => {
     let corruptPackage = 'ohayo gozaimasu!'
     writeFileSync(join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
     let basepath = pythonFunctions[0]
-    hydrate.install({ basepath }, function done (err) {
+    hydrate.install({ basepath, installing: true }, function done (err) {
       console.log(`noop log to help reset tap-spec lol`)
       if (err) t.pass(`Successfully errored: ${err}`)
       else t.fail('Hydration did not fail')
@@ -99,7 +99,7 @@ test('Corrupt requirements.txt fails hydrate.update', t => {
     let corruptPackage = 'ohayo gozaimasu!'
     writeFileSync(join(pythonFunctions[0], 'requirements.txt'), corruptPackage)
     let basepath = pythonFunctions[0]
-    hydrate.update({ basepath }, function done (err) {
+    hydrate.update({ basepath, installing: false }, function done (err) {
       console.log(`noop log to help reset tap-spec lol`)
       if (err) t.pass(`Successfully errored: ${err}`)
       else t.fail('Hydration did not fail')

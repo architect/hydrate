@@ -6,12 +6,17 @@ let print = require('../_printer')
 let { destroyPath } = require('../lib')
 
 module.exports = function hydrator (params, callback) {
-  let { file, action, update, env, shell, timeout, installing, verbose } = params
+  let { action, env, file, installing, inventory, shell, timeout, update, verbose } = params
+
   let cwd = dirname(file)
   let options = { cwd, env, shell, timeout }
-  let start
+  let start, lambda
   let now = Date.now()
   let isRoot = cwd === '.'
+  if (!isRoot) {
+    let fullPath = join(inventory.inv._project.cwd, cwd)
+    lambda = inventory.inv.lambdasBySrcDir?.[fullPath]
+  }
 
   // Prints and executes the command
   function exec (cmd, opts, callback) {
@@ -100,15 +105,30 @@ module.exports = function hydrator (params, callback) {
       }
 
       // Install Python deps
-      else if (isPy && installing) {
-        exec(`pip3 install -r requirements.txt -t ./vendor`, options, callback)
-      }
+      // Things get super weird in here because of Python's sdist vs. wheel distribution in PyPI (and which Python versions, platforms, glibc versions, etc. each package has chosen to build for), platform tagging, AWS Linux glibc, and more...
+      // tl;dr: this is all best-effort, but ultimately may not work, depending on the package in question
+      else if (isPy) {
+        let flags = ''
+        if (lambda) {
+          // Technique per AWS, found that `--python-version` was essential, but `--implementation cp` may not be
+          // https://repost.aws/knowledge-center/lambda-python-package-compatible
+          // This may still not work because of glibc version differences, see:
+          // https://docs.aws.amazon.com/linux/al2023/ug/compare-with-al2.html#glibc-gcc-and-binutils
+          let arch = lambda.config.architecture === 'arm64' ? 'manylinux2014_aarch64' : 'manylinux2014_x86_64'
+          let ver = lambda.config.runtime.split('python')[1]
+          flags = '--only-binary=:all: ' +
+                  `--platform=${arch} ` +
+                  `--python-version ${ver} `
 
-      // Update Python deps
-      // TODO: pip requires manual locking (via two requirements.txt files) so we dont test update w/ python
-      // ... thus, it may not make sense to execute this at all
-      else if (isPy && !installing) {
-        exec(`pip3 install -r requirements.txt -t ./vendor -U --upgrade-strategy eager`, options, callback)
+          // Update Python deps
+          if (!installing) {
+            // TODO: pip requires manual locking (via two requirements.txt files) so we don't test update w/ python
+            // ... thus, it may not make sense to execute this at all
+            flags += '-U --upgrade-strategy eager'
+          }
+        }
+        let cmd = `pip3 install -r requirements.txt -t ./vendor ${flags}`.trim()
+        exec(cmd, options, callback)
       }
 
       // Install Ruby deps

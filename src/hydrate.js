@@ -164,6 +164,7 @@ function hydrator (inventory, installing, params, callback) {
       file,
       installing,
       update,
+      inventory,
       ...params
     }, callback))
   })
