@@ -2,6 +2,14 @@
 
 ---
 
+## [3.3.1] 2023-08-28
+
+### Changed
+
+- Optimistically import `importlib_metadata` during Python treeshaking in case it's already installed in the system
+
+---
+
 ## [3.3.0] 2023-07-31
 
 ### Added
