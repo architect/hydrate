@@ -69,10 +69,10 @@ module.exports = function treeshakeNode (nodeDirs, params) {
     let lambda = inventory.inv.lambdasBySrcDir[dir]
     if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { config, name, pragma } = lambda
-    let { runtime } = config
+    let { runtime, ignoredDependencies } = config
 
     try {
-      let result = getLambdaDeps({ dir, update, inventory })
+      let result = getLambdaDeps({ dir, update, inventory, ignoredDependencies })
       let { deps, files, awsSdkV2, awsSdkV3 } = result
       projectFiles += files.length
       failures = failures.concat(result.failures)
