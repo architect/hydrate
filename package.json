@@ -34,7 +34,7 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/inventory": "~3.6.0",
+    "@architect/inventory": "~3.6.2",
     "@architect/utils": "~3.1.9",
     "acorn-loose": "~8.3.0",
     "chalk": "4.1.2",

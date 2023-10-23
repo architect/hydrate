@@ -2,6 +2,14 @@
 
 ---
 
+## [3.4.0] 2023-10-23
+
+### Added
+
+- Added ability to ignore dependencies during hydration; thanks @andybee!
+
+---
+
 ## [3.3.1] 2023-08-28
 
 ### Changed
