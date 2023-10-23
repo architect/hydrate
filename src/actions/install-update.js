@@ -73,13 +73,13 @@ module.exports = function hydrator (params, callback) {
         }
         else if (isPnpm) {
           prodFlag = isRoot ? '' : '--prod'
-          let local = join(cwd, 'node_modules', 'pnpm')
-          let cmd = local ? `npx pnpm i ${prodFlag}` : `pnpm i ${prodFlag}`
+          let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
+          let cmd = localPnpm ? `npx pnpm i ${prodFlag}` : `pnpm i ${prodFlag}`
           exec(cmd, options, callback)
         }
         else if (isYarn) {
-          let local = join(cwd, 'node_modules', 'yarn')
-          let cmd = local ? `npx yarn ${prodFlag}` : `yarn ${prodFlag}`
+          let localYarn = exists(join(cwd, 'node_modules', 'yarn'))
+          let cmd = localYarn ? `npx yarn ${prodFlag}` : `yarn ${prodFlag}`
           exec(cmd, options, callback)
         }
         else {
@@ -89,14 +89,14 @@ module.exports = function hydrator (params, callback) {
 
       // Update JS deps
       else if (isJs && !installing) {
-        if (isYarn) {
-          let local = join(cwd, 'node_modules', 'yarn')
-          let cmd = local ? 'npx yarn upgrade' : 'yarn upgrade'
+        if (isPnpm) {
+          let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
+          let cmd = localPnpm ? 'npx pnpm update' : 'pnpm update'
           exec(cmd, options, callback)
         }
-        else if (isPnpm) {
-          let local = join(cwd, 'node_modules', 'pnpm')
-          let cmd = local ? 'npx pnpm update' : 'pnpm update'
+        else if (isYarn) {
+          let localYarn = exists(join(cwd, 'node_modules', 'yarn'))
+          let cmd = localYarn ? 'npx yarn upgrade' : 'yarn upgrade'
           exec(cmd, options, callback)
         }
         else {

@@ -2,11 +2,16 @@
 
 ---
 
-## [3.4.0] 2023-10-23
+## [3.4.0 - 3.4.1] 2023-10-23
 
 ### Added
 
 - Added ability to ignore dependencies during hydration; thanks @andybee!
+
+
+### Fixed
+
+- Fixed pnpm / Yarn commands when globally installed
 
 ---
 
