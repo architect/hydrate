@@ -11,6 +11,7 @@
 
 ### Fixed
 
+- Add `local` flag for hydration of platform-specific binary deps (namely: Python); fixes #1457
 - Fixed pnpm / Yarn commands when globally installed
 
 ---

@@ -6,7 +6,7 @@ let print = require('../_printer')
 let { destroyPath } = require('../lib')
 
 module.exports = function hydrator (params, callback) {
-  let { action, env, file, installing, inventory, shell, timeout, update, verbose } = params
+  let { action, env, file, installing, inventory, local, shell, timeout, update, verbose } = params
 
   let cwd = dirname(file)
   let options = { cwd, env, shell, timeout }
@@ -119,6 +119,8 @@ module.exports = function hydrator (params, callback) {
           flags = '--only-binary=:all: ' +
                   `--platform=${arch} ` +
                   `--python-version ${ver} `
+          // Reset flags if installing from Sandbox
+          if (local) flags = ''
 
           // Update Python deps
           if (!installing) {

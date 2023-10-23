@@ -39,6 +39,7 @@ All methods accept an `options` object can include the following properties:
   - Defaults to `true`
   - Used by `install` + `update`
 - `inventory` - **Object** - Architect Inventory object; generally used internally
+- `local` - **Boolean** - Favor the local platform during installation of dependencies that may be distributed as platform-specific binaries
 - `only` - **String** - Specify a subset of possible shared files for `shared` to copy into Lambdas
   - Falsy by default
   - Accepts: `shared`, `views`, or `staticJson`
