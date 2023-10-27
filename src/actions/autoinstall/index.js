@@ -69,8 +69,8 @@ function getRuntimeDirs (dirs, inventory, runtimeName) {
   let runtimeDirs = dirs.filter(dir => {
     let lambda = inventory.inv.lambdasBySrcDir[dir]
     if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
-    let { runtime } = lambda.config
-    if (runtime.startsWith(runtimeName)) return true
+    let { runtime, hydrate } = lambda.config
+    return runtime.startsWith(runtimeName) && hydrate !== false
   })
   return runtimeDirs
 }
