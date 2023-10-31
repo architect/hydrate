@@ -2,6 +2,14 @@
 
 ---
 
+## [3.5.0] 2023-10-31
+
+### Added
+
+- Added ability to ignore Lambdas during via `@arc hydrate false`; thanks @lpsinger!
+
+---
+
 ## [3.4.0 - 3.4.1] 2023-10-23
 
 ### Added
