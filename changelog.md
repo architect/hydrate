@@ -8,6 +8,11 @@
 
 - Added additional dependency ignoring property case: `ignoreDependencies` or `ignoredDependencies` can now be used; `ignoreDependencies` is preferred
 
+
+### Changed
+
+- Updated dependencies
+
 ---
 
 ## [3.5.0] 2023-10-31
