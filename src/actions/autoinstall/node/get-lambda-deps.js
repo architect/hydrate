@@ -3,7 +3,7 @@ let { globSync } = require('glob')
 let { destroyPath, ignoreDeps } = require('../../../lib')
 let getRequires = require('./find-lambda-deps')
 
-module.exports = function getDirDeps ({ dir, update, inventory, ignoredDependencies }) {
+module.exports = function getDirDeps ({ dir, update, inventory, ignored }) {
   // Clean everything (except the root) out before we get going jic
   let isRoot = dir === inventory.inv._project.cwd
   if (!isRoot) {
@@ -35,7 +35,7 @@ module.exports = function getDirDeps ({ dir, update, inventory, ignoredDependenc
   // However, due to SDK version differences between older vs. newer Node.js Lambda containers, that may not actually necessarily be the case, so flag them
   let awsSdkV2 = deps.some(d => d === 'aws-sdk')
   let awsSdkV3 = deps.some(d => d.startsWith('@aws-sdk'))
-  deps = deps.filter(d => d !== 'aws-sdk' && !d.startsWith('@aws-sdk') && !ignoredDependencies?.includes(d))
+  deps = deps.filter(d => d !== 'aws-sdk' && !d.startsWith('@aws-sdk') && !ignored?.includes(d))
 
   return { deps, failures, files, awsSdkV2, awsSdkV3 }
 }
