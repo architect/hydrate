@@ -1,6 +1,6 @@
 let { join } = require('path')
 let test = require('tape')
-let mockFs = require('mock-fs')
+let mockTmp = require('mock-tmp')
 let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'node', 'get-root-deps')
 let getRootDeps = require(sut)
 
@@ -11,11 +11,13 @@ function pkgify (deps, devDeps, lock) {
   if (lock) tmpl.lockfileVersion = lock
   return JSON.stringify(tmpl, null, 2)
 }
-let inventory = { inv: { _project: { cwd: process.cwd() } } }
+
+let cwd
+let inventory = () => ({ inv: { _project: { cwd } } })
 let run = fs => {
-  mockFs(fs)
-  let result = getRootDeps(inventory)
-  mockFs.restore()
+  cwd = mockTmp(fs)
+  let result = getRootDeps(inventory())
+  mockTmp.reset()
   return result
 }
 
@@ -28,7 +30,7 @@ test('package.json', t => {
   t.plan(4)
   let result
 
-  result = run({})
+  result = run({ ok: 'hi' })
   t.deepEqual(result, {}, 'Got back empty object with no package.json present')
   console.log(result)
 
@@ -79,7 +81,7 @@ test('package.json + package-lock.json', t => {
   }
   t.deepEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 1)')
   console.log(result)
-  mockFs.restore()
+  mockTmp.reset()
 
   // v2
   result = run({
@@ -88,7 +90,7 @@ test('package.json + package-lock.json', t => {
   })
   t.deepEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 2)')
   console.log(result)
-  mockFs.restore()
+  mockTmp.reset()
 
   // v1
   deps = {
@@ -110,7 +112,7 @@ test('package.json + package-lock.json', t => {
   }
   t.deepEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 1)')
   console.log(result)
-  mockFs.restore()
+  mockTmp.reset()
 
   // v2
   result = run({
@@ -120,5 +122,5 @@ test('package.json + package-lock.json', t => {
   t.deepEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 2)')
   console.log(result)
 
-  mockFs.restore()
+  mockTmp.reset()
 })
