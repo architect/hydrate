@@ -116,7 +116,7 @@ module.exports = function hydrator (params, callback) {
           // https://docs.aws.amazon.com/linux/al2023/ug/compare-with-al2.html#glibc-gcc-and-binutils
           let arch = lambda.config.architecture === 'arm64' ? 'manylinux2014_aarch64' : 'manylinux2014_x86_64'
           let ver = lambda.config.runtime.split('python')[1]
-          flags = '--only-binary=:all: ' +
+          flags = '--no-binary=:none: ' +
                   `--platform=${arch} ` +
                   `--python-version ${ver} `
           // Reset flags if installing from Sandbox
