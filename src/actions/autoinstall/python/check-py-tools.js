@@ -3,7 +3,7 @@ let { spawnSync } = require('child_process')
 module.exports = function checkPyTools () {
 
   let cmd = 'python3'
-  let args = [ '-m', 'pip', 'list' ]
+  let args = [ '-m', 'pip', '--version' ]
   let raw = spawnSync(cmd, args, {
     cwd: __dirname,
     shell: true,
