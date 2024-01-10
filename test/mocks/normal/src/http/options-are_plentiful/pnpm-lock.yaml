@@ -1,13 +1,16 @@
-lockfileVersion: 5.4
+lockfileVersion: '6.0'
 
-specifiers:
-  tiny-json-http: ^7.0.2
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 dependencies:
-  tiny-json-http: 7.5.0
+  tiny-json-http:
+    specifier: ^7.0.2
+    version: 7.5.0
 
 packages:
 
-  /tiny-json-http/7.5.0:
+  /tiny-json-http@7.5.0:
     resolution: {integrity: sha512-Cv42Xad9ZhI/vMMAqvykPC6eh38LyCxaVw6fR+0CWZnZsYUE3dEtdaIGQ0H22m/LgKcQZt5X/z1gKpsfLWgRUw==}
     dev: false
