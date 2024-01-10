@@ -110,17 +110,28 @@ module.exports = function hydrator (params, callback) {
       else if (isPy) {
         let flags = ''
         if (lambda) {
-          // Technique per AWS, found that `--python-version` was essential, but `--implementation cp` may not be
-          // https://repost.aws/knowledge-center/lambda-python-package-compatible
-          // This may still not work because of glibc version differences, see:
-          // https://docs.aws.amazon.com/linux/al2023/ug/compare-with-al2.html#glibc-gcc-and-binutils
-          let arch = lambda.config.architecture === 'arm64' ? 'manylinux2014_aarch64' : 'manylinux2014_x86_64'
-          let ver = lambda.config.runtime.split('python')[1]
-          flags = '--only-binary=:all: ' +
-                  `--platform=${arch} ` +
-                  `--python-version ${ver} `
-          // Reset flags if installing from Sandbox
-          if (local) flags = ''
+          if (!local) {
+            let arch = lambda.config.architecture === 'arm64' ? 'aarch64' : 'x86_64'
+            let ver = lambda.config.runtime.split('python')[1]
+
+            let pythonPlatformCheck = child.spawnSync('python3', [ '-c', "'import platform; import sys; print(platform.system(), platform.machine(), *platform.python_version_tuple())'", ], { shell: true })
+            if (pythonPlatformCheck.status) {
+              console.error(pythonPlatformCheck.output.toString())
+              throw Error(`python3 error`)
+            }
+            let [ platformSystem, platformMachine, platformPythonVersionMajor, platformPythonVersionMinor, ] = pythonPlatformCheck.stdout.toString().trim().split(' ')
+            let isNative = platformSystem === 'Linux' && platformMachine === arch && `${platformPythonVersionMajor}.${platformPythonVersionMinor}` === ver
+
+            if (!isNative) {
+              // Technique per AWS, found that `--python-version` was essential, but `--implementation cp` may not be
+              // https://repost.aws/knowledge-center/lambda-python-package-compatible
+              // This may still not work because of glibc version differences, see:
+              // https://docs.aws.amazon.com/linux/al2023/ug/compare-with-al2.html#glibc-gcc-and-binutils
+              flags = '--only-binary=:all: ' +
+                      `--platform=manylinux2014_${arch} ` +
+                      `--python-version ${ver} `
+            }
+          }
 
           // Update Python deps
           if (!installing) {
