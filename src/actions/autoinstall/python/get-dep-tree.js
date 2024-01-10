@@ -5,7 +5,7 @@ module.exports = function getDepTree (topLevelDeps) {
   let shell = true
 
   if (!pipdeptree) {
-    let pipdeptreeCheck = spawnSync('pip3', [ 'list' ], { shell })
+    let pipdeptreeCheck = spawnSync('python3', [ '-m', 'pip', 'list' ], { shell })
     if (pipdeptreeCheck.status) {
       console.error(pipdeptreeCheck.output.toString())
       throw Error(`pip3 error`)
@@ -16,7 +16,7 @@ module.exports = function getDepTree (topLevelDeps) {
       if (l.split(' ')[0] === 'pipdeptree') pipdeptree = true
     })
     if (!pipdeptree) {
-      throw Error(`pipdeptree required for treeshaking Python Lambdas, please run 'pip3 install pipdeptree'`)
+      throw Error(`pipdeptree required for treeshaking Python Lambdas, please run 'python3 -m pip install pipdeptree'`)
     }
   }
 

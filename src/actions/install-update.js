@@ -129,7 +129,7 @@ module.exports = function hydrator (params, callback) {
             flags += '-U --upgrade-strategy eager'
           }
         }
-        let cmd = `pip3 install -r requirements.txt -t ./vendor ${flags}`.trim()
+        let cmd = `python3 -m pip install -r requirements.txt -t ./vendor ${flags}`.trim()
         exec(cmd, options, callback)
       }
 

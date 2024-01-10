@@ -2,8 +2,8 @@ let { spawnSync } = require('child_process')
 
 module.exports = function checkPyTools () {
 
-  let cmd = 'pip3'
-  let args = [ 'list' ]
+  let cmd = 'python3'
+  let args = [ '-m', 'pip', 'list' ]
   let raw = spawnSync(cmd, args, {
     cwd: __dirname,
     shell: true,
@@ -19,7 +19,7 @@ module.exports = function checkPyTools () {
     if (l.split(' ')[0] === 'pipdeptree') pipdeptree = true
   })
   if (!pipdeptree) {
-    throw Error(`pipdeptree required for treeshaking Python Lambdas, please run 'pip3 install pipdeptree'`)
+    throw Error(`pipdeptree required for treeshaking Python Lambdas, please run 'python3 -m pip install pipdeptree'`)
   }
   return true
 }
