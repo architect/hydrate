@@ -9,6 +9,11 @@
 - Added Node.js 20.x to test matrix
 - Breaking change: removed support for Node.js 14.x (now EOL, and no longer available to created in AWS Lambda)
 
+
+### Fixed
+
+- Fixed issue where `ignoreDependencies` would not work if only a single dependency was ignored; thanks @andybee!
+
 ---
 
 ## [3.5.1] 2023-11-19
