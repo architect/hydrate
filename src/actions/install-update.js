@@ -40,11 +40,22 @@ module.exports = function hydrator (params, callback) {
   let isPy = file.endsWith('requirements.txt')
   let isRb = file.endsWith('Gemfile')
 
-  let isNpm, isPnpm, isYarn
+  let isNpmWithLockfile, isPnpm, isYarn
   if (isJs) {
-    isNpm = exists('package-lock.json')
+    isNpmWithLockfile = exists('package-lock.json')
     isPnpm = params.pnpm || exists('pnpm-lock.yaml')
     isYarn = params.yarn || exists('yarn.lock')
+  }
+
+  function nativeModuleArgs () {
+    let args = ''
+    // Best effort ship to ship correct native modules to Lambda
+    let deploying = inventory.inv._arc.deployStage
+    if (deploying && !isRoot) {
+      args += ` --os linux`
+      if (lambda?.config?.architecture === 'arm64') args += ` --cpu arm64`
+    }
+    return args
   }
 
   series([
@@ -67,9 +78,9 @@ module.exports = function hydrator (params, callback) {
 
       // Install JS deps
       if (isJs && installing) {
-        let prodFlag = isRoot ? '' : '--production'
-        if (isNpm) {
-          exec(`npm ci ${prodFlag}`, options, callback)
+        let prodFlag = isRoot ? '' : '--omit=dev'
+        if (isNpmWithLockfile) {
+          exec(`npm ci ${prodFlag + nativeModuleArgs()}`, options, callback)
         }
         else if (isPnpm) {
           prodFlag = isRoot ? '' : '--prod'
@@ -82,8 +93,8 @@ module.exports = function hydrator (params, callback) {
           let cmd = localYarn ? `npx yarn ${prodFlag}` : `yarn ${prodFlag}`
           exec(cmd, options, callback)
         }
-        else {
-          exec(`npm i ${prodFlag}`, options, callback)
+        else /* Default to npm */ {
+          exec(`npm i ${prodFlag + nativeModuleArgs()}`, options, callback)
         }
       }
 

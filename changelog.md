@@ -4,10 +4,20 @@
 
 ## [4.0.0] 2024-01-09
 
+### Added
+
+- Improved cross-platform deployment of native modules to `arm64` Lambda (the new default in Architect 11)
+  - This means any non-`arm64` and/or non-Linux machine will now best-effort deploy to `arm64` Linux; users are highly encouraged to validate application functionality that relies on native modules
+  - This is accomplished by adding the npm `--cpu` + `--os` flags, supported by npm v10.1+ – this version of npm is bundled with Node.js 18.19+ or 20.7+
+  - If you are using pnpm or Yarn, you must continue to deploy Lambdas to `arm64` as before
+
+
 ### Changed
 
+- Use `--omit=dev` instead of `--production` arg for npm
 - Added Node.js 20.x to test matrix
 - Breaking change: removed support for Node.js 14.x (now EOL, and no longer available to created in AWS Lambda)
+- Updated dependencies
 
 
 ### Fixed
