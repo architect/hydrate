@@ -2,6 +2,14 @@
 
 ---
 
+## [4.0.1] 2024-02-02
+
+### Fixed
+
+- Fixed issue where treeshaking runs against Lambdas with explicit dependency manifests in cases where those Lambdas were themselves plugins installed as dependencies
+
+---
+
 ## [4.0.0] 2024-01-09
 
 ### Added

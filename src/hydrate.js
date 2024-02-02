@@ -62,6 +62,12 @@ function hydrator (inventory, installing, params, callback) {
 
   // Does this project have any Lambdae?
   let hasLambdae = inv.lambdaSrcDirs?.length
+  let manifestFiles = [ 'package.json', 'requirements.txt', 'Gemfile' ]
+  let possibleLambdaManifests = []
+  if (hasLambdae) possibleLambdaManifests = inv.lambdaSrcDirs.reduce((acc, dir) => {
+    acc.push(...manifestFiles.map(manifest => join(dir, manifest)))
+    return acc
+  }, [])
 
   // From here on out normalize all file comparisons to Unix paths
   let sharedDir = inv.shared && inv.shared.src && stripCwd(inv.shared.src, cwd)
@@ -71,10 +77,11 @@ function hydrator (inventory, installing, params, callback) {
    * Find our dependency manifests
    */
   // eslint-disable-next-line
-  let pattern = p => pathToUnix(`${p}/**/@(package.json|requirements.txt|Gemfile)`)
+  let pattern = p => pathToUnix(`${p}/**/@(${manifestFiles.join('|')})`)
   let dir = basepath || '.'
   // Get everything except shared
   let manifests = globSync(pattern(dir), { dot: true }).filter(file => {
+    if (possibleLambdaManifests.includes(file)) return true
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
     if (viewsDir && file.includes(viewsDir)) return false
