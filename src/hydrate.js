@@ -65,7 +65,7 @@ function hydrator (inventory, installing, params, callback) {
   let manifestFiles = [ 'package.json', 'requirements.txt', 'Gemfile' ]
   let possibleLambdaManifests = []
   if (hasLambdae) possibleLambdaManifests = inv.lambdaSrcDirs.reduce((acc, dir) => {
-    acc.push(...manifestFiles.map(manifest => join(dir, manifest)))
+    acc.push(...manifestFiles.map(manifest => stripCwd(join(dir, manifest), cwd)))
     return acc
   }, [])
 
