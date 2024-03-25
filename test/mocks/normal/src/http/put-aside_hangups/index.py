@@ -1,4 +1,4 @@
-import pipdeptree
+import urllib3
 
 
 def handler(event, context):

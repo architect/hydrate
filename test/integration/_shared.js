@@ -57,7 +57,7 @@ let nodeFunctions = arcHttp.concat(arcEvents, arcQueues, arcScheduled, arcTables
  * Runtime dependencies
  */
 let pythonDependencies = pythonFunctions
-  .map(p => join(p, 'vendor', 'pipdeptree'))
+  .map(p => join(p, 'vendor', 'urllib3'))
 
 let rubyDependencies = () => rubyFunctions
   .map(p => globSync(pathToUnix(`${p}/vendor/bundle/ruby/**/gems/a-0.2.1`))[0])
