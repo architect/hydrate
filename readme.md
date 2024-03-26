@@ -62,7 +62,7 @@ Installs function dependencies, then invokes [`hydrate.shared()`][shared].
 To ensure local development behavior is as close to `staging` and `production` as possible, `hydrate.install()` (and other hydrate functions) uses:
 
 - **Node.js**: `npm ci` if `package-lock.json` is present and `npm i` if not; or `yarn`
-- **Python**: `pip3 install`
+- **Python**: `python3 -m pip install`
 - **Ruby**: `bundle install`
 
 Note: by default `update` also installs dependencies in shared folders like `src/shared` and `src/views`.
@@ -75,7 +75,7 @@ Updates function dependencies, then invokes [`hydrate.shared()`][shared].
 `update` is functionally almost identical to [`install`][install], except it will update dependencies to newer versions _if they exist_. This is done via:
 
 - **Node.js**: `npm update` or `yarn upgrade`
-- **Python**: `pip3 install -U --upgrade-strategy eager`
+- **Python**: `python3 -m pip install -U --upgrade-strategy eager`
 - **Ruby**: `bundle update`
 
 Note: by default `update` also updates dependencies in shared folders like `src/shared` and `src/views`.

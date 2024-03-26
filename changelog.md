@@ -94,7 +94,7 @@
   - Docs: https://arc.codes/docs/en/guides/developer-experience/dependency-management#python
   - This supports global options passed in a root `requirements.txt` file (example: `--extra-index-url https://test.pypi.org/simple/`), but does not yet support dependencies versioned at root, or shared or views dependencies
   - All project dependencies must be installed on the system prior to deployment
-  - Python Lambda treeshaking also requires the `pipdeptree` package to be available from shell; ensure you've run `pip3 install pipdeptree` prior to use
+  - Python Lambda treeshaking also requires the `pipdeptree` package to be available from shell; ensure you've run `python3 -m pip install pipdeptree` prior to use
 
 ---
 
