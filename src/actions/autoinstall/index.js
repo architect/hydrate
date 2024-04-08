@@ -7,6 +7,11 @@ module.exports = function autoinstaller (params) {
   let { dirs, inventory, update, verbose } = params
   if (!dirs.length) return []
 
+  let asap = inventory.inv.http?.find(l => l.arcStaticAssetProxy)
+  if (asap) {
+    dirs.push(asap.src)
+  }
+
   update.start('Finding dependencies')
 
   // Generated manifests to be hydrated later (if there are no parsing failures)
@@ -68,6 +73,10 @@ module.exports = function autoinstaller (params) {
 function getRuntimeDirs (dirs, inventory, runtimeName) {
   let runtimeDirs = dirs.filter(dir => {
     let lambda = inventory.inv.lambdasBySrcDir[dir]
+    if (!lambda) {
+      lambda = inventory.inv.http?.find(l => l.arcStaticAssetProxy)
+      if (!lambda) throw ReferenceError(`Cannot find Lambda at: ${dir}`)
+    }
     if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { runtime, hydrate } = lambda.config
     return runtime.startsWith(runtimeName) && hydrate !== false
