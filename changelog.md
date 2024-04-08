@@ -2,6 +2,15 @@
 
 ---
 
+## [4.0.4] 2024-04-08
+
+### Fixed
+
+- Fixed Lambda treeshaking of default `get /*` ASAP handler; thanks @filmaj!
+- Improved detection of local vs global Yarn and pnpm
+
+---
+
 ## [4.0.3] 2024-03-25
 
 ### Changed
