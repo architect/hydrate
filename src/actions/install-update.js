@@ -84,12 +84,25 @@ module.exports = function hydrator (params, callback) {
         }
         else if (isPnpm) {
           prodFlag = isRoot ? '' : '--prod'
-          let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
+          let localPnpm
+          try {
+            // eslint-disable-next-line
+            require.resolve('pnpm')
+            localPnpm = true
+          }
+          catch { /* noop */ }
           let cmd = localPnpm ? `npx pnpm i ${prodFlag}` : `pnpm i ${prodFlag}`
           exec(cmd, options, callback)
         }
         else if (isYarn) {
-          let localYarn = exists(join(cwd, 'node_modules', 'yarn'))
+          let localYarn
+          try {
+            // eslint-disable-next-line
+            require.resolve('yarn')
+            localYarn = true
+          }
+          catch { /* noop */ }
+          localYarn = true
           let cmd = localYarn ? `npx yarn ${prodFlag}` : `yarn ${prodFlag}`
           exec(cmd, options, callback)
         }
