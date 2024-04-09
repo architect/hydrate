@@ -62,9 +62,10 @@ function hydrator (inventory, installing, params, callback) {
 
   // Does this project have any Lambdae?
   let hasLambdae = inv.lambdaSrcDirs?.length
+  let hasASAP = inventory.inv.http?.find(l => l.arcStaticAssetProxy)
   let manifestFiles = [ 'package.json', 'requirements.txt', 'Gemfile' ]
   let possibleLambdaManifests = []
-  if (hasLambdae) possibleLambdaManifests = inv.lambdaSrcDirs.reduce((acc, dir) => {
+  if (hasLambdae) possibleLambdaManifests = inv.lambdaSrcDirs?.reduce((acc, dir) => {
     acc.push(...manifestFiles.map(manifest => stripCwd(join(dir, manifest), cwd)))
     return acc
   }, [])
@@ -120,24 +121,33 @@ function hydrator (inventory, installing, params, callback) {
   })
 
   // Run the autoinstaller first in case we need to add any new manifests to the ops
-  if (autoinstall && installing && hasLambdae) {
+  if (autoinstall && installing && (hasLambdae || hasASAP)) {
+    let srcDirsWithoutManifests = []
+
     // Ignore directories already known to have a manifest
-    let srcDirsWithoutManifests = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
-      if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
-      let rel = stripCwd(src, cwd)
-      let lambdaHasManifest = manifests.some(file => dirname(file) === rel)
-      // TODO this should be enumerated in inventory
-      if (lambdaHasManifest && lambda.config.runtime.startsWith('nodejs')) {
-        try {
-          let pkg = JSON.parse(readFileSync(join(src, 'package.json')))
-          if (!pkg.dependencies && !pkg.peerDependencies && !pkg.devDependencies) return src
+    if (hasLambdae) {
+      srcDirsWithoutManifests = Object.entries(inv.lambdasBySrcDir).map(([ src, lambda ]) => {
+        if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
+        let rel = stripCwd(src, cwd)
+        let lambdaHasManifest = manifests.some(file => dirname(file) === rel)
+        // TODO this should be enumerated in inventory
+        if (lambdaHasManifest && lambda.config.runtime.startsWith('nodejs')) {
+          try {
+            let pkg = JSON.parse(readFileSync(join(src, 'package.json')))
+            if (!pkg.dependencies && !pkg.peerDependencies && !pkg.devDependencies) return src
+          }
+          catch (err) {
+            update.error(`Invalid or unable to read ${src}${sep}package.json`)
+          }
         }
-        catch (err) {
-          update.error(`Invalid or unable to read ${src}${sep}package.json`)
-        }
-      }
-      else if (!lambdaHasManifest) return src
-    }).filter(Boolean)
+        else if (!lambdaHasManifest) return src
+      }).filter(Boolean)
+    }
+
+    // Handle special case: ASAP doesn't appear in lambdasBySrcDir since it's not userland
+    if (hasASAP) {
+      srcDirsWithoutManifests.push(hasASAP.src)
+    }
 
     // Allow scoping to a single directory
     if (basepath) {
