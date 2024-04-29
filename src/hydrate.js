@@ -53,7 +53,7 @@ function hydrator (inventory, installing, params, callback) {
     verbose,
     // Isolation / sandbox
     copyShared = true,
-    hydrateShared = true
+    hydrateShared = true,
   } = params
   let updaterParams = { quiet }
   let update = updater('Hydrate', updaterParams)
@@ -77,7 +77,6 @@ function hydrator (inventory, installing, params, callback) {
   /**
    * Find our dependency manifests
    */
-  // eslint-disable-next-line
   let pattern = p => pathToUnix(`${p}/**/@(${manifestFiles.join('|')})`)
   let dir = basepath || '.'
   // Get everything except shared
@@ -136,7 +135,7 @@ function hydrator (inventory, installing, params, callback) {
             let pkg = JSON.parse(readFileSync(join(src, 'package.json')))
             if (!pkg.dependencies && !pkg.peerDependencies && !pkg.devDependencies) return src
           }
-          catch (err) {
+          catch {
             update.error(`Invalid or unable to read ${src}${sep}package.json`)
           }
         }
@@ -182,7 +181,7 @@ function hydrator (inventory, installing, params, callback) {
       installing,
       update,
       inventory,
-      ...params
+      ...params,
     }, callback))
   })
 

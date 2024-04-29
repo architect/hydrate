@@ -2,7 +2,7 @@
  * Filter out excessive / unhelpful vendor logging that includes any of the following strings
  */
 let strings = [
-  'npm WARN prepare removing existing node_modules/ before installation'
+  'npm WARN prepare removing existing node_modules/ before installation',
 ]
 let regexes = [
   /npm WARN .* No description/g,

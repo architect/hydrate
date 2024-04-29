@@ -26,7 +26,7 @@ module.exports = function cleanup (installed) {
           renameSync(join(dir, swap), join(dir, file))
         }
       }
-      catch (err) { null } // Swallow errors, we may have to bubble something else
+      catch { null } // Swallow errors, we may have to bubble something else
     })
   }
 }

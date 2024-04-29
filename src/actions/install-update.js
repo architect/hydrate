@@ -86,7 +86,6 @@ module.exports = function hydrator (params, callback) {
           prodFlag = isRoot ? '' : '--prod'
           let localPnpm
           try {
-            // eslint-disable-next-line
             require.resolve('pnpm')
             localPnpm = true
           }
@@ -97,7 +96,6 @@ module.exports = function hydrator (params, callback) {
         else if (isYarn) {
           let localYarn
           try {
-            // eslint-disable-next-line
             require.resolve('yarn')
             localYarn = true
           }
@@ -170,6 +168,6 @@ module.exports = function hydrator (params, callback) {
       else {
         callback()
       }
-    }
+    },
   ], callback)
 }

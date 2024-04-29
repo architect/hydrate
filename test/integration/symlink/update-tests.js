@@ -25,7 +25,6 @@ test(`[Symlinking] update() bumps installed dependencies to newer versions`, t =
     hydrate.update({ symlink }, function (err) {
       if (err) t.fail(err)
       else {
-        // eslint-disable-next-line
         let pkgLock = JSON.parse(readFileSync(join(mockTmp, nodeFunctions[0], 'package-lock.json')))
         let newVersion = [ 2, 3 ].includes(pkgLock.lockfileVersion)
           ? pkgLock.packages['node_modules/tiny-json-http'].version

@@ -5,7 +5,7 @@ let {
   mkdirSync,
   readFileSync,
   renameSync,
-  writeFileSync
+  writeFileSync,
 } = require('fs')
 let cp = require('cpr')
 let test = require('tape')
@@ -63,7 +63,7 @@ test(`[Shared file copying (default paths)] shared() copies shared and views (un
     sharedArtifacts.length +
     getViewsArtifacts.length +
     sharedArtifactsDisabled.length +
-    viewsArtifactsDisabled.length + 1
+    viewsArtifactsDisabled.length + 1,
   )
   resetAndCopyShared(t, function () {
     hydrate.shared({}, function (err) {
@@ -99,7 +99,7 @@ test(`[Shared file copying with plugins (default paths)] shared() copies shared 
     getViewsArtifacts.length +
     sharedArtifactsDisabled.length +
     viewsArtifactsDisabled.length +
-    pluginArtifacts.length + 1
+    pluginArtifacts.length + 1,
   )
   resetAndCopySharedPlugins(t, function () {
     cp(join('src', 'app.plugins'), join('.', 'app.arc'), { overwrite: true },
@@ -144,7 +144,7 @@ test(`[Shared file copying (custom paths)] shared() copies shared and views (unl
     sharedArtifacts.length +
     getViewsArtifacts.length +
     sharedArtifactsDisabled.length +
-    viewsArtifactsDisabled.length + 1
+    viewsArtifactsDisabled.length + 1,
   )
   resetAndCopySharedCustom(t, function () {
     hydrate.shared({}, function (err) {

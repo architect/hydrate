@@ -120,7 +120,7 @@ module.exports = function treeshakeNode (nodeDirs, params) {
         dir,
         file: 'package.json',
         remove: [ 'package.json', 'package-lock.json' ], // Identify files for later removal
-        data: JSON.stringify(lambdaPackage, null, 2)
+        data: JSON.stringify(lambdaPackage, null, 2),
       }
       // Autoinstall can be called on a directory that contains a package.json with `"type": "module"` (and no dependencies)
       // If we find such a case, kindly move the existing package.json aside until autoinstall ops are complete

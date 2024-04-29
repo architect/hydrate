@@ -19,7 +19,6 @@ test(`[Default (file copying)] update() bumps installed dependencies to newer ve
     hydrate.update(undefined, function (err) {
       if (err) t.fail(err)
       else {
-        // eslint-disable-next-line
         let pkgLock = JSON.parse(readFileSync(join(mockTmp, nodeFunctions[0], 'package-lock.json')))
         let newVersion = [ 2, 3 ].includes(pkgLock.lockfileVersion)
           ? pkgLock.packages['node_modules/tiny-json-http'].version

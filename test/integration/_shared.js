@@ -126,7 +126,7 @@ let pluginArtifacts = []
   .flat()
 
 let sharedArtifactsDisabled = [
-  join('src', 'http', 'any-time_is_good-catchall', nodeShared, 'shared.md')
+  join('src', 'http', 'any-time_is_good-catchall', nodeShared, 'shared.md'),
 ]
 
 // Represents src/views without @views pragma (i.e. all GET fns receive views)
@@ -145,7 +145,7 @@ let viewsArtifacts = []
   .concat(arcCustomPath.map(p => join(p, nodeShared, 'views.md')))
 
 let viewsArtifactsDisabled = [
-  join('src', 'http', 'any-time_is_good-catchall', nodeShared, 'views.md')
+  join('src', 'http', 'any-time_is_good-catchall', nodeShared, 'views.md'),
 ]
 
 

@@ -60,7 +60,7 @@ ${requirementsConfig}${dependencies}
         dir,
         file: 'requirements.txt',
         remove: [ 'requirements.txt' ], // Identify files for later removal
-        data: lambdaRequirements
+        data: lambdaRequirements,
       }
       installing.push(params)
     }

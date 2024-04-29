@@ -3,7 +3,7 @@ let {
   existsSync,
   mkdirSync,
   readFileSync,
-  writeFileSync
+  writeFileSync,
 } = require('fs')
 let test = require('tape')
 let {
@@ -116,7 +116,7 @@ test(`[Default (file copying)] install() hydrates all Functions', shared and vie
         let dependencies = {
           cpr: 'latest',
           'run-series': 'latest',
-          'tiny-json-http': 'latest'
+          'tiny-json-http': 'latest',
         }
         t.deepEqual(autoinstall._parsed, _parsed, 'Autoinstall walked shared + views')
         t.deepEqual(autoinstall.dependencies, dependencies, 'Autoinstall installed shared + views deps')
@@ -256,7 +256,7 @@ test(`[Default (file copying)] install() should not recurse into Functions depen
     mkdirSync(subdep, { recursive: true })
     writeFileSync(join(subdep, 'package.json'), JSON.stringify({
       name: 'poop',
-      dependencies: { 'tiny-json-http': '*' }
+      dependencies: { 'tiny-json-http': '*' },
     }), 'utf-8')
     let basepath = nodeFunctions[0]
     hydrate.install({ basepath }, function (err) {

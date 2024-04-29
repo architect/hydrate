@@ -13,10 +13,10 @@ test('inventory with a shared path to hydrate and a single node runtime lambda a
       lambdasBySrcDir: {
         [path]: {
           name: 'get /items',
-          config: { runtime: 'nodejs12' }
-        }
-      }
-    }
+          config: { runtime: 'nodejs12' },
+        },
+      },
+    },
   }
   let paths = getPaths(inventory)
   t.equals(paths.all[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (all)')
@@ -33,15 +33,15 @@ test('inventory with a shared path to hydrate and a single non-node runtime lamb
   let inventory = {
     inv: {
       shared: {
-        shared: [ path ]
+        shared: [ path ],
       },
       lambdasBySrcDir: {
         [path]: {
           name: 'get /items',
-          config: { runtime: 'python3' }
-        }
-      }
-    }
+          config: { runtime: 'python3' },
+        },
+      },
+    },
   }
   let paths = getPaths(inventory)
   t.equals(paths.all[path], join(path, 'vendor'), 'non-node runtime lambda returns vendor path (all)')
@@ -58,16 +58,16 @@ test('inventory with a shared path to hydrate and multiple node runtime lambdas 
   let inventory = {
     inv: {
       views: {
-        views: [ path ]
+        views: [ path ],
       },
       lambdasBySrcDir: {
         [path]: [
           { name: 'get /items', config: { runtime: 'nodejs12' } },
           { name: 'get /api/v1/items', config: { runtime: 'nodejs12' } },
           { name: 'get /api/v2/items', config: { runtime: 'nodejs12' } },
-        ]
-      }
-    }
+        ],
+      },
+    },
   }
   let paths = getPaths(inventory)
   t.equals(paths.all[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (all)')

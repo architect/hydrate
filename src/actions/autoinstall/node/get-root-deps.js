@@ -7,7 +7,7 @@ module.exports = function getRootDeps ({ inv }) {
   let packageJson = join(root, 'package.json')
   let packageLock = join(root, 'package-lock.json')
 
-  let package = existsSync(packageJson) && JSON.parse(readFileSync(packageJson)) || {}
+  let package = (existsSync(packageJson) && JSON.parse(readFileSync(packageJson))) || {}
   let deps = Object.assign(package.devDependencies || {}, package.dependencies || {})
 
   let lock = existsSync(packageLock) && JSON.parse(readFileSync(packageLock))
