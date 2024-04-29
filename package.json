@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "npm run lint && npm run test:integration && npm run coverage",
+    "test:nolint": "npm run test:integration && npm run coverage",
     "test:unit": "cross-env tape 'test/unit/**/*-tests.js' | tap-arc",
     "test:integration": "cross-env tape 'test/integration/**/*-tests.js' | tap-arc",
     "test:integration:fast": "cross-env tape 'test/integration/symlink/**/*-tests.js' 'test/integration/*-tests.js' | tap-arc",
