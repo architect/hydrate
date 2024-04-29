@@ -2,6 +2,15 @@
 
 ---
 
+## [4.0.6] 2024-04-29
+
+### Changed
+
+- Updated dependencies
+- Updated `package.json` `engines.node` property to reflect changes from v4
+
+---
+
 ## [4.0.4 - 4.0.5] 2024-04-08
 
 ### Fixed
