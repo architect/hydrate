@@ -14,6 +14,11 @@ let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
 let symlink = true
 
+test('Does not exit code 1', t => {
+  process.on('exit', code => { if (code === 1) t.fail('Exited code 1!') })
+  t.end()
+})
+
 // As of late 2020, this test passes GHCI in both windows-latest and windows-2016
 // This is strange, bc windows-2016 should be running a pre-Windows-symlink build (10.0.14393 Build 3930)
 // See: https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/

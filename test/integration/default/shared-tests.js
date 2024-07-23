@@ -27,6 +27,11 @@ let {
 let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
+test('Does not exit code 1', t => {
+  process.on('exit', code => { if (code === 1) t.fail('Exited code 1!') })
+  t.end()
+})
+
 test(`[Shared file copying (default paths)] shared() never uses symlinks by default`, t => {
   t.plan(2)
   resetAndCopyShared(t, function () {

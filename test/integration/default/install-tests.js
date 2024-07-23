@@ -32,6 +32,11 @@ let {
 let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
+test('Does not exit code 1', t => {
+  process.on('exit', code => { if (code === 1) t.fail('Exited code 1!') })
+  t.end()
+})
+
 test(`[Default (file copying)] install() hydrates all Functions', shared and views dependencies (autoinstall enabled)`, t => {
   let count =
     pythonDependencies.length +
