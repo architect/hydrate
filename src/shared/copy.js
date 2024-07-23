@@ -1,5 +1,5 @@
-let cp = require('cpr')
-let { mkdirSync } = require('fs')
+// let cpr = require('cpr')
+let { cp, mkdirSync } = require('fs')
 let { dirname } = require('path')
 let { sync: symlinkOrCopy } = require('symlink-or-copy')
 let { destroyPath } = require('../lib')
@@ -17,7 +17,9 @@ module.exports = function copy (source, destination, params, callback) {
       callback()
     }
     else {
-      cp(source, destination, { overwrite: true }, callback)
+      console.log('>>>> RUNNING cp', source, destination)
+      // cpr(source, destination, { overwrite: true }, callback)
+      cp(source, destination, { recursive: true }, callback)
     }
   }
   catch (err) {
