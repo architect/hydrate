@@ -2,6 +2,14 @@
 
 ---
 
+## [4.0.7] 2024-07-24
+
+### Fixed
+
+- Fixed issue where Hydrate fails on projects with only an ASAP root handler, no other Lambdas; fixes #1491
+
+---
+
 ## [4.0.6] 2024-04-29
 
 ### Changed
