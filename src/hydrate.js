@@ -155,7 +155,10 @@ function hydrator (inventory, installing, params, callback) {
     let result = actions.autoinstall({ dirs: srcDirsWithoutManifests, update, ...params, inventory })
     if (result.length) {
       autoinstalled = result
-      let install = autoinstalled.map(({ dir, file }) => stripCwd(join(dir, file), cwd))
+      let install = autoinstalled.map(({ dir, file }) => hasASAP?.src === dir
+        // At this point, ASAP has been given a package.json, and should just be run as an absolute path
+        ? join(dir, file)
+        : stripCwd(join(dir, file), cwd))
       manifests = manifests.concat(install)
     }
   }
