@@ -2,6 +2,19 @@
 
 ---
 
+## [4.0.8] 2024-07-25
+
+### Changed
+
+- Update vendored Python `importlib_metadata`
+
+
+### Fixed
+
+- Fixed issue where ASAP would blow up treeshaking due to malformed file path
+
+---
+
 ## [4.0.7] 2024-07-24
 
 ### Fixed
