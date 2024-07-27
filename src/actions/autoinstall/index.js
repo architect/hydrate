@@ -67,7 +67,7 @@ module.exports = function autoinstaller (params) {
 
 function getRuntimeDirs (dirs, inventory, runtimeName) {
   let runtimeDirs = dirs.filter(dir => {
-    let lambda = inventory.inv.lambdasBySrcDir[dir]
+    let lambda = inventory.inv.lambdasBySrcDir?.[dir]
     if (!lambda) lambda = inventory.inv.http?.find(l => l.arcStaticAssetProxy)
     if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { runtime, hydrate } = lambda.config

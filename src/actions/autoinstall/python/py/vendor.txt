@@ -1,2 +1,2 @@
-importlib_metadata==6.8.0
+importlib_metadata==8.2.0
 zipp

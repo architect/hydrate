@@ -66,7 +66,7 @@ module.exports = function treeshakeNode (nodeDirs, params) {
 
   nodeDirs.forEach(dir => {
     projectDirs++
-    let lambda = inventory.inv.lambdasBySrcDir[dir]
+    let lambda = inventory.inv.lambdasBySrcDir?.[dir]
     if (!lambda) lambda = inventory.inv.http?.find(l => l.arcStaticAssetProxy)
     if (Array.isArray(lambda)) lambda = lambda[0] // Multi-tenant Lambda check
     let { config, name, pragma } = lambda
