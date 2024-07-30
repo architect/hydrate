@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [ 16.x, 18.x, 20.x ]
+        node-version: [ 16.x, 18.x, 20.x, 22.x ]
         os: [ windows-latest, ubuntu-latest, macOS-latest ]
 
     # Go
@@ -44,7 +44,7 @@ jobs:
 
     - name: Set up bundle
       run: |
-        gem install bundler -v 1.17.3 # Bundler 2.x breaks test lockfile
+        gem install bundler -v 2.4.22 # 2.5+ breaks
         bundle config jobs 4
         bundle config retry 3
 

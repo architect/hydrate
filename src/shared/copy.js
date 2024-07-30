@@ -17,7 +17,6 @@ module.exports = function copy (source, destination, params, callback) {
       callback()
     }
     else {
-      console.log('>>>> RUNNING cp', source, destination)
       // cpr(source, destination, { overwrite: true }, callback)
       cp(source, destination, { recursive: true }, callback)
     }
