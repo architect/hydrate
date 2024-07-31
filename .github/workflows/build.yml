@@ -44,7 +44,7 @@ jobs:
 
     - name: Set up bundle
       run: |
-        gem install bundler -v 2.4.22 # 2.5+ breaks
+        gem install bundler -v 1.17.3
         bundle config jobs 4
         bundle config retry 3
 
