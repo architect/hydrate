@@ -1,4 +1,3 @@
-// let cpr = require('cpr')
 let { cp, mkdirSync } = require('fs')
 let { dirname } = require('path')
 let { sync: symlinkOrCopy } = require('symlink-or-copy')
@@ -17,7 +16,6 @@ module.exports = function copy (source, destination, params, callback) {
       callback()
     }
     else {
-      // cpr(source, destination, { overwrite: true }, callback)
       cp(source, destination, { recursive: true, force: true }, callback)
     }
   }

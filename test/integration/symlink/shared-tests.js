@@ -8,7 +8,6 @@ let {
   renameSync,
   writeFileSync,
 } = require('fs')
-// let cp = require('cpr')
 let test = require('tape')
 let {
   resetAndCopyShared,

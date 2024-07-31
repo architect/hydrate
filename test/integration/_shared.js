@@ -1,6 +1,5 @@
 let { dirname, join } = require('path')
 let { cp, existsSync } = require('fs')
-// let cp = require('cpr')
 let { globSync } = require('glob')
 let { pathToUnix } = require('@architect/utils')
 let { destroyPath } = require('../../src/lib')
