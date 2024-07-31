@@ -112,7 +112,7 @@ test(`[Shared file symlinking with plugins (default paths)] shared() copies shar
     pluginArtifacts.length + 1,
   )
   resetAndCopySharedPlugins(t, function () {
-    cp(join('src', 'app.plugins'), join('.', 'app.arc'), { recursive: true },
+    cp(join('src', 'app.plugins'), join('.', 'app.arc'), { recursive: true, force: true },
       function (err) {
         if (err) t.fail(err)
         else {
@@ -187,7 +187,7 @@ test(`[Shared file symlinking (custom paths)] shared() copies shared and views (
 test(`[Shared file symlinking (default paths)] shared() views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopyShared(t, function () {
-    cp(join('src', 'app.arc-views'), join('.', 'app.arc'), { recursive: true }, function (err) {
+    cp(join('src', 'app.arc-views'), join('.', 'app.arc'), { recursive: true, force: true }, function (err) {
       if (err) t.fail(err)
       else {
         hydrate.shared({ symlink }, function (err) {
@@ -216,7 +216,7 @@ test(`[Shared file symlinking (default paths)] shared() views to only @views (un
 test(`[Shared file symlinking (custom paths)] shared() views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopySharedCustom(t, function () {
-    cp(join('_shared-custom', 'app.arc-views'), join('.', 'app.arc'), { recursive: true }, function (err) {
+    cp(join('_shared-custom', 'app.arc-views'), join('.', 'app.arc'), { recursive: true, force: true }, function (err) {
       if (err) t.fail(err)
       else {
         hydrate.shared({ symlink }, function (err) {

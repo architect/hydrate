@@ -18,7 +18,7 @@ module.exports = function copy (source, destination, params, callback) {
     }
     else {
       // cpr(source, destination, { overwrite: true }, callback)
-      cp(source, destination, { recursive: true }, callback)
+      cp(source, destination, { recursive: true, force: true }, callback)
     }
   }
   catch (err) {

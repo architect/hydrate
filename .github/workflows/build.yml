@@ -44,7 +44,7 @@ jobs:
 
     - name: Set up bundle
       run: |
-        gem install bundler -v 1.17.3
+        gem install bundler -v 1.17.3 # Bundler 2.x breaks test lockfile
         bundle config jobs 4
         bundle config retry 3
 
