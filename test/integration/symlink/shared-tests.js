@@ -1,5 +1,6 @@
 let { dirname, join } = require('path')
 let {
+  cp,
   existsSync,
   lstatSync,
   mkdirSync,
@@ -7,7 +8,6 @@ let {
   renameSync,
   writeFileSync,
 } = require('fs')
-let cp = require('cpr')
 let test = require('tape')
 let {
   resetAndCopyShared,
@@ -26,6 +26,11 @@ let {
 let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
 let symlink = true
+
+test('Does not exit code 1', t => {
+  process.on('exit', code => { if (code === 1) t.fail('Exited code 1!') })
+  t.end()
+})
 
 // As of late 2020, this test passes GHCI in both windows-latest and windows-2016
 // This is strange, bc windows-2016 should be running a pre-Windows-symlink build (10.0.14393 Build 3930)
@@ -106,7 +111,7 @@ test(`[Shared file symlinking with plugins (default paths)] shared() copies shar
     pluginArtifacts.length + 1,
   )
   resetAndCopySharedPlugins(t, function () {
-    cp(join('src', 'app.plugins'), join('.', 'app.arc'), { overwrite: true },
+    cp(join('src', 'app.plugins'), join('.', 'app.arc'), { recursive: true, force: true },
       function (err) {
         if (err) t.fail(err)
         else {
@@ -181,7 +186,7 @@ test(`[Shared file symlinking (custom paths)] shared() copies shared and views (
 test(`[Shared file symlinking (default paths)] shared() views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopyShared(t, function () {
-    cp(join('src', 'app.arc-views'), join('.', 'app.arc'), { overwrite: true }, function (err) {
+    cp(join('src', 'app.arc-views'), join('.', 'app.arc'), { recursive: true, force: true }, function (err) {
       if (err) t.fail(err)
       else {
         hydrate.shared({ symlink }, function (err) {
@@ -210,7 +215,7 @@ test(`[Shared file symlinking (default paths)] shared() views to only @views (un
 test(`[Shared file symlinking (custom paths)] shared() views to only @views (unless disabled or folder not found)`, t => {
   t.plan(viewsArtifacts.length + viewsArtifactsDisabled.length + 1)
   resetAndCopySharedCustom(t, function () {
-    cp(join('_shared-custom', 'app.arc-views'), join('.', 'app.arc'), { overwrite: true }, function (err) {
+    cp(join('_shared-custom', 'app.arc-views'), join('.', 'app.arc'), { recursive: true, force: true }, function (err) {
       if (err) t.fail(err)
       else {
         hydrate.shared({ symlink }, function (err) {

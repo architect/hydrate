@@ -11,6 +11,11 @@ let {
 let hydrate = require('../../..')
 process.env.CI = true // Suppresses tape issues with progress indicator
 
+test('Does not exit code 1', t => {
+  process.on('exit', code => { if (code === 1) t.fail('Exited code 1!') })
+  t.end()
+})
+
 test(`[Default (file copying)] update() bumps installed dependencies to newer versions`, t => {
   t.plan(4)
   reset(t, function () {

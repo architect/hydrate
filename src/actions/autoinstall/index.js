@@ -54,8 +54,8 @@ module.exports = function autoinstaller (params) {
       `Scanned ${projectDirs} project dirs`,
       `Inspected ${projectFiles} project files`,
     ]
-    if (nodeDeps.length) stats.push(`Installed ${nodeDeps} Node.js dependencies`)
-    if (pyDeps.length) stats.push(`Installed ${pyDeps} Python dependencies`)
+    if (nodeDeps > 0) stats.push(`Installed ${nodeDeps} Node.js dependencies`)
+    if (pyDeps > 0) stats.push(`Installed ${pyDeps} Python dependencies`)
     stats.push(`Found a total of ${totalDeps} dependencies to install`)
     update.status('Dependency analysis', ...stats)
     update.done(`Completed in ${Date.now() - start}ms`)

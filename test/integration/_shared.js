@@ -1,6 +1,5 @@
 let { dirname, join } = require('path')
-let { existsSync } = require('fs')
-let cp = require('cpr')
+let { cp, existsSync } = require('fs')
 let { globSync } = require('glob')
 let { pathToUnix } = require('@architect/utils')
 let { destroyPath } = require('../../src/lib')
@@ -153,7 +152,7 @@ let viewsArtifactsDisabled = [
 function reset (t, callback) {
   process.chdir(join(__dirname, '..'))
   destroyPath(mockTmp)
-  cp(mockSource, mockTmp, { overwrite: true }, function (err) {
+  cp(mockSource, mockTmp, { recursive: true, force: true }, function (err) {
     if (err) t.fail(err)
     else {
       process.chdir(mockTmp)
@@ -163,7 +162,7 @@ function reset (t, callback) {
 }
 function resetAndCopyShared (t, callback) {
   reset(t, function () {
-    cp('_shared', 'src', { overwrite: true }, function done (err) {
+    cp('_shared', 'src', { recursive: true, force: true }, function done (err) {
       if (err) t.fail(err)
       else callback()
     })
@@ -171,7 +170,7 @@ function resetAndCopyShared (t, callback) {
 }
 function resetAndCopySharedAutoinstall (t, callback) {
   reset(t, function () {
-    cp('_shared-autoinstall', '.', { overwrite: true }, function done (err) {
+    cp('_shared-autoinstall', '.', { recursive: true, force: true }, function done (err) {
       if (err) t.fail(err)
       else callback()
     })
@@ -179,7 +178,7 @@ function resetAndCopySharedAutoinstall (t, callback) {
 }
 function resetAndCopySharedCustom (t, callback) {
   reset(t, function () {
-    cp('_shared-custom', '.', { overwrite: true }, function done (err) {
+    cp('_shared-custom', '.', { recursive: true, force: true }, function done (err) {
       if (err) t.fail(err)
       else callback()
     })
@@ -187,7 +186,7 @@ function resetAndCopySharedCustom (t, callback) {
 }
 function resetAndCopySharedPlugins (t, callback) {
   reset(t, function () {
-    cp('_shared-plugins', 'src', { overwrite: true }, function done (err) {
+    cp('_shared-plugins', 'src', { recursive: true, force: true }, function done (err) {
       if (err) t.fail(err)
       else callback()
     })
