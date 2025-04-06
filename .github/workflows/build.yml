@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [ 16.x, 18.x, 20.x, 22.x ]
+        node-version: [ 18.x, 20.x, 22.x ]
         os: [ windows-latest, ubuntu-latest, macOS-latest ]
 
     # Go
@@ -40,7 +40,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '2.7'
+        ruby-version: '3.3'
 
     - name: Set up bundle
       run: |
@@ -67,15 +67,7 @@ jobs:
         npm install
         pip3 install -r requirements.txt
 
-    - name: Test (Node.js <= 16.x)
-      if: matrix.node-version <= '16.x'
-      run: npm run test:nolint
-      env:
-        CI: true
-        CI_OS: ${{ matrix.os }}
-
     - name: Test
-      if: matrix.node-version > '16.x'
       run: npm test
       env:
         CI: true
