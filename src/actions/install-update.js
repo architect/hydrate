@@ -1,4 +1,4 @@
-let { dirname, join, sep } = require('path')
+let { dirname, join, parse, sep } = require('path')
 let { existsSync } = require('fs')
 let child = require('child_process')
 let series = require('run-series')
@@ -8,13 +8,20 @@ let { destroyPath } = require('../lib')
 module.exports = function hydrator (params, callback) {
   let { action, env, file, installing, inventory, local, shell, timeout, update, verbose } = params
 
+  const root = parse(process.cwd()).root
   let cwd = dirname(file)
+  if (!existsSync(cwd)) {
+    cwd = join(root, dirname(file))
+  }
   let options = { cwd, env, shell, timeout }
   let start, lambda
   let now = Date.now()
   let isRoot = cwd === '.'
   if (!isRoot) {
     let fullPath = join(inventory.inv._project.cwd, cwd)
+    if (!existsSync(fullPath)) {
+      fullPath = join(root, cwd)
+    }
     lambda = inventory.inv.lambdasBySrcDir?.[fullPath]
   }
 
