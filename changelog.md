@@ -2,6 +2,10 @@
 
 ---
 
+## Pending release
+
+- Fixed issue with hydrate not working on code outside the project root.
+
 ## [4.0.8] 2024-07-25
 
 ### Changed
