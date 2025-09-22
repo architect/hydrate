@@ -1,5 +1,5 @@
 let { join } = require('path')
-let { globSync } = require('glob')
+let { globSync } = require('@architect/utils/glob')
 let { destroyPath, ignoreDeps } = require('../../../lib')
 let getRequires = require('./find-lambda-deps')
 

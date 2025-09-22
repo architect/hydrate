@@ -39,12 +39,11 @@
     "@architect/utils": "~5.0.0-RC.0",
     "acorn-loose": "~8.5.2",
     "esquery": "~1.6.0",
-    "glob": "10.4.5",
     "symlink-or-copy": "~1.3.1"
   },
   "devDependencies": {
     "@architect/eslint-config": "~3.0.0",
-    "cross-env": "~7.0.3",
+    "cross-env": "~10.0.0",
     "eslint": "~9.36.0",
     "mock-tmp": "~0.0.4",
     "nyc": "~17.1.0",
