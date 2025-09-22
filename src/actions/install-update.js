@@ -1,7 +1,7 @@
 let { dirname, join, parse, sep } = require('path')
 let { existsSync } = require('fs')
 let child = require('child_process')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let print = require('../_printer')
 let { destroyPath } = require('../lib')
 

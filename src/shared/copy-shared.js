@@ -1,6 +1,6 @@
 let cp = require('./copy')
 let { join } = require('path')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let print = require('../_printer')
 let { stripCwd } = require('../lib')
 
