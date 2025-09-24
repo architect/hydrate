@@ -1,11 +1,10 @@
-let series = require('run-series')
 let getPaths = require('./get-paths')
 let resetShared = require('./reset')
 let copyShared = require('./copy-shared')
 let copyViews = require('./copy-views')
 let copyStaticJSON = require('./copy-static-json')
 let copyPlugins = require('./copy-plugins')
-let { updater } = require('@architect/utils')
+let { updater, series } = require('@architect/utils')
 let _inventory = require('@architect/inventory')
 
 module.exports = function shared (params = {}, callback) {

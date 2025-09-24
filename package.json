@@ -1,24 +1,25 @@
 {
   "name": "@architect/hydrate",
-  "version": "4.0.10",
+  "version": "4.0.11-RC.1",
   "description": "Architect dependency hydrator and shared file manager",
   "main": "src/index.js",
   "bin": {
     "arc-hydrate": "src/cli.js"
   },
   "scripts": {
-    "test": "npm run lint && npm run test:integration && npm run coverage",
+    "test": "node test/unit/src/actions/install-update-tests.js",
+    "_test": "npm run lint && npm run test:integration && npm run coverage",
     "test:nolint": "npm run test:integration && npm run coverage",
-    "test:unit": "cross-env tape 'test/unit/**/*-tests.js' | tap-arc",
-    "test:integration": "cross-env tape 'test/integration/**/*-tests.js' | tap-arc",
-    "test:integration:fast": "cross-env tape 'test/integration/symlink/**/*-tests.js' 'test/integration/*-tests.js' | tap-arc",
+    "test:unit": "cross-env tape 'test/unit/**/*-tests.js'",
+    "test:integration": "cross-env tape 'test/integration/**/*-tests.js'",
+    "test:integration:fast": "cross-env tape 'test/integration/symlink/**/*-tests.js' 'test/integration/*-tests.js'",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:unit",
     "lint": "eslint . --fix",
     "rc": "npm version prerelease --preid RC",
     "vendor": "cd src/actions/autoinstall/python/py/ && vendoring sync && zip -r9 vendor.zip ./vendor"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "repository": {
     "type": "git",
@@ -35,26 +36,20 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/inventory": "~4.0.5",
-    "@architect/utils": "~4.0.6",
-    "acorn-loose": "~8.4.0",
-    "chalk": "4.1.2",
-    "esquery": "~1.6.0",
-    "glob": "10.4.5",
-    "minimist": "~1.2.8",
-    "run-series": "~1.1.9",
-    "symlink-or-copy": "~1.3.1"
+    "@architect/inventory": "~5.0.0",
+    "@architect/utils": "~5.0.0",
+    "acorn-loose": "8.5.2",
+    "esquery": "1.6.0"
   },
   "devDependencies": {
     "@architect/eslint-config": "~3.0.0",
-    "cross-env": "~7.0.3",
-    "eslint": "~9.7.0",
+    "cross-env": "~10.0.0",
+    "eslint": "~9.36.0",
     "mock-tmp": "~0.0.4",
-    "nyc": "^15.1.0",
-    "pnpm": "~8.15.9",
+    "nyc": "~17.1.0",
+    "pnpm": "~10.17.1",
     "proxyquire": "~2.1.3",
-    "tap-arc": "~1.2.2",
-    "tape": "~5.8.1",
+    "tape": "~5.9.0",
     "yarn": "~1.22.22"
   }
 }

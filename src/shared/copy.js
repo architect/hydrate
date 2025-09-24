@@ -1,6 +1,6 @@
 let { cp, mkdirSync } = require('fs')
 let { dirname } = require('path')
-let { sync: symlinkOrCopy } = require('symlink-or-copy')
+let { sync: symlinkOrCopy } = require('./symlink-or-copy')
 let { destroyPath } = require('../lib')
 
 module.exports = function copy (source, destination, params, callback) {

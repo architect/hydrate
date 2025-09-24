@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-let minimist = require('minimist')
 let _inventory = require('@architect/inventory')
-let { banner } = require('@architect/utils')
+let { banner, minimist } = require('@architect/utils')
 let { version } = require('../package.json')
 let hydrate = require('.')
 

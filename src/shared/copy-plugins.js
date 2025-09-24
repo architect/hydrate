@@ -1,8 +1,7 @@
-let { deepFrozenCopy } = require('@architect/utils')
+let { deepFrozenCopy, series } = require('@architect/utils')
 let cp = require('./copy')
 let { basename, join, isAbsolute } = require('path')
 let { existsSync } = require('fs')
-let series = require('run-series')
 
 module.exports = function runCopyPlugins (params, paths, callback) {
   let { inventory } = params

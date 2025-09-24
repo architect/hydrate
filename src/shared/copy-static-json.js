@@ -1,7 +1,7 @@
 let cp = require('./copy')
 let { existsSync } = require('fs')
 let { join } = require('path')
-let series = require('run-series')
+let series = require('@architect/utils/run-series')
 let print = require('../_printer')
 
 /**
