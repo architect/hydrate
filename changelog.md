@@ -1,8 +1,13 @@
 # Architect Hydrate changelog
+---
+
+## [5.0.0]
+
+- Update deps and move to node > 20
 
 ---
 
-## Pending release
+## [4.0.10]
 
 - Fixed issue with hydrate not working on code outside the project root.
 
@@ -11,7 +16,6 @@
 ### Changed
 
 - Update vendored Python `importlib_metadata`
-
 
 ### Fixed
 
