@@ -7,7 +7,6 @@ let denoise = require('./_denoise')
  * - Diff tools may do weird things; e.g. may only receive stderr, but no err, and exit 0
  */
 module.exports = function print (params, callback) {
-  console.log('---------------------------------->', params)
   let { err, stdout, stderr, cmd, start, done, update, verbose } = params
 
   if (stdout && !cmd) {
