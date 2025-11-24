@@ -1,5 +1,5 @@
 let { join } = require('path')
-let { globSync } = require('@architect/utils/glob')
+let { globSync } = require('fs')
 let { destroyPath, ignoreDeps } = require('../../../lib')
 let getRequires = require('./find-lambda-deps')
 
@@ -17,7 +17,7 @@ module.exports = function getDirDeps ({ dir, update, inventory, ignored }) {
   let failures = []
 
   // Gather ye business logic while ye may
-  let files = globSync('**/*.+(js|cjs|mjs)', { cwd: dir }).filter(ignoreDeps)
+  let files = Array.from(globSync('**/*.{js,cjs,mjs}', { cwd: dir })).filter(ignoreDeps)
   files.forEach(f => {
     try {
       let requires = getRequires({ dir, file: join(dir, f), update })
