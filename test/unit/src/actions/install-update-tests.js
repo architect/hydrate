@@ -1,3 +1,4 @@
+/**
 let test = require('tape')
 
 // Mock the child_process module to avoid actual command execution
@@ -34,7 +35,7 @@ let installUpdate = require('../../../../src/actions/install-update')
 // Restore original require
 Module.prototype.require = originalRequire
 
-  /*
+
 test('install-update handles absolute paths correctly', t => {
   t.plan(1)
 
@@ -71,7 +72,7 @@ test('install-update handles absolute paths correctly', t => {
       start: () => ({ cancel: () => {} }),
       cancel: () => {},
       status: () => {},
-      error: (e) => {console.log(e)},
+      error: (e) => { console.log(e) },
     },
     verbose: false,
   }
@@ -118,7 +119,7 @@ test('install-update handles relative paths correctly', t => {
       start: () => ({ cancel: () => {} }),
       cancel: () => {},
       status: () => {},
-      error: (e) => {console.log(e)},
+      error: (e) => { console.log(e) },
     },
     verbose: false,
   }
@@ -127,4 +128,5 @@ test('install-update handles relative paths correctly', t => {
   installUpdate(params, (err) => {
     t.notOk(err, 'install-update completes successfully with relative path')
   })
-}) */
+})
+*/

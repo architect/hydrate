@@ -7,8 +7,7 @@
     "arc-hydrate": "src/cli.js"
   },
   "scripts": {
-    "test": "node test/unit/src/actions/install-update-tests.js",
-    "_test": "npm run lint && npm run test:integration && npm run coverage",
+    "test": "npm run lint && npm run test:integration && npm run coverage",
     "test:nolint": "npm run test:integration && npm run coverage",
     "test:unit": "cross-env tape 'test/unit/**/*-tests.js'",
     "test:integration": "cross-env tape 'test/integration/**/*-tests.js'",
@@ -19,7 +18,7 @@
     "vendor": "cd src/actions/autoinstall/python/py/ && vendoring sync && zip -r9 vendor.zip ./vendor"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "repository": {
     "type": "git",
