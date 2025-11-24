@@ -1,7 +1,6 @@
 let { dirname, join, sep } = require('path')
-let { readFileSync } = require('fs')
+let { readFileSync, globSync } = require('fs')
 let { pathToUnix, updater, series } = require('@architect/utils')
-let { globSync } = require('@architect/utils/glob')
 let _inventory = require('@architect/inventory')
 let { isDep, ignoreDeps, stripCwd } = require('./lib')
 let shared = require('./shared')
@@ -76,10 +75,10 @@ function hydrator (inventory, installing, params, callback) {
   /**
    * Find our dependency manifests
    */
-  let pattern = p => pathToUnix(`${p}/**/@(${manifestFiles.join('|')})`)
+  let pattern = p => pathToUnix(`${p}/**/{${manifestFiles.join(',')}}`)
   let dir = basepath || '.'
   // Get everything except shared
-  let manifests = globSync(pattern(dir), { dot: true }).filter(file => {
+  let manifests = globSync(pattern(dir)).filter(file => {
     if (possibleLambdaManifests.includes(file)) return true
     if (isDep(file)) return false
     if (sharedDir && file.includes(sharedDir)) return false
