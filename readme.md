@@ -9,6 +9,12 @@
 - **Ruby** via `bundle` using `Gemfile` and `Gemfile.lock` files
 
 
+# Requirements
+
+- **Node.js 22 or later** is required to use `@architect/hydrate` version 6.0.0 and above
+- For Node.js 20 support, use `@architect/hydrate` version 5.x
+
+
 # Installation
 
     npm install @architect/hydrate

@@ -7,3 +7,4 @@ test/integration/tmp
 test/tmp
 vendor/
 .DS_Store
+.kiro

@@ -1,6 +1,38 @@
 # Architect Hydrate changelog
 ---
 
+## [6.0.0]
+
+### Breaking Changes
+
+- **Node.js 22+ required**: Updated minimum Node.js version from 20 to 22
+- Replaced external glob dependency (`@architect/utils/glob`) with native Node.js `fs.globSync`
+  - Takes advantage of Node.js 22's built-in glob support
+  - Reduces external dependencies and improves performance
+  - No functional changes to dependency discovery behavior
+
+### Migration Guide
+
+If you are upgrading from version 5.x:
+
+1. **Upgrade Node.js**: Ensure you are running Node.js 22 or later
+   - Check your version: `node --version`
+   - If using Node.js 20 or earlier, upgrade to Node.js 22+ or stay on `@architect/hydrate` 5.x
+
+2. **Update your CI/CD**: Update any CI/CD configurations to use Node.js 22 or later
+   - GitHub Actions: Update `node-version` in workflow files
+   - Other CI systems: Update Node.js version in configuration
+
+3. **No code changes required**: The API remains unchanged, all existing code will continue to work
+
+### Changed
+
+- Updated `engines.node` in package.json from `>=20` to `>=22`
+- Migrated from `@architect/utils/glob` to native `fs.globSync` for file pattern matching
+- Updated CI test matrix to use Node.js 22.x and 24.x
+
+---
+
 ## [5.0.0]
 
 - Update deps and move to node > 20
