@@ -35,8 +35,8 @@
     "src/*"
   ],
   "dependencies": {
-    "@architect/inventory": "~5.0.0",
-    "@architect/utils": "~5.0.0",
+    "@architect/inventory": "~6.0.0",
+    "@architect/utils": "~6.0.0",
     "acorn-loose": "8.5.2",
     "esquery": "1.6.0"
   },
