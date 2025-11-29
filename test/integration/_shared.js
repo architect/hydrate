@@ -148,52 +148,50 @@ let viewsArtifactsDisabled = [
 
 
 // Test resetters
-function reset (t, callback) {
+function reset (callback) {
   process.chdir(join(__dirname, '..'))
   destroyPath(mockTmp)
   cp(mockSource, mockTmp, { recursive: true, force: true }, function (err) {
-    if (err) t.fail(err)
-    else {
-      process.chdir(mockTmp)
-      callback()
-    }
+    if (err) throw err
+    process.chdir(mockTmp)
+    callback()
   })
 }
-function resetAndCopyShared (t, callback) {
-  reset(t, function () {
+function resetAndCopyShared (callback) {
+  reset(function () {
     cp('_shared', 'src', { recursive: true, force: true }, function done (err) {
-      if (err) t.fail(err)
-      else callback()
+      if (err) throw err
+      callback()
     })
   })
 }
-function resetAndCopySharedAutoinstall (t, callback) {
-  reset(t, function () {
+function resetAndCopySharedAutoinstall (callback) {
+  reset(function () {
     cp('_shared-autoinstall', '.', { recursive: true, force: true }, function done (err) {
-      if (err) t.fail(err)
-      else callback()
+      if (err) throw err
+      callback()
     })
   })
 }
-function resetAndCopySharedCustom (t, callback) {
-  reset(t, function () {
+function resetAndCopySharedCustom (callback) {
+  reset(function () {
     cp('_shared-custom', '.', { recursive: true, force: true }, function done (err) {
-      if (err) t.fail(err)
-      else callback()
+      if (err) throw err
+      callback()
     })
   })
 }
-function resetAndCopySharedPlugins (t, callback) {
-  reset(t, function () {
+function resetAndCopySharedPlugins (callback) {
+  reset(function () {
     cp('_shared-plugins', 'src', { recursive: true, force: true }, function done (err) {
-      if (err) t.fail(err)
-      else callback()
+      if (err) throw err
+      callback()
     })
   })
 }
 
 // Ensure we don't create empty folders with copied files
-let checkFolderCreation = t => t.notOk(existsSync(join('src', 'events', 'silence')), `Did not copy and create function folder that should not exist`)
+let checkFolderCreation = assert => assert.ok(!existsSync(join('src', 'events', 'silence')), `Did not copy and create function folder that should not exist`)
 
 
 module.exports = {

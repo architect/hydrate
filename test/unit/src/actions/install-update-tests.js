@@ -1,43 +1,39 @@
-/**
-let test = require('tape')
+const { test } = require('node:test')
+const assert = require('node:assert')
+const Module = require('module')
 
-// Mock the child_process module to avoid actual command execution
-let mockChildProcess = {
-  exec: (cmd, opts, callback) => {
-    // Mock successful execution
-    callback(null, 'mock success', '')
-  },
-}
+test('install-update handles absolute paths correctly', async () => {
+  // Mock modules using Module._load override
+  const originalLoad = Module._load
+  Module._load = function (request) {
+    if (request === 'child_process') {
+      return {
+        exec: (cmd, opts, callback) => {
+          callback(null, 'mock success', '')
+        },
+      }
+    }
+    if (request === '../_printer') {
+      return (params, callback) => {
+        callback()
+      }
+    }
+    if (request === '../lib') {
+      return {
+        destroyPath: () => {},
+      }
+    }
+    return originalLoad.apply(this, arguments)
+  }
 
-// Mock the _printer module
-let mockPrinter = (params, callback) => {
-  callback()
-}
+  // Clear require cache for install-update module
+  const modulePath = require.resolve('../../../../src/actions/install-update')
+  delete require.cache[modulePath]
 
-// Mock the lib module
-let mockLib = {
-  destroyPath: () => {},
-}
+  const installUpdate = require('../../../../src/actions/install-update')
 
-// Override requires for the install-update module
-let Module = require('module')
-let originalRequire = Module.prototype.require
-
-Module.prototype.require = function (id) {
-  if (id === 'child_process') return mockChildProcess
-  if (id === '../_printer') return mockPrinter
-  if (id === '../lib') return mockLib
-  return originalRequire.apply(this, arguments)
-}
-
-let installUpdate = require('../../../../src/actions/install-update')
-
-// Restore original require
-Module.prototype.require = originalRequire
-
-
-test('install-update handles absolute paths correctly', t => {
-  t.plan(1)
+  // Restore original Module._load
+  Module._load = originalLoad
 
   // Mock inventory with project cwd and lambdasBySrcDir
   let mockInventory = {
@@ -78,13 +74,46 @@ test('install-update handles absolute paths correctly', t => {
   }
 
   // The test should complete without throwing an error
-  installUpdate(params, (err) => {
-    t.notOk(err, 'install-update completes successfully with absolute path')
+  await new Promise((resolve) => {
+    installUpdate(params, (err) => {
+      assert.ok(!err, 'install-update completes successfully with absolute path')
+      resolve()
+    })
   })
 })
 
-test('install-update handles relative paths correctly', t => {
-  t.plan(1)
+test('install-update handles relative paths correctly', async () => {
+  // Mock modules using Module._load override
+  const originalLoad = Module._load
+  Module._load = function (request) {
+    if (request === 'child_process') {
+      return {
+        exec: (cmd, opts, callback) => {
+          callback(null, 'mock success', '')
+        },
+      }
+    }
+    if (request === '../_printer') {
+      return (params, callback) => {
+        callback()
+      }
+    }
+    if (request === '../lib') {
+      return {
+        destroyPath: () => {},
+      }
+    }
+    return originalLoad.apply(this, arguments)
+  }
+
+  // Clear require cache for install-update module
+  const modulePath = require.resolve('../../../../src/actions/install-update')
+  delete require.cache[modulePath]
+
+  const installUpdate = require('../../../../src/actions/install-update')
+
+  // Restore original Module._load
+  Module._load = originalLoad
 
   // Mock inventory with project cwd and lambdasBySrcDir
   let mockInventory = {
@@ -125,8 +154,10 @@ test('install-update handles relative paths correctly', t => {
   }
 
   // The test should complete without throwing an error
-  installUpdate(params, (err) => {
-    t.notOk(err, 'install-update completes successfully with relative path')
+  await new Promise((resolve) => {
+    installUpdate(params, (err) => {
+      assert.ok(!err, 'install-update completes successfully with relative path')
+      resolve()
+    })
   })
 })
-*/
