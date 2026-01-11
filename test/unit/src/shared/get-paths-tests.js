@@ -1,13 +1,20 @@
-let test = require('tape')
-let mockTmp = require('mock-tmp')
-let { join } = require('path')
-let getPaths = require('../../../../src/shared/get-paths')
-let lambdaPath = join('app', 'src', 'http', 'get-items')
+const { test } = require('node:test')
+const assert = require('node:assert')
+const { mkdtempSync, rmSync, mkdirSync, writeFileSync } = require('fs')
+const { tmpdir } = require('os')
+const { join } = require('path')
+const getPaths = require('../../../../src/shared/get-paths')
 
-test('inventory with a shared path to hydrate and a single node runtime lambda aliased to a single directory should return a path to node modules', t => {
-  t.plan(3)
-  let tmp = mockTmp({ [lambdaPath]: 'fake file contents' })
-  let path = join(tmp, lambdaPath)
+test('inventory with a shared path to hydrate and a single node runtime lambda aliased to a single directory should return a path to node modules', async (t) => {
+  const lambdaPath = join('app', 'src', 'http', 'get-items')
+  const tmp = mkdtempSync(join(tmpdir(), 'test-'))
+  t.after(() => rmSync(tmp, { recursive: true, force: true }))
+
+  const fullLambdaPath = join(tmp, lambdaPath)
+  mkdirSync(fullLambdaPath, { recursive: true })
+  writeFileSync(join(fullLambdaPath, 'index.js'), 'fake file contents')
+
+  let path = fullLambdaPath
   let inventory = {
     inv: {
       lambdasBySrcDir: {
@@ -19,17 +26,21 @@ test('inventory with a shared path to hydrate and a single node runtime lambda a
     },
   }
   let paths = getPaths(inventory)
-  t.equals(paths.all[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (all)')
-  t.notOk(Object.keys(paths.shared).length, 'Did not load any shared paths')
-  t.notOk(Object.keys(paths.views).length, 'Did not load any views paths')
-  mockTmp.reset()
+  assert.strictEqual(paths.all[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (all)')
+  assert.ok(!Object.keys(paths.shared).length, 'Did not load any shared paths')
+  assert.ok(!Object.keys(paths.views).length, 'Did not load any views paths')
 })
 
-test('inventory with a shared path to hydrate and a single non-node runtime lambda aliased to a single directory should return a path to vendor', t => {
-  t.plan(3)
-  let lambdaPath = join('app', 'src', 'http', 'get-items')
-  let tmp = mockTmp({ [lambdaPath]: 'fake file contents' })
-  let path = join(tmp, lambdaPath)
+test('inventory with a shared path to hydrate and a single non-node runtime lambda aliased to a single directory should return a path to vendor', async (t) => {
+  const lambdaPath = join('app', 'src', 'http', 'get-items')
+  const tmp = mkdtempSync(join(tmpdir(), 'test-'))
+  t.after(() => rmSync(tmp, { recursive: true, force: true }))
+
+  const fullLambdaPath = join(tmp, lambdaPath)
+  mkdirSync(fullLambdaPath, { recursive: true })
+  writeFileSync(join(fullLambdaPath, 'index.py'), 'fake file contents')
+
+  let path = fullLambdaPath
   let inventory = {
     inv: {
       shared: {
@@ -44,17 +55,21 @@ test('inventory with a shared path to hydrate and a single non-node runtime lamb
     },
   }
   let paths = getPaths(inventory)
-  t.equals(paths.all[path], join(path, 'vendor'), 'non-node runtime lambda returns vendor path (all)')
-  t.equals(paths.shared[path], join(path, 'vendor'), 'non-node runtime lambda returns vendor path (shared)')
-  t.notOk(Object.keys(paths.views).length, 'Did not load any views paths')
-  mockTmp.reset()
+  assert.strictEqual(paths.all[path], join(path, 'vendor'), 'non-node runtime lambda returns vendor path (all)')
+  assert.strictEqual(paths.shared[path], join(path, 'vendor'), 'non-node runtime lambda returns vendor path (shared)')
+  assert.ok(!Object.keys(paths.views).length, 'Did not load any views paths')
 })
 
-test('inventory with a shared path to hydrate and multiple node runtime lambdas aliased to a single directory should return a single path to node_modules', t => {
-  t.plan(3)
-  let lambdaPath = join('app', 'src', 'http', 'get-items')
-  let tmp = mockTmp({ [lambdaPath]: 'fake file contents' })
-  let path = join(tmp, lambdaPath)
+test('inventory with a shared path to hydrate and multiple node runtime lambdas aliased to a single directory should return a single path to node_modules', async (t) => {
+  const lambdaPath = join('app', 'src', 'http', 'get-items')
+  const tmp = mkdtempSync(join(tmpdir(), 'test-'))
+  t.after(() => rmSync(tmp, { recursive: true, force: true }))
+
+  const fullLambdaPath = join(tmp, lambdaPath)
+  mkdirSync(fullLambdaPath, { recursive: true })
+  writeFileSync(join(fullLambdaPath, 'index.js'), 'fake file contents')
+
+  let path = fullLambdaPath
   let inventory = {
     inv: {
       views: {
@@ -70,8 +85,7 @@ test('inventory with a shared path to hydrate and multiple node runtime lambdas 
     },
   }
   let paths = getPaths(inventory)
-  t.equals(paths.all[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (all)')
-  t.equals(paths.views[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (views)')
-  t.notOk(Object.keys(paths.shared).length, 'Did not load any shared paths')
-  mockTmp.reset()
+  assert.strictEqual(paths.all[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (all)')
+  assert.strictEqual(paths.views[path], join(path, 'node_modules', '@architect'), 'node runtime lambda returns node_modules path (views)')
+  assert.ok(!Object.keys(paths.shared).length, 'Did not load any shared paths')
 })

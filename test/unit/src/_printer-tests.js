@@ -1,14 +1,13 @@
-let test = require('tape')
-let print = require('../../../src/_printer')
-let { updater } = require('@architect/utils')
+const { test } = require('node:test')
+const assert = require('node:assert')
+const print = require('../../../src/_printer')
+const { updater } = require('@architect/utils')
 
-test('Set up env', t => {
-  t.plan(1)
-  t.ok(print, 'Printer loaded')
+test('Set up env', async () => {
+  assert.ok(print, 'Printer loaded')
 })
 
-test('Error on missing params', t => {
-  t.plan(3)
+test('Error on missing params', async () => {
   let name = 'Testing err'
   let startMsg = 'Start test'
   let stdout = 'some info\nmore info'
@@ -16,23 +15,35 @@ test('Error on missing params', t => {
   let done = 'Finish test'
   let update = updater(name)
   let start = update.start(startMsg)
-  print({ stdout, start, done, update }, (err, result) => {
-    if (err) t.pass(err)
-    if (result) t.fail('Got unexpected result')
+
+  await new Promise((resolve) => {
+    print({ stdout, start, done, update }, (err, result) => {
+      if (err) assert.ok(true, err)
+      if (result) assert.fail('Got unexpected result')
+      resolve()
+    })
   })
-  print({ stdout, cmd, start, done }, (err, result) => {
-    if (err) t.pass(err)
-    if (result) t.fail('Got unexpected result')
+
+  await new Promise((resolve) => {
+    print({ stdout, cmd, start, done }, (err, result) => {
+      if (err) assert.ok(true, err)
+      if (result) assert.fail('Got unexpected result')
+      resolve()
+    })
   })
-  print({ stdout, cmd, update }, (err, result) => {
-    if (err) t.pass(err)
-    if (result) t.fail('Got unexpected result')
+
+  await new Promise((resolve) => {
+    print({ stdout, cmd, update }, (err, result) => {
+      if (err) assert.ok(true, err)
+      if (result) assert.fail('Got unexpected result')
+      resolve()
+    })
   })
+
   update.cancel()
 })
 
-test('Basic stdout', t => {
-  t.plan(6)
+test('Basic stdout', async () => {
   // Messages
   let name = 'Testing stdout'
   let startMsg = 'Start test'
@@ -42,22 +53,24 @@ test('Basic stdout', t => {
   let update = updater(name)
   let start = update.start(startMsg)
 
-  print({ stdout, cmd, start, done, update }, err => {
-    if (err) t.fail(err)
-    else {
-      let got = update.get()
-      update.reset()
-      t.match(got, new RegExp(name), `Contents include: ${name}`)
-      t.match(got, new RegExp(startMsg), `Contents include: ${startMsg}`)
-      stdout.split('\n').forEach(o => t.match(got, new RegExp(o), `Contents include: ${o}`))
-      t.match(got, new RegExp(cmd), `Contents include: ${cmd}`)
-      t.match(got, new RegExp(done), `Contents include: ${done}`)
-    }
+  await new Promise((resolve) => {
+    print({ stdout, cmd, start, done, update }, err => {
+      if (err) assert.fail(err)
+      else {
+        let got = update.get()
+        update.reset()
+        assert.match(got, new RegExp(name), `Contents include: ${name}`)
+        assert.match(got, new RegExp(startMsg), `Contents include: ${startMsg}`)
+        stdout.split('\n').forEach(o => assert.match(got, new RegExp(o), `Contents include: ${o}`))
+        assert.match(got, new RegExp(cmd), `Contents include: ${cmd}`)
+        assert.match(got, new RegExp(done), `Contents include: ${done}`)
+      }
+      resolve()
+    })
   })
 })
 
-test('Basic stderr', t => {
-  t.plan(6)
+test('Basic stderr', async () => {
   // Messages
   let name = 'Testing stderr'
   let startMsg = 'Start test'
@@ -67,22 +80,24 @@ test('Basic stderr', t => {
   let update = updater(name)
   let start = update.start(startMsg)
 
-  print({ stderr, cmd, start, done, update }, err => {
-    if (err) t.fail(err)
-    else {
-      let got = update.get()
-      update.reset()
-      t.match(got, new RegExp(name), `Contents include: ${name}`)
-      t.match(got, new RegExp(startMsg), `Contents include: ${startMsg}`)
-      stderr.split('\n').forEach(o => t.match(got, new RegExp(o), `Contents include: ${o}`))
-      t.match(got, new RegExp(cmd), `Contents include: ${cmd}`)
-      t.match(got, new RegExp(done), `Contents include: ${done}`)
-    }
+  await new Promise((resolve) => {
+    print({ stderr, cmd, start, done, update }, err => {
+      if (err) assert.fail(err)
+      else {
+        let got = update.get()
+        update.reset()
+        assert.match(got, new RegExp(name), `Contents include: ${name}`)
+        assert.match(got, new RegExp(startMsg), `Contents include: ${startMsg}`)
+        stderr.split('\n').forEach(o => assert.match(got, new RegExp(o), `Contents include: ${o}`))
+        assert.match(got, new RegExp(cmd), `Contents include: ${cmd}`)
+        assert.match(got, new RegExp(done), `Contents include: ${done}`)
+      }
+      resolve()
+    })
   })
 })
 
-test('Basic err (with some stdout)', t => {
-  t.plan(6)
+test('Basic err (with some stdout)', async () => {
   // Messages
   let name = 'Testing err'
   let startMsg = 'Start test asdfasdfasfs'
@@ -94,16 +109,19 @@ test('Basic err (with some stdout)', t => {
   let update = updater(name)
   let start = update.start(startMsg)
 
-  print({ stdout, err, cmd, start, done, update }, err => {
-    if (!err) t.fail('No error present')
-    else {
-      let got = update.get()
-      update.reset()
-      t.match(got, new RegExp(name), `Contents include: ${name}`)
-      t.match(got, new RegExp(startMsg), `Contents include: ${startMsg}`)
-      errLine.split('\n').forEach(o => t.match(got, new RegExp(o), `Contents include: ${o}`))
-      t.match(got, new RegExp(cmd), `Contents include: ${cmd}`)
-      t.match(got, new RegExp(done), `Contents do not include: ${done}`)
-    }
+  await new Promise((resolve) => {
+    print({ stdout, err, cmd, start, done, update }, err => {
+      if (!err) assert.fail('No error present')
+      else {
+        let got = update.get()
+        update.reset()
+        assert.match(got, new RegExp(name), `Contents include: ${name}`)
+        assert.match(got, new RegExp(startMsg), `Contents include: ${startMsg}`)
+        errLine.split('\n').forEach(o => assert.match(got, new RegExp(o), `Contents include: ${o}`))
+        assert.match(got, new RegExp(cmd), `Contents include: ${cmd}`)
+        assert.match(got, new RegExp(done), `Contents do not include: ${done}`)
+      }
+      resolve()
+    })
   })
 })

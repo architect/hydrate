@@ -10,6 +10,13 @@
   - Takes advantage of Node.js 22's built-in glob support
   - Reduces external dependencies and improves performance
   - No functional changes to dependency discovery behavior
+- **Test infrastructure modernization**: Migrated from tape to Node.js native test runner
+  - Removed dependencies: `tape`, `nyc`, `cross-env`, `proxyquire`, `mock-tmp`
+  - Added dependency: `c8` (for code coverage)
+  - All tests now use Node.js built-in `node:test` and `node:assert` modules
+  - Module mocking now uses Node.js native mock functionality instead of proxyquire
+  - Temporary directory creation now uses native `fs.mkdtempSync()` instead of mock-tmp
+  - Test scripts no longer require cross-env for environment variable management
 
 ### Migration Guide
 
@@ -25,11 +32,22 @@ If you are upgrading from version 5.x:
 
 3. **No code changes required**: The API remains unchanged, all existing code will continue to work
 
+4. **For contributors**: If you're contributing to this project, note the new testing patterns:
+   - Use `node:test` and `node:assert` instead of tape
+   - Use native `mock.module()` for mocking instead of proxyquire
+   - Use `fs.mkdtempSync()` for temporary directories instead of mock-tmp
+   - Test scripts now use `node --test` directly
+   - Coverage reports use `c8` instead of `nyc`
+
 ### Changed
 
 - Updated `engines.node` in package.json from `>=20` to `>=22`
 - Migrated from `@architect/utils/glob` to native `fs.globSync` for file pattern matching
 - Updated CI test matrix to use Node.js 22.x and 24.x
+- Migrated all test files from tape to Node.js native test runner
+- Updated test scripts to use `node --test` instead of tape
+- Replaced nyc with c8 for code coverage reporting
+- Removed cross-env from all test scripts (no longer needed with native test runner)
 
 ---
 
