@@ -8,7 +8,8 @@ let { destroyPath } = require('../lib')
 module.exports = function hydrator (params, callback) {
   let { action, env, file, installing, inventory, local, shell, timeout, update, verbose } = params
 
-  const root = parse(process.cwd()).root
+  const prjRoot = process.cwd()
+  const root = parse(prjRoot).root
   let cwd = dirname(file)
   if (!existsSync(cwd)) {
     cwd = join(root, dirname(file))
@@ -42,6 +43,7 @@ module.exports = function hydrator (params, callback) {
     })
   }
 
+  // let exists = file => existsSync(join(prjRoot, file))
   let exists = file => existsSync(join(cwd, file))
   let isJs = file.endsWith('package.json')
   let isPy = file.endsWith('requirements.txt')
