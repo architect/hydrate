@@ -97,7 +97,7 @@ module.exports = function hydrator (params, callback) {
             localPnpm = true
           }
           catch { /* noop */ }
-          let cmd = localPnpm ? `npx pnpm i ${prodFlag}` : `pnpm i ${prodFlag}`
+          let cmd = localPnpm ? `npx pnpm --node-linker=hoisted i ${prodFlag}` : `pnpm --node-linker=hoisted i ${prodFlag}`
           exec(cmd, options, callback)
         }
         else if (isYarn) {
@@ -120,7 +120,7 @@ module.exports = function hydrator (params, callback) {
       else if (isJs && !installing) {
         if (isPnpm) {
           let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
-          let cmd = localPnpm ? 'npx pnpm update' : 'pnpm update'
+          let cmd = localPnpm ? 'npx pnpm --node-linker=hoisted update' : 'pnpm --node-linker=hoisted update'
           exec(cmd, options, callback)
         }
         else if (isYarn) {
@@ -146,8 +146,8 @@ module.exports = function hydrator (params, callback) {
           let arch = lambda.config.architecture === 'arm64' ? 'manylinux2014_aarch64' : 'manylinux2014_x86_64'
           let ver = lambda.config.runtime.split('python')[1]
           flags = '--only-binary=:all: ' +
-                  `--platform=${arch} ` +
-                  `--python-version ${ver} `
+            `--platform=${arch} ` +
+            `--python-version ${ver} `
           // Reset flags if installing from Sandbox
           if (local) flags = ''
 
