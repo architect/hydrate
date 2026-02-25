@@ -97,7 +97,7 @@ module.exports = function hydrator (params, callback) {
             localPnpm = true
           }
           catch { /* noop */ }
-          let cmd = localPnpm ? `npx pnpm --node-linker=hoisted i ${prodFlag}` : `pnpm --node-linker=hoisted i ${prodFlag}`
+          let cmd = localPnpm ? `npx pnpm --config.node-linker=hoisted i ${prodFlag}` : `pnpm --config.node-linker=hoisted i ${prodFlag}`
           exec(cmd, options, callback)
         }
         else if (isYarn) {
@@ -120,7 +120,7 @@ module.exports = function hydrator (params, callback) {
       else if (isJs && !installing) {
         if (isPnpm) {
           let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
-          let cmd = localPnpm ? 'npx pnpm --node-linker=hoisted update' : 'pnpm --node-linker=hoisted update'
+          let cmd = localPnpm ? 'npx pnpm --config.node-linker=hoisted update' : 'pnpm --config.node-linker=hoisted update'
           exec(cmd, options, callback)
         }
         else if (isYarn) {
