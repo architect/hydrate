@@ -97,8 +97,9 @@ module.exports = function hydrator (params, callback) {
             localPnpm = true
           }
           catch { /* noop */ }
-          let cmd = localPnpm ? `npx pnpm i ${prodFlag}` : `pnpm i ${prodFlag}`
-          exec(cmd, options, callback)
+          let cmd = localPnpm ? `npx pnpm --config.node-linker=hoisted i ${prodFlag}` : `pnpm --config.node-linker=hoisted i ${prodFlag}`
+          let pnpmOptions = { ...options, env: { ...(options.env || process.env), CI: 'true' } }
+          exec(cmd, pnpmOptions, callback)
         }
         else if (isYarn) {
           let localYarn
@@ -120,8 +121,9 @@ module.exports = function hydrator (params, callback) {
       else if (isJs && !installing) {
         if (isPnpm) {
           let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
-          let cmd = localPnpm ? 'npx pnpm update' : 'pnpm update'
-          exec(cmd, options, callback)
+          let cmd = localPnpm ? 'npx pnpm --config.node-linker=hoisted update' : 'pnpm --config.node-linker=hoisted update'
+          let pnpmOptions = { ...options, env: { ...(options.env || process.env), CI: 'true' } }
+          exec(cmd, pnpmOptions, callback)
         }
         else if (isYarn) {
           let localYarn = exists(join(cwd, 'node_modules', 'yarn'))
@@ -146,8 +148,8 @@ module.exports = function hydrator (params, callback) {
           let arch = lambda.config.architecture === 'arm64' ? 'manylinux2014_aarch64' : 'manylinux2014_x86_64'
           let ver = lambda.config.runtime.split('python')[1]
           flags = '--only-binary=:all: ' +
-                  `--platform=${arch} ` +
-                  `--python-version ${ver} `
+            `--platform=${arch} ` +
+            `--python-version ${ver} `
           // Reset flags if installing from Sandbox
           if (local) flags = ''
 
