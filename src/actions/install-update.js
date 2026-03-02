@@ -98,7 +98,8 @@ module.exports = function hydrator (params, callback) {
           }
           catch { /* noop */ }
           let cmd = localPnpm ? `npx pnpm --config.node-linker=hoisted i ${prodFlag}` : `pnpm --config.node-linker=hoisted i ${prodFlag}`
-          exec(cmd, options, callback)
+          let pnpmOptions = { ...options, env: { ...(options.env || process.env), CI: 'true' } }
+          exec(cmd, pnpmOptions, callback)
         }
         else if (isYarn) {
           let localYarn
@@ -121,12 +122,14 @@ module.exports = function hydrator (params, callback) {
         if (isPnpm) {
           let localPnpm = exists(join(cwd, 'node_modules', 'pnpm'))
           let cmd = localPnpm ? 'npx pnpm --config.node-linker=hoisted update' : 'pnpm update'
-          exec(cmd, options, callback)
+          let pnpmOptions = { ...options, env: { ...(options.env || process.env), CI: 'true' } }
+          exec(cmd, pnpmOptions, callback)
         }
         else if (isYarn) {
           let localYarn = exists(join(cwd, 'node_modules', 'yarn'))
           let cmd = localYarn ? 'npx yarn upgrade' : 'yarn upgrade'
           exec(cmd, options, callback)
+
         }
         else {
           exec(`npm update`, options, callback)

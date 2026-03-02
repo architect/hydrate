@@ -1,5 +1,14 @@
 # Architect Hydrate changelog
 ---
+## [5.0.3]
+
+### Fixed
+
+- pnpm install and update commands now use `--config.node-linker=hoisted` to produce a flat `node_modules` layout compatible with AWS Lambda (which does not support symlinks)
+- pnpm commands now pass `CI=true` in the environment to prevent interactive prompts in non-TTY contexts
+
+---
+
 
 ## [5.0.0]
 
