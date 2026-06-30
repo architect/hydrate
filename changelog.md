@@ -1,6 +1,12 @@
 # Architect Hydrate changelog
 ---
 
+## [6.0.2]
+
+### Fixed
+
+- pin urllib3 version for CI/CD tests
+
 ## [6.0.1]
 
 ### Fixed
