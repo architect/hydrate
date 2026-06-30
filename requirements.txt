@@ -1,2 +1,2 @@
 pipdeptree
-urllib3 # needed for testing
+urllib3<2.7 # needed for testing; 2.7+ drops Python 3.9 support, which breaks the python3.9 autoinstall fixture
