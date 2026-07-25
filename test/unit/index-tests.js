@@ -1,5 +1,7 @@
-let test = require('tape')
-let proxyquire = require('proxyquire')
+const { test } = require('node:test')
+const assert = require('node:assert')
+const Module = require('module')
+
 let called = []
 function caller (type, callback) {
   called.push(type)
@@ -10,60 +12,78 @@ let run = (installing, params, callback) => {
   else caller('update', callback)
 }
 let shared = (p, callback) => caller('shared', callback)
-let hydrate = proxyquire('../../', {
-  './hydrate': run,
-  './shared': shared,
-})
-process.env.CI = true // Suppresses tape issues with progress indicator
+
+// Mock modules using Module._load override
+const originalLoad = Module._load
+Module._load = function (request, parent) {
+  if (request === './hydrate' && parent && parent.filename && parent.filename.endsWith('index.js')) {
+    return run
+  }
+  if (request === './shared' && parent && parent.filename && parent.filename.endsWith('index.js')) {
+    return shared
+  }
+  return originalLoad.apply(this, arguments)
+}
+
+const hydrate = require('../../')
+
+// Restore original Module._load
+Module._load = originalLoad
+
+process.env.CI = true // Suppresses issues with progress indicator
 
 function reset () {
   called = []
 }
 
-test('Set up env', t => {
-  t.plan(1)
-  t.ok(hydrate, 'Hydrate module is present')
+test('Set up env', async () => {
+  assert.ok(hydrate, 'Hydrate module is present')
 })
 
-test('Main hydration methods are present', t => {
-  t.plan(3)
-  t.ok(hydrate.install, 'install method is present')
-  t.ok(hydrate.update, 'update method is present')
-  t.ok(hydrate.shared, 'shared method is present')
+test('Main hydration methods are present', async () => {
+  assert.ok(hydrate.install, 'install method is present')
+  assert.ok(hydrate.update, 'update method is present')
+  assert.ok(hydrate.shared, 'shared method is present')
 })
 
-test(`hydrate.install invokes install`, t => {
-  t.plan(2)
-  hydrate.install({}, function done (err) {
-    if (err) t.fail(err)
-    else {
-      t.equal(called.length, 1, 'Invoked one method')
-      t.equal(called[0], 'install', 'Invoked install')
-    }
+test('hydrate.install invokes install', async () => {
+  await new Promise((resolve) => {
+    hydrate.install({}, function done (err) {
+      if (err) assert.fail(err)
+      else {
+        assert.strictEqual(called.length, 1, 'Invoked one method')
+        assert.strictEqual(called[0], 'install', 'Invoked install')
+      }
+      reset()
+      resolve()
+    })
   })
-  reset()
 })
 
-test(`hydrate.update invokes update`, t => {
-  t.plan(2)
-  hydrate.update({}, function done (err) {
-    if (err) t.fail(err)
-    else {
-      t.equal(called.length, 1, 'Invoked one method')
-      t.equal(called[0], 'update', 'Invoked update')
-    }
+test('hydrate.update invokes update', async () => {
+  await new Promise((resolve) => {
+    hydrate.update({}, function done (err) {
+      if (err) assert.fail(err)
+      else {
+        assert.strictEqual(called.length, 1, 'Invoked one method')
+        assert.strictEqual(called[0], 'update', 'Invoked update')
+      }
+      reset()
+      resolve()
+    })
   })
-  reset()
 })
 
-test(`hydrate.shared invokes shared`, t => {
-  t.plan(2)
-  hydrate.shared({}, function done (err) {
-    if (err) t.fail(err)
-    else {
-      t.equal(called.length, 1, 'Invoked one method')
-      t.equal(called[0], 'shared', 'Invoked shared')
-    }
+test('hydrate.shared invokes shared', async () => {
+  await new Promise((resolve) => {
+    hydrate.shared({}, function done (err) {
+      if (err) assert.fail(err)
+      else {
+        assert.strictEqual(called.length, 1, 'Invoked one method')
+        assert.strictEqual(called[0], 'shared', 'Invoked shared')
+      }
+      reset()
+      resolve()
+    })
   })
-  reset()
 })

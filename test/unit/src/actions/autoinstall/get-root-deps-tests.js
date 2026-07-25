@@ -1,8 +1,10 @@
-let { join } = require('path')
-let test = require('tape')
-let mockTmp = require('mock-tmp')
-let sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'node', 'get-root-deps')
-let getRootDeps = require(sut)
+const { join } = require('path')
+const { mkdtempSync, rmSync, writeFileSync } = require('fs')
+const { tmpdir } = require('os')
+const { test } = require('node:test')
+const assert = require('node:assert')
+const sut = join(process.cwd(), 'src', 'actions', 'autoinstall', 'node', 'get-root-deps')
+const getRootDeps = require(sut)
 
 function pkgify (deps, devDeps, lock) {
   let tmpl = { name: 'app' }
@@ -15,23 +17,25 @@ function pkgify (deps, devDeps, lock) {
 let cwd
 let inventory = () => ({ inv: { _project: { cwd } } })
 let run = fs => {
-  cwd = mockTmp(fs)
+  cwd = mkdtempSync(join(tmpdir(), 'test-'))
+  // Write files to temp directory
+  for (let [ filename, content ] of Object.entries(fs)) {
+    writeFileSync(join(cwd, filename), content)
+  }
   let result = getRootDeps(inventory())
-  mockTmp.reset()
+  rmSync(cwd, { recursive: true, force: true })
   return result
 }
 
-test('Set up env', t => {
-  t.plan(1)
-  t.ok(getRootDeps, 'Dependency getter module is present')
+test('Set up env', async () => {
+  assert.ok(getRootDeps, 'Dependency getter module is present')
 })
 
-test('package.json', t => {
-  t.plan(4)
+test('package.json', async () => {
   let result
 
   result = run({ ok: 'hi' })
-  t.deepEqual(result, {}, 'Got back empty object with no package.json present')
+  assert.deepStrictEqual(result, {}, 'Got back empty object with no package.json present')
   console.log(result)
 
   let deps = {
@@ -39,7 +43,7 @@ test('package.json', t => {
     bar: '2.0.0',
   }
   result = run({ 'package.json': pkgify(deps) })
-  t.deepEqual(result, deps, 'Got back dependencies (only)')
+  assert.deepStrictEqual(result, deps, 'Got back dependencies (only)')
   console.log(result)
 
   let devDeps = {
@@ -47,16 +51,15 @@ test('package.json', t => {
     bar: '4.0.0',
   }
   result = run({ 'package.json': pkgify(null, devDeps) })
-  t.deepEqual(result, devDeps, 'Got back devDependencies (only)')
+  assert.deepStrictEqual(result, devDeps, 'Got back devDependencies (only)')
   console.log(result)
 
   result = run({ 'package.json': pkgify(deps, devDeps) })
-  t.deepEqual(result, deps, 'Dependencies won over devDependencies')
+  assert.deepStrictEqual(result, deps, 'Dependencies won over devDependencies')
   console.log(result)
 })
 
-test('package.json + package-lock.json', t => {
-  t.plan(4)
+test('package.json + package-lock.json', async () => {
   let deps
   let lockDeps
   let correct
@@ -79,18 +82,16 @@ test('package.json + package-lock.json', t => {
     foo: '1.2.3',
     bar: '2.3.4',
   }
-  t.deepEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 1)')
+  assert.deepStrictEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 1)')
   console.log(result)
-  mockTmp.reset()
 
   // v2
   result = run({
     'package.json': pkgify(deps),
     'package-lock.json': pkgify(lockDeps, null, 2),
   })
-  t.deepEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 2)')
+  assert.deepStrictEqual(result, correct, 'Got back specific dep versions from lockfile (lockfileVersion 2)')
   console.log(result)
-  mockTmp.reset()
 
   // v1
   deps = {
@@ -110,17 +111,14 @@ test('package.json + package-lock.json', t => {
     bar: '2.3.4',
     baz: '3.4.5',
   }
-  t.deepEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 1)')
+  assert.deepStrictEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 1)')
   console.log(result)
-  mockTmp.reset()
 
   // v2
   result = run({
     'package.json': pkgify(deps),
     'package-lock.json': pkgify(lockDeps, null, 2),
   })
-  t.deepEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 2)')
+  assert.deepStrictEqual(result, correct, 'Merged dep versions from package + lockfile (lockfileVersion 2)')
   console.log(result)
-
-  mockTmp.reset()
 })

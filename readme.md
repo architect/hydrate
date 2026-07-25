@@ -92,6 +92,88 @@ Note: by default `update` also updates dependencies in shared folders like `src/
 Copies shared code (from `src/shared` and `src/views`, or your custom `@shared` + `@views` paths, if any) into all functions.
 
 
+# Testing
+
+This project uses Node.js's native test runner (`node:test` module) for all tests.
+
+## Running Tests
+
+```bash
+# Run all tests (lint + integration + coverage)
+npm test
+
+# Run only unit tests
+npm run test:unit
+
+# Run only integration tests
+npm run test:integration
+
+# Run tests without linting
+npm run test:nolint
+
+# Run coverage report
+npm run coverage
+```
+
+## Test Structure
+
+- **Unit tests**: Located in `test/unit/` directory
+- **Integration tests**: Located in `test/integration/` directory
+- All test files use the `-tests.js` suffix
+
+## Writing Tests
+
+Tests use Node.js native testing modules:
+
+```javascript
+const { test } = require('node:test')
+const assert = require('node:assert')
+
+test('example test', async (t) => {
+  const result = someFunction()
+  assert.strictEqual(result, expectedValue)
+})
+```
+
+### Mocking
+
+For module mocking, use Node.js native mock functionality:
+
+```javascript
+const { test, mock } = require('node:test')
+
+test('test with mocks', async (t) => {
+  mock.module('./some-module', {
+    namedExports: { someFunction: () => 'mocked value' }
+  })
+  const module = require('./module-under-test')
+  // Test with mocked dependency
+})
+```
+
+### Temporary Directories
+
+For tests requiring temporary directories, use native `fs` operations:
+
+```javascript
+const { mkdtempSync, rmSync } = require('fs')
+const { tmpdir } = require('os')
+const { join } = require('path')
+
+test('test with temp dir', async (t) => {
+  const tmp = mkdtempSync(join(tmpdir(), 'test-'))
+  t.after(() => rmSync(tmp, { recursive: true, force: true }))
+  // Use tmp directory in test
+})
+```
+
+## Coverage
+
+Code coverage is collected using `c8` and reports are generated in the `coverage/` directory:
+- `coverage/lcov-report/` - HTML coverage report
+- `coverage/lcov.info` - LCOV format for CI integration
+
+
 [shared]: #hydratesharedoptions-callback
 [install]: #hydrateinstalloptions-callback
 [update]: #hydrateupdateoptions-callback
